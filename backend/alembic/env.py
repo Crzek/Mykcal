@@ -1,0 +1,34 @@
+"""Entorno de Alembic. Usa la conexión que le pasa `migrate.py` o crea la suya."""
+
+import asyncio
+
+from sqlalchemy.ext.asyncio import create_async_engine
+
+from alembic import context
+from mykcal.accounts import models as _accounts  # noqa: F401
+from mykcal.config import get_settings
+from mykcal.db import Base
+from mykcal.invitations import models as _invitations  # noqa: F401
+
+target_metadata = Base.metadata
+config = context.config
+
+
+def _run(connection):
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def _run_async():
+    engine = create_async_engine(get_settings().database_url)
+    async with engine.connect() as conn:
+        await conn.run_sync(_run)
+    await engine.dispose()
+
+
+connection = config.attributes.get("connection")
+if connection is not None:
+    _run(connection)
+else:
+    asyncio.run(_run_async())
