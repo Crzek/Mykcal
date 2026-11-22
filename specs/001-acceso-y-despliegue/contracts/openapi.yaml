@@ -1,0 +1,222 @@
+openapi: 3.1.0
+info:
+  title: Mykcal API — 001 acceso y sesión
+  version: 0.1.0
+  description: >
+    Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
+    fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
+servers:
+  - url: https://mykcal-bk-api.cruzerick.com
+    description: Producción (rama main)
+  - url: https://mykcal-bk-dev-api.cruzerick.com
+    description: Desarrollo (rama dev)
+
+security:
+  - bearerToken: []
+
+paths:
+  /v1/health:
+    get:
+      summary: Estado del servicio y de la base de datos (público)
+      security: []
+      responses:
+        "200":
+          description: Servicio y base disponibles
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, const: ok }
+        "503":
+          description: La base de datos no responde
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  /descargar/mykcal.apk:
+    get:
+      summary: Descarga del APK de este entorno (público, FR-018)
+      security: []
+      responses:
+        "200":
+          description: El APK
+          headers:
+            Content-Disposition:
+              schema: { type: string, example: 'attachment; filename="mykcal.apk"' }
+          content:
+            application/vnd.android.package-archive:
+              schema: { type: string, format: binary }
+        "404":
+          description: Todavía no se ha publicado ningún APK
+
+  /v1/me:
+    get:
+      summary: Identidad del usuario autenticado y estado de su cuenta (FR-011)
+      description: >
+        Es la única ruta que responde a una cuenta desactivada. Sin cuenta de Mykcal devuelve
+        404 ACCOUNT_NOT_REGISTERED y la app muestra la pantalla del código.
+      responses:
+        "200":
+          description: Cuenta existente (activa o desactivada)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: Identidad válida sin cuenta de Mykcal
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/registration:
+    post:
+      summary: Crear la cuenta de Mykcal con el código de invitación (FR-001, FR-002, FR-013)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [invitation_code]
+              additionalProperties: false
+              properties:
+                invitation_code:
+                  type: string
+                  maxLength: 32
+                  description: >
+                    Se normaliza (trim, mayúsculas, sin espacios ni guiones). El administrador
+                    (ADMIN_SUBJECT) puede enviar una cadena vacía.
+      responses:
+        "201":
+          description: Cuenta creada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        "400":
+          description: INVITATION_INVALID (código erróneo, sustituido o inexistente)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409":
+          description: NO_SEATS (50 cuentas activas) o ALREADY_REGISTERED
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "429":
+          description: TOO_MANY_ATTEMPTS; espera creciente activa
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+              description: Segundos que faltan
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/admin/invitation:
+    get:
+      summary: Código vigente y plazas (FR-004, FR-005). Solo administrador
+      responses:
+        "200":
+          description: Estado de las invitaciones
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvitationStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/admin/invitation/rotate:
+    post:
+      summary: Sustituir el código vigente por uno nuevo generado por el servidor (FR-004)
+      responses:
+        "200":
+          description: Nuevo estado; el código anterior deja de valer de inmediato
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvitationStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+components:
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Access token JWT de https://mg-zitadel.cruzerick.com con aud = ID del proyecto mykcal.
+        Validado contra el JWKS (research R4).
+
+  responses:
+    Unauthorized:
+      description: UNAUTHORIZED. Sin token, o token inválido, caducado o de otra audiencia
+      headers:
+        WWW-Authenticate:
+          schema: { type: string, example: 'Bearer error="invalid_token"' }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+    Forbidden:
+      description: ACCOUNT_NOT_REGISTERED, ACCOUNT_DISABLED o FORBIDDEN (no es administrador)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+    AuthUnavailable:
+      description: AUTH_UNAVAILABLE. No hay JWKS en memoria y Zitadel no responde
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  schemas:
+    Me:
+      type: object
+      additionalProperties: false
+      required: [id, display_name, is_admin, status]
+      properties:
+        id: { type: string, format: uuid, description: Identificador interno de Mykcal }
+        display_name: { type: string }
+        is_admin: { type: boolean }
+        status: { type: string, enum: [active, disabled] }
+
+    InvitationStatus:
+      type: object
+      additionalProperties: false
+      required: [code, created_at, active_accounts, max_accounts, free_seats]
+      properties:
+        code:
+          type: [string, "null"]
+          description: Código vigente sin guion (la app lo muestra como ABCD-EFGH); null si no hay
+        created_at: { type: [string, "null"], format: date-time }
+        active_accounts: { type: integer, minimum: 0, maximum: 50 }
+        max_accounts: { type: integer, const: 50 }
+        free_seats: { type: integer, minimum: 0, maximum: 50 }
+
+    ErrorBody:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - UNAUTHORIZED
+            - AUTH_UNAVAILABLE
+            - ACCOUNT_NOT_REGISTERED
+            - ACCOUNT_DISABLED
+            - FORBIDDEN
+            - ALREADY_REGISTERED
+            - INVITATION_INVALID
+            - NO_SEATS
+            - TOO_MANY_ATTEMPTS
+            - VALIDATION_ERROR
+            - INTERNAL_ERROR
+        message:
+          type: string
+          description: Texto técnico estable en español; la app muestra su propio texto según code
+        retry_after_s: { type: integer, minimum: 1 }
