@@ -1,0 +1,151 @@
+# =============================================================================
+# Mykcal — monorepo (app Flutter Android + backend FastAPI/PostgreSQL)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Secretos y configuración local (NUNCA al repo: constitución, principio IV)
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+# Credenciales de servicios (Zitadel, Gemini, etc.)
+*-credentials.json
+service-account*.json
+# Ajustes locales de Claude Code
+.claude/settings.local.json
+
+# -----------------------------------------------------------------------------
+# Flutter / Dart
+# -----------------------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.g.dart.tmp
+.metadata.bak
+# Ficheros generados de l10n e integración nativa
+**/generated_plugin_registrant.*
+**/flutter_export_environment.sh
+**/Generated.xcconfig
+# Nota: pubspec.lock SÍ se versiona (es una app, no una librería)
+
+# -----------------------------------------------------------------------------
+# Android
+# -----------------------------------------------------------------------------
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/key.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle/wrapper/gradle-wrapper.jar
+*.jks
+*.keystore
+!debug.keystore
+*.apk
+*.aab
+*.ap_
+*.dex
+.cxx/
+.externalNativeBuild/
+
+# iOS (fuera del MVP, por si se genera la carpeta)
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Runner.xcworkspace/xcuserdata/
+xcuserdata/
+
+# -----------------------------------------------------------------------------
+# Python / FastAPI
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.hypothesis/
+*.cover
+
+# -----------------------------------------------------------------------------
+# Base de datos y datos locales
+# -----------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+pgdata/
+postgres-data/
+# Ficheros descargados de bases de alimentos (se importan con script, no se versionan)
+data/raw/
+
+# -----------------------------------------------------------------------------
+# Docker / despliegue
+# -----------------------------------------------------------------------------
+docker-compose.override.yml
+.docker/
+
+# -----------------------------------------------------------------------------
+# Fotos de comida (principio IV: nunca fuera del móvil ni en el repo)
+# Las fixtures de pruebas viven en carpetas tests/fixtures y sí se versionan.
+# -----------------------------------------------------------------------------
+uploads/
+photos/
+
+# -----------------------------------------------------------------------------
+# Logs y temporales
+# -----------------------------------------------------------------------------
+*.log
+logs/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~
+
+# -----------------------------------------------------------------------------
+# IDEs y sistema operativo
+# -----------------------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+.DS_Store
+Thumbs.db
