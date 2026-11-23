@@ -1,32 +1,25 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 → 1.1.1 (PATCH: aclaraciones derivadas del plan de 001)
-- Cambios en 1.1.1:
-  - Principio V: las únicas rutas sin identidad son /v1/health y /descargar/mykcal.apk
-  - Restricciones técnicas → Despliegue: Application (Dockerfile) + servicio PostgreSQL de
-    Dokploy por entorno; Compose solo en local
-  - Restricciones técnicas → Autenticación: el código de invitación gatea el alta de la cuenta
-    de Mykcal, no la de Zitadel
-- Principios añadidos o eliminados en 1.1.1: ninguno
-- Historial 1.1.0 — 1.0.0 → 1.1.0 (MINOR: nueva subsección de gobierno)
-- Secciones añadidas en 1.1.0: "Ramas y entornos" dentro de Flujo de trabajo
-  (main = producción, dev = desarrollo, ramas de feature desde dev; feature → dev → main)
-- Principios modificados en 1.1.0: ninguno
-- Historial 1.0.0 — principios definidos (nuevos):
-  I. La IA propone, el usuario confirma
-  II. La base de alimentos es la única fuente nutricional
-  III. La IA es opcional
-  IV. Privacidad y datos de salud
-  V. Aislamiento por usuario y seguridad
-  VI. Cálculos deterministas y pruebas sin servicios reales
-  VII. Simplicidad
-  VIII. Accesible, en español y métrica
-  IX. Entrega vertical y desplegada
-  X. Observabilidad sin contenido sensible
-- Secciones añadidas: Restricciones técnicas; Flujo de trabajo; Governance
-- Secciones eliminadas: ninguna
+- Version change: 1.1.1 → 1.2.0 (MINOR: se redefine el modelo de entornos; no se elimina ni
+  renombra ningún principio)
+- Cambios en 1.2.0:
+  - Solo existe un entorno desplegado: producción (`main`). Se elimina el entorno de desarrollo
+    desplegado
+  - `dev` pasa a ser solo rama de integración, sin despliegue propio
+  - Principio IX: una feature se da por cerrada al desplegarse desde `main` y probar sus flujos
+    en el móvil; antes de fusionar, pruebas automáticas y, si hace falta, backend local
+  - Restricciones técnicas → Despliegue: una Application y un PostgreSQL de Dokploy, solo en
+    producción
+  - Flujo de trabajo → Ramas y entornos reescrito
+- Principios añadidos o eliminados: ninguno
 - Plantillas: no se modifican (leen la constitución en tiempo de ejecución)
-- TODOs diferidos: ninguno
+- TODOs diferidos: ninguno. Acciones de otras features (fuera de la constitución): retirar el
+  entorno dev de `specs/001-acceso-y-despliegue/contracts/dokploy-setup.md`, de
+  `docs/deploy/produccion.md` y del sabor `dev` de la app si ya no se usa
+- Historial 1.1.1 — aclaraciones derivadas del plan de 001: rutas sin identidad, despliegue con
+  Application + PostgreSQL de Dokploy, código de invitación gatea el alta de Mykcal
+- Historial 1.1.0 — sección "Ramas y entornos" (main = producción, dev = desarrollo)
+- Historial 1.0.0 — principios I–X definidos
 -->
 
 # Mykcal Constitution
@@ -122,8 +115,11 @@ exponer claves ni fotos.
 
 ### IX. Entrega vertical y desplegada
 
-- Cada feature MUST terminar con algo usable en el móvil (APK) y desplegado en Dokploy.
-- Una feature con interfaz se da por cerrada tras probar sus flujos en el emulador Android.
+- Cada feature MUST terminar con algo usable en el móvil (APK).
+- Antes de fusionar a `main`, la feature MUST pasar sus pruebas automáticas; no hay entorno de
+  desarrollo desplegado, así que lo que necesite un backend real se prueba en local.
+- Una feature se da por cerrada tras desplegarse en Dokploy desde `main` y probar sus flujos en
+  el móvil.
 
 **Razón**: avanzar en incrementos reales y comprobables, no en capas a medias.
 
@@ -140,8 +136,9 @@ exponer claves ni fotos.
 - **App**: Flutter, solo Android en el MVP, distribuida como APK por enlace. Requiere conexión;
   sin ella avisa y no pierde lo que el usuario está escribiendo.
 - **Backend**: Python con FastAPI y PostgreSQL, en un monorepo con la app.
-- **Despliegue**: Dokploy, con una Application (Dockerfile) y un servicio PostgreSQL de Dokploy
-  por entorno; Docker Compose solo en local. Secretos (clave maestra, credenciales) en variables
+- **Despliegue**: Dokploy, con una Application (Dockerfile) y un servicio PostgreSQL de Dokploy.
+  Solo existe el entorno de producción, que se despliega desde `main`; Docker Compose solo en
+  local. Secretos (clave maestra, credenciales) en variables
   de entorno de Dokploy.
 - **Autenticación**: instancia autoalojada de Zitadel, proyecto nuevo; Flutter con PKCE (patrón
   de Ligón) y backend validando el JWT contra el JWKS. El alta de la cuenta de Mykcal solo es
@@ -164,16 +161,15 @@ exponer claves ni fotos.
 
 ### Ramas y entornos
 
-- `main` es **producción**: solo recibe merges desde `dev` y lo que hay en `main` es lo que está
+- `main` es **producción** y el único entorno desplegado: lo que hay en `main` es lo que está
   desplegado para los usuarios. Nunca se hace commit directo en `main`.
-- `dev` es **desarrollo**: integra las features terminadas y se despliega en el entorno de
-  desarrollo para probarlas juntas.
+- `dev` es la rama de **integración**: reúne las features terminadas. No tiene despliegue propio.
 - Cada feature (spec) nace en su propia rama creada desde `dev`, con el mismo nombre que su
   directorio de spec (por ejemplo, `001-acceso-y-despliegue`).
-- Una feature se une a `dev` cuando cumple su spec, pasa sus pruebas y es usable en el móvil
-  (principio IX). Nunca se une directamente a `main`.
-- `dev` se une a `main` cuando el conjunto está probado en desarrollo; ese merge es la publicación
-  a producción.
+- Una feature se une a `dev` cuando cumple su spec, pasa sus pruebas automáticas y es usable en el
+  móvil (principio IX).
+- `dev` se une a `main` cuando el conjunto está probado; ese merge es la publicación a producción
+  y MUST hacerse con los textos definitivos (por ejemplo, el del consentimiento).
 - Flujo: `feature` → `dev` → `main`. Los arreglos urgentes siguen el mismo camino.
 - Si el plazo aprieta, las épicas P2 y P3 son las primeras en recortarse.
 
@@ -187,4 +183,4 @@ exponer claves ni fotos.
 - Cada plan y cada revisión de código MUST comprobar el cumplimiento; las excepciones se
   justifican por escrito en el plan.
 
-**Version**: 1.1.1 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-22
+**Version**: 1.2.0 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-23
