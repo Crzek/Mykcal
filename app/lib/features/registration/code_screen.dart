@@ -49,10 +49,11 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     final reg = ref.watch(registrationControllerProvider);
     final now = ref.read(authClockProvider)();
     final waiting = reg.retryAfter != null && reg.retryAfter!.isAfter(now);
-    final canSubmit = !reg.busy && !waiting && _field.text.trim().isNotEmpty;
+    final canSubmit = !reg.busy && !waiting;
 
     final message = switch (reg.problem) {
       RegistrationProblem.invalid => l10n.errInvitationInvalid,
+      RegistrationProblem.required => l10n.errInvitationRequired,
       RegistrationProblem.noSeats => l10n.errNoSeats,
       RegistrationProblem.tooManyAttempts => waiting
           ? l10n.errTooManyAttempts(_formatWait(reg.retryAfter!.difference(now)))
@@ -74,6 +75,8 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
               Text(l10n.codeIntro, style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 8),
               Text(l10n.codeHelp),
+              const SizedBox(height: 4),
+              Text(l10n.codeAdminHint),
               const SizedBox(height: 24),
               TextField(
                 controller: _field,

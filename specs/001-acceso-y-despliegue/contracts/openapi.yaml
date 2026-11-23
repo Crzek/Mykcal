@@ -88,7 +88,8 @@ paths:
                   maxLength: 32
                   description: >
                     Se normaliza (trim, mayúsculas, sin espacios ni guiones). El administrador
-                    (ADMIN_SUBJECT) puede enviar una cadena vacía.
+                    (ADMIN_SUBJECT) puede enviar una cadena vacía; para cualquier otro usuario, la cadena
+                    vacía (o que queda vacía al normalizar) devuelve 400 INVITATION_REQUIRED.
       responses:
         "201":
           description: Cuenta creada
@@ -96,7 +97,10 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Me" }
         "400":
-          description: INVITATION_INVALID (código erróneo, sustituido o inexistente)
+          description: >
+            INVITATION_INVALID (código erróneo, sustituido o inexistente) o
+            INVITATION_REQUIRED (código vacío de un usuario que no es administrador;
+            no cuenta como intento)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorBody" }
@@ -212,6 +216,7 @@ components:
             - FORBIDDEN
             - ALREADY_REGISTERED
             - INVITATION_INVALID
+            - INVITATION_REQUIRED
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR

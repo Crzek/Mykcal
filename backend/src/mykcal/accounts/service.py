@@ -65,6 +65,11 @@ async def register(
         if await get_account_by_subject(session, subject) is not None:
             raise ApiError(409, ErrorCode.ALREADY_REGISTERED, "Ya tienes cuenta en Mykcal.")
         if not is_admin:
+            # Un código vacío no compara nada: no cuenta como intento ni se frena (FR-010).
+            if codes.normalize(raw_code) == "":
+                raise ApiError(
+                    400, ErrorCode.INVITATION_REQUIRED, "Escribe el código de invitación."
+                )
             wait = await throttle.active_block(session, subject, now)
             if wait is not None:
                 raise ApiError(

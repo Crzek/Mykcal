@@ -339,6 +339,66 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cambiar'**
   String get confirmChange;
+
+  /// No description provided for @menuShareApp.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir Mykcal'**
+  String get menuShareApp;
+
+  /// No description provided for @shareTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir Mykcal'**
+  String get shareTitle;
+
+  /// No description provided for @shareIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Envía este enlace para que descarguen la app. Para crear la cuenta necesitarán un código de invitación.'**
+  String get shareIntro;
+
+  /// No description provided for @shareCopy.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar'**
+  String get shareCopy;
+
+  /// No description provided for @shareSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir'**
+  String get shareSend;
+
+  /// No description provided for @shareCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Enlace copiado'**
+  String get shareCopied;
+
+  /// No description provided for @shareCopyFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo copiar el enlace'**
+  String get shareCopyFailed;
+
+  /// No description provided for @shareText.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba Mykcal, la app para registrar lo que comes: {link}'**
+  String shareText(String link);
+
+  /// No description provided for @codeAdminHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Si eres el administrador, puedes dejarlo vacío.'**
+  String get codeAdminHint;
+
+  /// No description provided for @errInvitationRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el código de invitación.'**
+  String get errInvitationRequired;
 }
 
 class _AppLocalizationsDelegate

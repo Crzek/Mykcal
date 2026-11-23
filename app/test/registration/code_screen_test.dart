@@ -28,10 +28,19 @@ void main() {
     await expectAccessible(tester);
   });
 
-  testWidgets('el botón está desactivado con el campo vacío', (tester) async {
+  testWidgets('el botón está habilitado con el campo vacío y hay ayuda para el admin', (tester) async {
     await pumpCode(tester);
     final button = tester.widget<FilledButton>(find.byType(FilledButton));
-    expect(button.onPressed, isNull);
+    expect(button.onPressed, isNotNull);
+    expect(find.text('Si eres el administrador, puedes dejarlo vacío.'), findsOneWidget);
+  });
+
+  testWidgets('INVITATION_REQUIRED: pide el código', (tester) async {
+    final h = await pumpCode(tester);
+    h.api.onRegister = (_) async => throw const ApiError('INVITATION_REQUIRED', 400);
+    await submit(tester, '');
+    expect(find.text('Escribe el código de invitación.'), findsOneWidget);
+    expect(h.api.registerCodes, ['']);
   });
 
   testWidgets('envía el código tal cual (minúsculas y espacios los normaliza el servidor) y entra', (tester) async {
@@ -61,6 +70,9 @@ void main() {
     h.api.onRegister = (_) async => throw const ApiError('TOO_MANY_ATTEMPTS', 429, retryAfterSeconds: 90);
     await submit(tester, 'ABCD2345');
     expect(find.text('Demasiados intentos. Podrás volver a probar en 1 min 30 s.'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pump();
     expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
   });
 
