@@ -177,12 +177,12 @@
 
 - [X] T067 [P] `cd backend && uv run ruff check && uv run pytest` (unit, integración, contrato y privacy) y corregir avisos
 - [X] T068 [P] `cd app && flutter analyze && flutter test` y corregir avisos
-- [ ] T069 [P] Actualizar `specs/001-acceso-y-despliegue/contracts/ui-flows.md` con un enlace a `specs/002-onboarding-y-objetivo/contracts/ui-flows.md` y la nota de que la pantalla de inicio ya no es provisional
-- [ ] T070 [P] Actualizar `backend/.env.example`, `app/README.md` y `docs/deploy` si cambia algo (no se esperan variables nuevas; confirmar y anotar «sin cambios» si es así)
+- [X] T069 [P] Actualizar `specs/001-acceso-y-despliegue/contracts/ui-flows.md` con un enlace a `specs/002-onboarding-y-objetivo/contracts/ui-flows.md` y la nota de que la pantalla de inicio ya no es provisional
+- [X] T070 [P] Actualizar `backend/.env.example`, `app/README.md` y `docs/deploy` si cambia algo (no se esperan variables nuevas; confirmar y anotar «sin cambios» si es así) — confirmado: sin cambios
 - [ ] T071 Desplegar la rama en Dokploy `dev` (la migración `0002_onboarding` se aplica en el arranque con `migrate.py`) y comprobar `GET /v1/health`
 - [ ] T072 Compilar con `app/scripts/build_apk.sh dev`, instalar en el emulador y en el móvil con `adb install -r` y recorrer los escenarios 1–21 de `specs/002-onboarding-y-objetivo/quickstart.md` (incluidas las comprobaciones SQL de la sección 5), anotando el resultado en el PR; publicar el APK con `app/scripts/publish_apk.sh dev`
 - [ ] T073 **Bloquea el merge de `dev` → `main`**: sustituir el texto provisional del consentimiento en `app/lib/l10n/app_es.arb` por el definitivo redactado por Erick. Si el texto cambia respecto al que vio algún usuario de `dev`, subir a la vez `CURRENT_CONSENT_VERSION` (backend) y `consentTextVersion` (app). Añadir una prueba en `app/test/consent/consent_screen_test.dart` que falle si el texto contiene la marca «BORRADOR»
-- [ ] T074 Abrir el PR de `002-onboarding-y-objetivo` → `dev`; si T073 sigue pendiente, indicar en la descripción que bloquea la publicación en `main`
+- [X] T074 Abrir el PR de `002-onboarding-y-objetivo` → `dev`; si T073 sigue pendiente, indicar en la descripción que bloquea la publicación en `main`
 
 ---
 
