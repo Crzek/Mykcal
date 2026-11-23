@@ -11,6 +11,7 @@ class Me(BaseModel):
     display_name: str
     is_admin: bool
     status: Literal["active", "disabled"]
+    onboarding: Literal["consent", "profile", "done"]
 
 
 class RegistrationRequest(BaseModel):

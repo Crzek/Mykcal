@@ -7,8 +7,11 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from mykcal.accounts import models as _accounts  # noqa: F401
 from mykcal.config import get_settings
+from mykcal.consent import models as _consent  # noqa: F401
 from mykcal.db import Base
 from mykcal.invitations import models as _invitations  # noqa: F401
+from mykcal.profile import models as _profile  # noqa: F401
+from mykcal.targets import models as _targets  # noqa: F401
 
 target_metadata = Base.metadata
 config = context.config

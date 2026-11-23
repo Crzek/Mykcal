@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Mykcal API — 001 acceso y sesión
-  version: 0.1.0
+  title: Mykcal API — 001 acceso y sesión, 002 onboarding
+  version: 0.2.0
   description: >
     Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
     fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
@@ -147,6 +147,161 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
 
+  /v1/consent:
+    post:
+      summary: Registra el consentimiento de datos de salud (002, FR-001–FR-003)
+      description: >
+        Idempotente para la misma versión. La hora la pone el servidor. Solo acepta la versión
+        vigente del texto (002 research R8). Exige cuenta activa, no consentimiento previo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [text_version]
+              properties:
+                text_version: { type: string, minLength: 1, maxLength: 32 }
+      responses:
+        "201":
+          description: Consentimiento registrado (o ya existía con esa versión)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Consent" }
+        "400":
+          description: VALIDATION_ERROR
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: CONSENT_VERSION_MISMATCH. La app envía una versión que el servidor no conoce
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/profile:
+    get:
+      summary: Perfil del usuario y su peso actual (002)
+      description: Exige consentimiento (403 CONSENT_REQUIRED sin él).
+      responses:
+        "200":
+          description: Perfil
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: PROFILE_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    put:
+      summary: Crea o actualiza el perfil y aplica o propone el recálculo (002, FR-004–FR-006)
+      description: >
+        La primera vez crea perfil, registro de peso y objetivo calculado en una transacción
+        (002 research R11). Después, si cambian los datos del cálculo: recalcula si el objetivo es
+        calculated o devuelve una propuesta sin guardarla si es manual (002 research R12).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProfileInput" }
+      responses:
+        "200":
+          description: Perfil guardado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileSaved" }
+        "400":
+          description: VALIDATION_ERROR con fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/target:
+    get:
+      summary: Objetivo diario vigente (002)
+      responses:
+        "200":
+          description: Objetivo vigente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyTarget" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: TARGET_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    put:
+      summary: Sobrescribe el objetivo a mano (002, FR-014)
+      description: Guarda una versión manual con los 12 valores y copia los datos del cálculo anterior.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TargetValues" }
+      responses:
+        "200":
+          description: Nueva versión manual
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyTarget" }
+        "400":
+          description: VALIDATION_ERROR con fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: PROFILE_REQUIRED. Aún no hay perfil ni objetivo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/target/recalculate:
+    post:
+      summary: Recalcula con el perfil y el peso actuales (002, FR-016)
+      responses:
+        "200":
+          description: Nueva versión calculated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyTarget" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: PROFILE_REQUIRED
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/me/deactivation:
+    post:
+      summary: Da de baja la cuenta (002, FR-018, FR-019)
+      description: >
+        Desactiva la cuenta de Mykcal y conserva los datos. No toca el usuario de Zitadel. No exige
+        consentimiento. La app cierra la sesión a continuación (002 research R15).
+      responses:
+        "204": { description: Cuenta desactivada }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
 components:
   securitySchemes:
     bearerToken:
@@ -181,8 +336,12 @@ components:
     Me:
       type: object
       additionalProperties: false
-      required: [id, display_name, is_admin, status]
+      required: [id, display_name, is_admin, status, onboarding]
       properties:
+        onboarding:
+          type: string
+          enum: [consent, profile, done]
+          description: Paso pendiente del onboarding (002 research R10)
         id: { type: string, format: uuid, description: Identificador interno de Mykcal }
         display_name: { type: string }
         is_admin: { type: boolean }
@@ -201,6 +360,116 @@ components:
         max_accounts: { type: integer, const: 50 }
         free_seats: { type: integer, minimum: 0, maximum: 50 }
 
+    Consent:
+      type: object
+      additionalProperties: false
+      required: [text_version, accepted_at]
+      properties:
+        text_version: { type: string }
+        accepted_at: { type: string, format: date-time }
+
+    ProfileInput:
+      type: object
+      additionalProperties: false
+      required: [age, sex, height_cm, weight_kg, activity_level, goal, measured_on]
+      properties:
+        age: { type: integer, minimum: 18, maximum: 100 }
+        sex: { type: string, enum: [male, female] }
+        height_cm: { type: integer, minimum: 100, maximum: 250 }
+        weight_kg:
+          type: number
+          minimum: 30
+          maximum: 300
+          description: Con un decimal como máximo; el servidor valida con Decimal (002 research R14)
+        activity_level: { type: string, enum: [sedentary, light, moderate, high, very_high] }
+        goal: { type: string, enum: [lose_fat, maintain, gain_muscle] }
+        measured_on:
+          type: string
+          format: date
+          description: Fecha local del móvil para el registro de peso (002 research R6)
+
+    Profile:
+      type: object
+      additionalProperties: false
+      required: [age, sex, height_cm, weight_kg, weight_measured_on, activity_level, goal, updated_at]
+      properties:
+        age: { type: integer }
+        sex: { type: string, enum: [male, female] }
+        height_cm: { type: integer }
+        weight_kg: { type: number, description: Peso del registro más reciente }
+        weight_measured_on: { type: string, format: date }
+        activity_level: { type: string, enum: [sedentary, light, moderate, high, very_high] }
+        goal: { type: string, enum: [lose_fat, maintain, gain_muscle] }
+        updated_at: { type: string, format: date-time }
+
+    TargetValues:
+      type: object
+      additionalProperties: false
+      required: [kcal, protein_g, carbs_g, fat_g, fiber_g, sodium_mg, potassium_mg, calcium_mg, iron_mg, magnesium_mg, vitamin_d_ug, vitamin_c_mg]
+      properties:
+        kcal: { type: integer, minimum: 1, maximum: 10000 }
+        protein_g: { type: integer, minimum: 0, maximum: 1000 }
+        carbs_g: { type: integer, minimum: 0, maximum: 2000 }
+        fat_g: { type: integer, minimum: 0, maximum: 1000 }
+        fiber_g: { type: integer, minimum: 0, maximum: 200 }
+        sodium_mg: { type: integer, minimum: 0, maximum: 20000 }
+        potassium_mg: { type: integer, minimum: 0, maximum: 20000 }
+        calcium_mg: { type: integer, minimum: 0, maximum: 10000 }
+        iron_mg: { type: integer, minimum: 0, maximum: 200 }
+        magnesium_mg: { type: integer, minimum: 0, maximum: 5000 }
+        vitamin_d_ug: { type: integer, minimum: 0, maximum: 500 }
+        vitamin_c_mg: { type: integer, minimum: 0, maximum: 5000 }
+
+    DailyTarget:
+      type: object
+      additionalProperties: false
+      required: [values, source, effective_from, calculation]
+      properties:
+        values: { $ref: "#/components/schemas/TargetValues" }
+        source: { type: string, enum: [calculated, manual] }
+        effective_from: { type: string, format: date-time }
+        calculation:
+          type: object
+          additionalProperties: false
+          required: [weight_kg, age, sex, height_cm, activity_level, goal, calculated_at, notices]
+          description: Datos usados en el último cálculo (002 FR-013)
+          properties:
+            weight_kg: { type: number }
+            age: { type: integer }
+            sex: { type: string, enum: [male, female] }
+            height_cm: { type: integer }
+            activity_level: { type: string, enum: [sedentary, light, moderate, high, very_high] }
+            goal: { type: string, enum: [lose_fat, maintain, gain_muscle] }
+            calculated_at: { type: string, format: date-time }
+            notices:
+              type: array
+              items: { type: string, enum: [MIN_KCAL_APPLIED, CARBS_CLAMPED] }
+
+    ProfileSaved:
+      type: object
+      additionalProperties: false
+      required: [profile, target, recalculation]
+      properties:
+        profile: { $ref: "#/components/schemas/Profile" }
+        target: { $ref: "#/components/schemas/DailyTarget" }
+        recalculation:
+          type: object
+          additionalProperties: false
+          required: [status]
+          properties:
+            status:
+              type: string
+              enum: [created, applied, proposed, none]
+              description: >
+                created = primer objetivo; applied = recalculado automáticamente;
+                proposed = objetivo manual, ver proposed (no guardado); none = sin cambios
+            previous:
+              description: Solo con applied; valores anteriores para mostrar el cambio
+              $ref: "#/components/schemas/TargetValues"
+            proposed:
+              description: Solo con proposed; no se ha guardado
+              $ref: "#/components/schemas/TargetValues"
+
     ErrorBody:
       type: object
       additionalProperties: false
@@ -217,6 +486,11 @@ components:
             - ALREADY_REGISTERED
             - INVITATION_INVALID
             - INVITATION_REQUIRED
+            - CONSENT_REQUIRED
+            - CONSENT_VERSION_MISMATCH
+            - PROFILE_NOT_FOUND
+            - PROFILE_REQUIRED
+            - TARGET_NOT_FOUND
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR
@@ -225,3 +499,7 @@ components:
           type: string
           description: Texto técnico estable en español; la app muestra su propio texto según code
         retry_after_s: { type: integer, minimum: 1 }
+        fields:
+          type: array
+          items: { type: string }
+          description: Solo con VALIDATION_ERROR; nombres de campo, nunca valores (002 research R14)
