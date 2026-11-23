@@ -421,7 +421,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentBody.
   ///
   /// In es, this message translates to:
-  /// **'BORRADOR — Para calcular tu objetivo diario y llevar tu diario de comidas, Mykcal guarda tus datos de salud: edad, sexo, altura, peso, actividad física, objetivo y lo que registres cada día. Solo tú puedes verlos. Las fotos de comida no se guardan en el servidor. Puedes darte de baja cuando quieras; tus datos se conservan tras la baja.'**
+  /// **'Mykcal te pide permiso para guardar y tratar tus datos de salud: edad, sexo, altura, peso, actividad física semanal, tu objetivo (perder grasa, mantener o ganar músculo) y lo que registres cada día en tu diario de comidas.\n\nLos usamos solo para calcular tu objetivo diario y mostrarte tu progreso. Solo tú puedes verlos: ni el administrador ni otras personas de Mykcal tienen acceso a ellos.\n\nLas fotos de comida no se guardan en el servidor: se analizan en el momento y se descartan. Si usas la función de foto con tu propia clave de IA, la clave se guarda cifrada.\n\nPuedes darte de baja cuando quieras desde Ajustes. Al darte de baja tu cuenta se desactiva y tus datos se conservan, sin plazo, pero ya no podrás acceder a ellos desde la app. Sin tu consentimiento no guardamos ningún dato de salud.'**
   String get consentBody;
 
   /// No description provided for @consentCheckbox.

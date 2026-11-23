@@ -10,6 +10,7 @@ import '../helpers/fakes.dart';
 Finder accept() => find.widgetWithText(FilledButton, 'Aceptar y continuar');
 
 Future<Harness> start(WidgetTester tester) async {
+  await tallScreen(tester);
   final h = Harness();
   await seedSession();
   h.api.onMe = () async => meNeedsConsent;
@@ -77,8 +78,7 @@ void main() {
   testWidgets('el texto del consentimiento definitivo no es un borrador (T073)', (tester) async {
     final text = AppLocalizationsEs().consentBody;
     expect(text.contains('BORRADOR'), isFalse);
-    // Bloquea el paso de dev a main: se activa con --dart-define=CONSENT_FINAL=true.
-  }, skip: !const bool.fromEnvironment('CONSENT_FINAL'));
+  });
 
   testWidgets('pantalla de consentimiento legible con el texto al 200%', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
