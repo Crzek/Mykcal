@@ -13,7 +13,12 @@ import 'session_store.dart';
 const renewMargin = Duration(seconds: 60);
 
 /// Avisos de la pantalla de acceso.
-enum AccessNotice { signInFailed, unavailable, sessionExpired }
+enum AccessNotice {
+  signInFailed,
+  unavailable,
+  sessionExpired,
+  accountDeactivated,
+}
 
 /// Estado de la cuenta (data-model.md, «Estado en la app»).
 sealed class AccountState {
@@ -54,7 +59,9 @@ class ConnectionError extends AccountState {
 }
 
 /// Plazo total para revocar los tokens al cerrar sesión; pasado, se cierra igual.
-final signOutDeadlineProvider = Provider<Duration>((ref) => const Duration(seconds: 5));
+final signOutDeadlineProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 5),
+);
 
 /// Reloj inyectable para las pruebas.
 final authClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
@@ -91,6 +98,19 @@ class AuthController extends AsyncNotifier<AccountState> {
     }
   }
 
+  /// Vuelve a pedir `/v1/me` sin pasar por la pantalla de carga (p. ej. tras aceptar el
+  /// consentimiento o terminar el onboarding).
+  Future<void> refreshAccount() async {
+    state = AsyncData(await _loadAccount());
+  }
+
+  /// Da de baja la cuenta y cierra la sesión. Los errores del API llegan a quien llama.
+  Future<void> deactivate() async {
+    await _api.deactivate();
+    await signOut();
+    state = const AsyncData(SignedOut(notice: AccessNotice.accountDeactivated));
+  }
+
   /// Vuelve a consultar la cuenta tras un error de conexión.
   Future<void> retry() async {
     state = const AsyncLoading<AccountState>().copyWithPrevious(state);
@@ -107,12 +127,14 @@ class AuthController extends AsyncNotifier<AccountState> {
         unawaited(_revokeQuietly(tokens.accessToken));
         throw const SignInFailed();
       }
-      await _store.write(StoredSession(
-        accessToken: tokens.accessToken,
-        refreshToken: refresh,
-        accessTokenExpiresAt: _effectiveExpiry(tokens),
-        idToken: tokens.idToken,
-      ));
+      await _store.write(
+        StoredSession(
+          accessToken: tokens.accessToken,
+          refreshToken: refresh,
+          accessTokenExpiresAt: _effectiveExpiry(tokens),
+          idToken: tokens.idToken,
+        ),
+      );
       state = AsyncData(await _loadAccount());
     } on SignInCancelled {
       state = const AsyncData(SignedOut());
@@ -148,19 +170,22 @@ class AuthController extends AsyncNotifier<AccountState> {
 
   /// Las renovaciones simultáneas comparten una sola llamada a Zitadel.
   Future<String?> _refresh(StoredSession session) {
-    return _refreshing ??= _doRefresh(session).whenComplete(() => _refreshing = null);
+    return _refreshing ??= _doRefresh(session)
+        .whenComplete(() => _refreshing = null);
   }
 
   Future<String?> _doRefresh(StoredSession session) async {
     try {
       final tokens = await _auth.refresh(session.refreshToken);
       // Zitadel rota el refresh token: se guarda siempre el último.
-      await _store.write(StoredSession(
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken ?? session.refreshToken,
-        accessTokenExpiresAt: _effectiveExpiry(tokens),
-        idToken: tokens.idToken ?? session.idToken,
-      ));
+      await _store.write(
+        StoredSession(
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken ?? session.refreshToken,
+          accessTokenExpiresAt: _effectiveExpiry(tokens),
+          idToken: tokens.idToken ?? session.idToken,
+        ),
+      );
       return tokens.accessToken;
     } on RefreshRejected {
       return null;
@@ -213,7 +238,8 @@ class AuthController extends AsyncNotifier<AccountState> {
   DateTime _effectiveExpiry(TokenSet tokens) {
     final now = _now();
     final cap = now.add(const Duration(minutes: 15));
-    final expiry = tokens.expiresAt?.toUtc() ?? _jwtExp(tokens.accessToken) ?? cap;
+    final expiry =
+        tokens.expiresAt?.toUtc() ?? _jwtExp(tokens.accessToken) ?? cap;
     return expiry.isBefore(cap) ? expiry : cap;
   }
 }
@@ -222,9 +248,13 @@ DateTime? _jwtExp(String token) {
   final parts = token.split('.');
   if (parts.length != 3) return null;
   try {
-    final decoded = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+    final decoded = jsonDecode(
+      utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+    );
     final exp = decoded is Map<String, dynamic> ? decoded['exp'] : null;
-    return exp is int ? DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true) : null;
+    return exp is int
+        ? DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true)
+        : null;
   } on FormatException {
     return null;
   }

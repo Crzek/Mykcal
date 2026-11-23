@@ -5,9 +5,11 @@ import '../../core/api/models.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../admin/invitations_screen.dart';
+import '../settings/settings_screen.dart';
 import '../share/share_app_sheet.dart';
+import '../target/target_card.dart';
 
-enum _MenuAction { invitations, shareApp, signOut }
+enum _MenuAction { invitations, shareApp, settings, signOut }
 
 /// Inicio: saludo con el nombre visible y marcador de las siguientes features.
 class HomeScreen extends ConsumerWidget {
@@ -28,10 +30,18 @@ class HomeScreen extends ConsumerWidget {
               switch (action) {
                 case _MenuAction.invitations:
                   Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const InvitationsScreen()),
+                    MaterialPageRoute<void>(
+                      builder: (_) => const InvitationsScreen(),
+                    ),
                   );
                 case _MenuAction.shareApp:
                   showShareAppSheet(context);
+                case _MenuAction.settings:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SettingsScreen(),
+                    ),
+                  );
                 case _MenuAction.signOut:
                   ref.read(authControllerProvider.notifier).signOut();
               }
@@ -46,13 +56,20 @@ class HomeScreen extends ConsumerWidget {
                 value: _MenuAction.shareApp,
                 child: Text(l10n.menuShareApp),
               ),
-              PopupMenuItem(value: _MenuAction.signOut, child: Text(l10n.signOut)),
+              PopupMenuItem(
+                value: _MenuAction.settings,
+                child: Text(l10n.menuSettings),
+              ),
+              PopupMenuItem(
+                value: _MenuAction.signOut,
+                child: Text(l10n.signOut),
+              ),
             ],
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +82,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(l10n.homePlaceholder, style: Theme.of(context).textTheme.bodyLarge),
+              const TargetCard(),
             ],
           ),
         ),

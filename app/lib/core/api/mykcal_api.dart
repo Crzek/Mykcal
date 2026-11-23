@@ -11,6 +11,13 @@ abstract class MykcalApi {
   Future<Me> register(String invitationCode);
   Future<InvitationStatus> invitation();
   Future<InvitationStatus> rotateInvitation();
+  Future<void> acceptConsent(String textVersion);
+  Future<Profile> profile();
+  Future<ProfileSaved> saveProfile(ProfileInput input);
+  Future<DailyTarget> target();
+  Future<DailyTarget> saveTarget(TargetValues values);
+  Future<DailyTarget> recalculateTarget();
+  Future<void> deactivate();
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -25,12 +32,14 @@ class HttpMykcalApi implements MykcalApi {
 
   static const requestTimeout = Duration(seconds: 10);
 
-  static Dio buildDio(String baseUrl) => Dio(BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: requestTimeout,
-        sendTimeout: requestTimeout,
-        receiveTimeout: requestTimeout,
-      ));
+  static Dio buildDio(String baseUrl) => Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: requestTimeout,
+      sendTimeout: requestTimeout,
+      receiveTimeout: requestTimeout,
+    ),
+  );
 
   final Dio dio;
 
@@ -45,8 +54,12 @@ class HttpMykcalApi implements MykcalApi {
 
   @override
   Future<Me> register(String invitationCode) async => Me.fromJson(
-        await _json('POST', '/v1/registration', data: {'invitation_code': invitationCode}),
-      );
+    await _json(
+      'POST',
+      '/v1/registration',
+      data: {'invitation_code': invitationCode},
+    ),
+  );
 
   @override
   Future<InvitationStatus> invitation() async =>
@@ -54,9 +67,49 @@ class HttpMykcalApi implements MykcalApi {
 
   @override
   Future<InvitationStatus> rotateInvitation() async =>
-      InvitationStatus.fromJson(await _json('POST', '/v1/admin/invitation/rotate'));
+      InvitationStatus.fromJson(
+        await _json('POST', '/v1/admin/invitation/rotate'),
+      );
 
-  Future<Map<String, dynamic>> _json(String method, String path, {Object? data}) async {
+  @override
+  Future<void> acceptConsent(String textVersion) async {
+    await _json('POST', '/v1/consent', data: {'text_version': textVersion});
+  }
+
+  @override
+  Future<Profile> profile() async =>
+      Profile.fromJson(await _json('GET', '/v1/profile'));
+
+  @override
+  Future<ProfileSaved> saveProfile(ProfileInput input) async =>
+      ProfileSaved.fromJson(
+        await _json('PUT', '/v1/profile', data: input.toJson()),
+      );
+
+  @override
+  Future<DailyTarget> target() async =>
+      DailyTarget.fromJson(await _json('GET', '/v1/target'));
+
+  @override
+  Future<DailyTarget> saveTarget(TargetValues values) async =>
+      DailyTarget.fromJson(
+        await _json('PUT', '/v1/target', data: values.toJson()),
+      );
+
+  @override
+  Future<DailyTarget> recalculateTarget() async =>
+      DailyTarget.fromJson(await _json('POST', '/v1/target/recalculate'));
+
+  @override
+  Future<void> deactivate() async {
+    await _json('POST', '/v1/me/deactivation');
+  }
+
+  Future<Map<String, dynamic>> _json(
+    String method,
+    String path, {
+    Object? data,
+  }) async {
     var token = await accessToken();
     if (token == null) throw const SessionExpired();
     for (var attempt = 0; attempt < 2; attempt++) {
@@ -64,7 +117,10 @@ class HttpMykcalApi implements MykcalApi {
         final response = await dio.request<Map<String, dynamic>>(
           path,
           data: data,
-          options: Options(method: method, headers: {'Authorization': 'Bearer $token'}),
+          options: Options(
+            method: method,
+            headers: {'Authorization': 'Bearer $token'},
+          ),
         );
         return response.data ?? const {};
       } on DioException catch (e) {
@@ -91,8 +147,18 @@ ApiFailure mapDioError(DioException e) {
   if (status >= 500 || code == 'AUTH_UNAVAILABLE') return const ServerFailure();
   if (code == null) return const ServerFailure();
   final header = int.tryParse(response.headers.value('retry-after') ?? '');
-  final fromBody = body is Map<String, dynamic> ? body['retry_after_s'] as int? : null;
-  return ApiError(code, status, retryAfterSeconds: header ?? fromBody);
+  final fromBody = body is Map<String, dynamic>
+      ? body['retry_after_s'] as int?
+      : null;
+  final fields = body is Map<String, dynamic> && body['fields'] is List
+      ? (body['fields'] as List<dynamic>).whereType<String>().toList()
+      : const <String>[];
+  return ApiError(
+    code,
+    status,
+    retryAfterSeconds: header ?? fromBody,
+    fields: fields,
+  );
 }
 
 final mykcalApiProvider = Provider<MykcalApi>((ref) {
