@@ -133,8 +133,9 @@ sesión contra el servidor desplegado.
   (por ejemplo, el código de invitación) no se pierde y puede reintentar.
 - **Código con espacios o en otro caso de letras**: se ignoran espacios al principio y al final y
   la comparación no distingue mayúsculas de minúsculas.
-- **Intentos repetidos con códigos erróneos**: tras varios intentos fallidos seguidos desde el
-  mismo dispositivo se aplica una espera creciente antes de permitir otro intento.
+- **Intentos repetidos con códigos erróneos**: tras 3 fallos seguidos de la misma identidad se
+  aplica una espera creciente (30 s duplicándose, máximo 1 h). Si los fallos entre todas las
+  identidades llegan a 20 en 10 minutos, se bloquean todas las altas 10 minutos.
 - **Sesión caducada mientras se usa la app**: la app intenta renovarla de forma transparente; si
   no puede, lleva al usuario a iniciar sesión sin perder lo que estaba escribiendo en pantalla.
 - **El código cambia mientras alguien está registrándose**: si el código introducido ya no es el
@@ -147,8 +148,9 @@ sesión contra el servidor desplegado.
 
 ### Functional Requirements
 
-- **FR-001**: El sistema MUST permitir registrarse solo a quien introduzca el código de invitación
-  vigente.
+- **FR-001**: El sistema MUST permitir crear una cuenta de Mykcal solo a quien introduzca el código
+  de invitación vigente. Única excepción: la cuenta del administrador (ver Assumptions), que puede
+  crearse sin código para poder generar el primero.
 - **FR-002**: El sistema MUST rechazar el registro cuando haya 50 cuentas activas, aunque el código
   sea válido. Las cuentas desactivadas no cuentan para el límite.
 - **FR-003**: El sistema MUST mantener un único código de invitación vigente a la vez.
@@ -169,7 +171,9 @@ sesión contra el servidor desplegado.
   (activa o desactivada).
 - **FR-012**: El sistema MUST rechazar cualquier otra operación de una cuenta desactivada.
 - **FR-013**: El sistema MUST limitar los intentos de registro fallidos repetidos con una espera
-  creciente.
+  creciente por identidad y, además, con un límite global que bloquee temporalmente todas las altas
+  si los fallos entre todas las identidades superan un umbral (evita adivinar el código creando
+  identidades nuevas).
 - **FR-014**: El sistema MUST registrar el 100% de los errores del servidor, sin incluir tokens ni
   credenciales en los registros.
 - **FR-015**: Sin conexión, la app MUST avisar al usuario y conservar lo que estaba escribiendo en
@@ -181,7 +185,7 @@ sesión contra el servidor desplegado.
   sistema.
 - **FR-018**: La app MUST distribuirse como instalable de Android mediante un enlace, y el servidor
   MUST quedar desplegado en la infraestructura de Erick.
-- **FR-019**: MUST existir dos entornos separados, con datos y usuarios independientes: producción
+- **FR-019**: MUST existir dos entornos separados, con datos y cuentas de Mykcal independientes: producción
   (publicado desde la rama `main`) y desarrollo (publicado desde la rama `dev`). Cada entorno tiene
   su propia app instalable, apuntando a su servidor.
 
@@ -214,7 +218,11 @@ sesión contra el servidor desplegado.
 - Se reutiliza el proveedor de identidad autoalojado de Erick (ya en uso en otras apps) con un
   proyecto nuevo para Mykcal, y el patrón de inicio de sesión de Ligón.
 - El administrador es una cuenta concreta (la de Erick) marcada como tal en la configuración del
-  despliegue; no hay pantalla para nombrar otros administradores.
+  despliegue; no hay pantalla para nombrar otros administradores. Puede registrarse sin código
+  (al principio no existe ninguno) y ocupa una de las 50 plazas.
+- El proveedor de identidad (Zitadel) permite crear usuarios sin código; el código controla el
+  alta de la cuenta de Mykcal. Sin cuenta de Mykcal no se puede usar ninguna función. Los usuarios
+  del proveedor se comparten entre producción y desarrollo; las cuentas y los datos no.
 - La desactivación de cuentas la implementa la feature 002 (baja); aquí solo se respeta el estado.
 - El registro de datos de salud no ocurre en esta feature; el consentimiento llega en la 002.
 - Nombre visible y email salen del proveedor de identidad; Mykcal no gestiona contraseñas.

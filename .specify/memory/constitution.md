@@ -1,6 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0 (MINOR: nueva subsección de gobierno)
+- Version change: 1.1.0 → 1.1.1 (PATCH: aclaraciones derivadas del plan de 001)
+- Cambios en 1.1.1:
+  - Principio V: las únicas rutas sin identidad son /v1/health y /descargar/mykcal.apk
+  - Restricciones técnicas → Despliegue: Application (Dockerfile) + servicio PostgreSQL de
+    Dokploy por entorno; Compose solo en local
+  - Restricciones técnicas → Autenticación: el código de invitación gatea el alta de la cuenta
+    de Mykcal, no la de Zitadel
+- Principios añadidos o eliminados en 1.1.1: ninguno
+- Historial 1.1.0 — 1.0.0 → 1.1.0 (MINOR: nueva subsección de gobierno)
 - Secciones añadidas en 1.1.0: "Ramas y entornos" dentro de Flujo de trabajo
   (main = producción, dev = desarrollo, ramas de feature desde dev; feature → dev → main)
 - Principios modificados en 1.1.0: ninguno
@@ -73,7 +81,9 @@ exponer claves ni fotos.
 ### V. Aislamiento por usuario y seguridad
 
 - El 100% de los endpoints MUST exigir una identidad válida (JWT de Zitadel validado contra el
-  JWKS); sin identidad la respuesta es un rechazo.
+  JWKS); sin identidad la respuesta es un rechazo. Únicas excepciones: `/v1/health` y la descarga
+  pública del APK (`/descargar/mykcal.apk`), que no devuelven datos de usuario; una prueba
+  automática fija esa lista de rutas públicas.
 - Los usuarios se identifican por el `sub` del token.
 - Todo acceso a datos MUST filtrarse por el usuario autenticado; ningún usuario puede leer ni
   modificar datos de otro, incluido el administrador salvo que una spec lo apruebe expresamente.
@@ -130,10 +140,13 @@ exponer claves ni fotos.
 - **App**: Flutter, solo Android en el MVP, distribuida como APK por enlace. Requiere conexión;
   sin ella avisa y no pierde lo que el usuario está escribiendo.
 - **Backend**: Python con FastAPI y PostgreSQL, en un monorepo con la app.
-- **Despliegue**: Docker Compose en Dokploy. Secretos (clave maestra, credenciales) en variables
+- **Despliegue**: Dokploy, con una Application (Dockerfile) y un servicio PostgreSQL de Dokploy
+  por entorno; Docker Compose solo en local. Secretos (clave maestra, credenciales) en variables
   de entorno de Dokploy.
 - **Autenticación**: instancia autoalojada de Zitadel, proyecto nuevo; Flutter con PKCE (patrón
-  de Ligón) y backend validando el JWT contra el JWKS. Registro solo con código de invitación.
+  de Ligón) y backend validando el JWT contra el JWKS. El alta de la cuenta de Mykcal solo es
+  posible con el código de invitación vigente: el usuario puede existir en Zitadel sin él, pero
+  sin cuenta de Mykcal ninguna función opera.
 - **IA**: Google Gemini como único proveedor en el MVP; cada usuario aporta su propia clave.
 - **Alimentos**: base genérica (BEDCA, licencia a verificar) importada en PostgreSQL; productos
   envasados desde Open Food Facts por código de barras, con caché local.
@@ -174,4 +187,4 @@ exponer claves ni fotos.
 - Cada plan y cada revisión de código MUST comprobar el cumplimiento; las excepciones se
   justifican por escrito en el plan.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-22
+**Version**: 1.1.1 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-22
