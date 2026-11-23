@@ -64,7 +64,7 @@ el servicio de alta.
 | VII. Simplicidad | ✅ | Sin infraestructura. El enlace se deriva de la configuración existente en vez de una ruta o un ajuste de servidor (R2). Solo se añade una dependencia, `share_plus`, justificada en R1. |
 | VIII. Accesible y en español | ✅ | Textos nuevos en `app_es.arb`. Botones con etiqueta y el enlace legible y seleccionable. |
 | IX. Entrega vertical | ✅ | Se cierra con APK de prod instalado en el móvil y los escenarios de `quickstart.md`. |
-| X. Observabilidad | ✅ | `registration_rejected` se registra con `reason=code_required`, sin el código ni el `sub`. |
+| X. Observabilidad | ✅ | No se añaden registros: el `400` es un error de cliente, como `INVITATION_INVALID` en la 001. La prueba de logs sin secretos sigue cubriendo el alta. |
 | Ramas y entornos | ⚠️ Justificado | La rama sale de `001-acceso-y-despliegue` y no de `dev`, porque necesita el arreglo de `taskAffinity` del PR #3, aún sin fusionar. Su PR a `dev` se abre cuando el PR #3 esté fusionado; el historial queda igual que si saliera de `dev`. |
 
 **Resultado**: pasa. La excepción de ramas está en *Complexity Tracking*.
