@@ -1,8 +1,8 @@
 {
   "OIDC_ISSUER": "https://mg-zitadel.cruzerick.com",
-  "OIDC_ORG_ID": "",
-  "OIDC_PROJECT_ID": "",
-  "OIDC_CLIENT_ID": "",
+  "OIDC_ORG_ID": "400870495697764355",
+  "OIDC_PROJECT_ID": "400870782219059203",
+  "OIDC_CLIENT_ID": "400871269714624515",
   "OIDC_REDIRECT_URL": "com.cruzerick.mykcal:/oauth2redirect",
   "OIDC_LOGOUT_URL": "com.cruzerick.mykcal:/logout",
   "API_BASE_URL": "https://mykcal-bk-api.cruzerick.com"
