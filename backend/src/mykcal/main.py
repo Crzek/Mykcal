@@ -16,12 +16,15 @@ from sqlalchemy import text
 
 from mykcal.accounts.router import router as accounts_router
 from mykcal.config import Settings, get_settings
+from mykcal.consent.router import router as consent_router
 from mykcal.core.auth import OidcClient
 from mykcal.core.errors import ApiError, ErrorCode
 from mykcal.db import make_engine, make_sessionmaker
 from mykcal.distribution.router import router as distribution_router
 from mykcal.invitations.router import router as invitations_router
 from mykcal.logging import configure_logging, get_logger
+from mykcal.profile.router import router as profile_router
+from mykcal.targets.router import router as targets_router
 
 # Única lista de rutas sin identidad (principio V, Complexity Tracking del plan).
 PUBLIC_ROUTES = {("GET", "/v1/health"), ("GET", "/descargar/mykcal.apk")}
@@ -75,8 +78,16 @@ def create_app(
         return JSONResponse(exc.body(), status_code=exc.status, headers=exc.headers)
 
     @app.exception_handler(RequestValidationError)
-    async def _validation(_: Request, __: RequestValidationError) -> JSONResponse:
-        err = ApiError(400, ErrorCode.VALIDATION_ERROR, "Petición no válida.")
+    async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # Solo los nombres de campo: nunca `input` ni el mensaje, que pueden llevar el valor.
+        fields: list[str] = []
+        for item in exc.errors():
+            name = next((str(p) for p in reversed(item["loc"]) if isinstance(p, str)), None)
+            if name and name not in ("body", "query") and name not in fields:
+                fields.append(name)
+        err = ApiError(
+            400, ErrorCode.VALIDATION_ERROR, "Petición no válida.", fields=fields or None
+        )
         return JSONResponse(err.body(), status_code=400)
 
     @app.exception_handler(Exception)
@@ -99,4 +110,7 @@ def create_app(
     app.include_router(accounts_router)
     app.include_router(invitations_router)
     app.include_router(distribution_router)
+    app.include_router(consent_router)
+    app.include_router(profile_router)
+    app.include_router(targets_router)
     return app

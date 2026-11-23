@@ -147,8 +147,9 @@ async def app(settings, migrated, zitadel):
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE registration_failure, registration_throttle, "
-                "invitation_code, user_account RESTART IDENTITY CASCADE"
+                "TRUNCATE registration_failure, registration_throttle, daily_target, weight_entry, "
+                "user_profile, health_consent, invitation_code, user_account "
+                "RESTART IDENTITY CASCADE"
             )
         )
     yield application
@@ -181,6 +182,44 @@ def make_account(app):
         return acc
 
     return _make
+
+
+@pytest.fixture
+def grant_consent(app):
+    """Registra el consentimiento vigente de una cuenta."""
+    from mykcal.consent.models import HealthConsent
+    from mykcal.consent.service import CURRENT_CONSENT_VERSION
+
+    async def _grant(account: UserAccount) -> None:
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(
+                HealthConsent(
+                    user_id=account.id,
+                    text_version=CURRENT_CONSENT_VERSION,
+                    accepted_at=datetime.now(UTC),
+                )
+            )
+
+    return _grant
+
+
+@pytest.fixture
+def profile_body():
+    """Cuerpo válido de PUT /v1/profile (ejemplo de la spec: hombre, 30, 180, 80, moderada)."""
+
+    def _body(**overrides) -> dict:
+        body = {
+            "age": 30,
+            "sex": "male",
+            "height_cm": 180,
+            "weight_kg": 80,
+            "activity_level": "moderate",
+            "goal": "maintain",
+            "measured_on": datetime.now(UTC).date().isoformat(),
+        }
+        return {**body, **overrides}
+
+    return _body
 
 
 @pytest.fixture

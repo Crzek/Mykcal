@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import timedelta
 
+import structlog
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -12,11 +14,14 @@ from mykcal.accounts import throttle
 from mykcal.accounts.models import UserAccount
 from mykcal.accounts.repository import get_account_by_subject
 from mykcal.config import MAX_ACTIVE_ACCOUNTS
+from mykcal.consent.service import has_consent
 from mykcal.core.auth import OidcClient, auth_unavailable
 from mykcal.core.errors import ApiError, ErrorCode
 from mykcal.core.userinfo import fetch_display_name
 from mykcal.invitations import codes
 from mykcal.invitations.models import InvitationCode
+from mykcal.profile.models import UserProfile
+from mykcal.targets.models import DailyTarget
 
 # Mismo bloqueo para altas y rotaciones (research R7).
 REGISTRATION_LOCK_KEY = 0x4D594B43
@@ -33,6 +38,23 @@ async def count_active(session: AsyncSession) -> int:
         select(func.count()).select_from(UserAccount).where(UserAccount.status == "active")
     )
     return int(result.scalar_one())
+
+
+async def onboarding_state(session: AsyncSession, user_id: uuid.UUID) -> str:
+    """Paso pendiente del onboarding (research R10): consent, profile o done."""
+    if not await has_consent(session, user_id):
+        return "consent"
+    has_profile = (
+        await session.execute(select(UserProfile.user_id).where(UserProfile.user_id == user_id))
+    ).first()
+    has_target = (
+        await session.execute(
+            select(DailyTarget.id).where(
+                DailyTarget.user_id == user_id, DailyTarget.is_current.is_(True)
+            )
+        )
+    ).first()
+    return "done" if has_profile and has_target else "profile"
 
 
 async def sync_display_name(
@@ -107,3 +129,18 @@ async def register(
         raise error
     assert account is not None
     return account
+
+
+async def deactivate(sessionmaker: async_sessionmaker[AsyncSession], account_id: uuid.UUID) -> None:
+    """Baja: desactiva la cuenta y conserva los datos (research R15).
+
+    Toma el mismo bloqueo que el alta para que no se cruce con un recuento de plazas.
+    """
+    async with sessionmaker() as session, session.begin():
+        await lock_registration(session)
+        account = await session.get(UserAccount, account_id)
+        if account is None or account.status == "disabled":
+            return
+        account.status = "disabled"
+        account.disabled_at = clock.utcnow()
+    structlog.get_logger("mykcal").info("account_deactivated")

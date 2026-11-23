@@ -22,7 +22,7 @@ inicio → ¿tokens guardados?
 |---|---|---|
 | **AccesoScreen** | Nombre de la app y una frase breve | «Iniciar sesión» y «Crear cuenta» abren la página de Zitadel (en registro, con el prompt `create`) |
 | **CodigoInvitacionScreen** | Campo de código (acepta minúsculas y espacios), ayuda «Pídeselo a Erick» y «Si eres el administrador, puedes dejarlo vacío.» | «Continuar» (habilitado también con el campo vacío, 008) → `POST /v1/registration`; «Cerrar sesión» |
-| **InicioScreen** | Saludo con `display_name` y marcador de lo que vendrá en las siguientes features | Menú: «Invitaciones» (solo si `is_admin`), «Compartir Mykcal» (todos, 008), «Cerrar sesión» |
+| **InicioScreen** | Saludo con `display_name` y la tarjeta «Tu objetivo de hoy» (002) | Menú: «Invitaciones» (solo si `is_admin`), «Compartir Mykcal» (todos, 008), «Ajustes» (todos, 002), «Cerrar sesión» |
 | **InvitacionesScreen** (admin) | Código vigente como `ABCD-EFGH`, botón copiar, «N de 50 cuentas activas · M plazas libres» | «Cambiar código» (con confirmación en un diálogo de la app, no del sistema) |
 | **CuentaDesactivadaScreen** | «Tu cuenta está desactivada» | «Cerrar sesión» |
 
@@ -48,3 +48,6 @@ inicio → ¿tokens guardados?
 
 > La hoja «Compartir Mykcal» y el cambio de la pantalla del código están detallados en
 > `specs/008-compartir-app-y-alta-admin/contracts/ui-flows.md`.
+
+> Onboarding (consentimiento, perfil, objetivo), ajustes y baja: ver
+> `specs/002-onboarding-y-objetivo/contracts/ui-flows.md`. `AppGate` elige la pantalla con `Me.onboarding`.

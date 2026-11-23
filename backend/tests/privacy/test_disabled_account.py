@@ -26,3 +26,22 @@ async def test_admin_desactivado_no_opera(client, zitadel, make_account):
     await make_account("admin-sub", status="disabled")
     resp = await client.get("/v1/admin/invitation", headers=zitadel.headers("admin-sub"))
     assert resp.status_code == 403 and resp.json()["code"] == "ACCOUNT_DISABLED"
+
+
+async def test_rutas_de_002_rechazan_cuenta_desactivada(
+    client, zitadel, make_account, profile_body
+):
+    """SC-005: todas las rutas nuevas rechazan una cuenta dada de baja."""
+    await make_account("dis", status="disabled")
+    h = zitadel.headers("dis")
+    calls = [
+        ("POST", "/v1/consent", {"text_version": "2026-11-1"}),
+        ("POST", "/v1/me/deactivation", None),
+        ("GET", "/v1/profile", None),
+        ("PUT", "/v1/profile", profile_body()),
+        ("GET", "/v1/target", None),
+        ("POST", "/v1/target/recalculate", None),
+    ]
+    for method, path, body in calls:
+        resp = await client.request(method, path, headers=h, json=body)
+        assert resp.status_code == 403 and resp.json()["code"] == "ACCOUNT_DISABLED", path
