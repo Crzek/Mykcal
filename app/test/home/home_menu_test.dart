@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/a11y.dart';
@@ -14,6 +15,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Cerrar sesión'), findsOneWidget);
     expect(find.text('Invitaciones'), findsNothing);
+    expect(find.text('Compartir Mykcal'), findsOneWidget);
   });
 
   testWidgets('administrador: ve «Invitaciones» (US4-1)', (tester) async {
@@ -24,5 +26,28 @@ void main() {
     await tester.tap(find.byTooltip('Menú'));
     await tester.pumpAndSettle();
     expect(find.text('Invitaciones'), findsOneWidget);
+  });
+
+  testWidgets('administrador: ve «Compartir Mykcal» y «Invitaciones»', (tester) async {
+    final h = Harness();
+    await seedSession();
+    h.api.onMe = () async => meAdmin;
+    await h.pumpApp(tester);
+    await tester.tap(find.byTooltip('Menú'));
+    await tester.pumpAndSettle();
+    expect(find.text('Compartir Mykcal'), findsOneWidget);
+    expect(find.text('Invitaciones'), findsOneWidget);
+  });
+
+  testWidgets('«Compartir Mykcal» abre la hoja con el enlace', (tester) async {
+    final h = Harness();
+    await seedSession();
+    await h.pumpApp(tester);
+    await tester.tap(find.byTooltip('Menú'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compartir Mykcal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.text('Copiar'), findsOneWidget);
   });
 }

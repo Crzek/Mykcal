@@ -7,7 +7,7 @@ import '../../core/auth/auth_controller.dart';
 /// caducar la sesión (FR-015, caso límite).
 final registrationDraftProvider = StateProvider<String>((ref) => '');
 
-enum RegistrationProblem { invalid, noSeats, tooManyAttempts, forbidden, offline, server }
+enum RegistrationProblem { invalid, required, noSeats, tooManyAttempts, forbidden, offline, server }
 
 class RegistrationState {
   const RegistrationState({this.busy = false, this.problem, this.retryAfter});
@@ -32,6 +32,7 @@ class RegistrationController extends Notifier<RegistrationState> {
     } on ApiError catch (e) {
       state = switch (e.code) {
         'INVITATION_INVALID' => const RegistrationState(problem: RegistrationProblem.invalid),
+        'INVITATION_REQUIRED' => const RegistrationState(problem: RegistrationProblem.required),
         'NO_SEATS' => const RegistrationState(problem: RegistrationProblem.noSeats),
         'TOO_MANY_ATTEMPTS' => RegistrationState(
             problem: RegistrationProblem.tooManyAttempts,

@@ -37,6 +37,7 @@ Es nueva y está separada de la de Ligón, para no abrir el registro allí.
 | Check authorization on authentication | **no**, porque los autorregistrados no tienen grants (R3) |
 | Check for project on authentication | no |
 
+- Si «Check authorization on authentication» queda activo, Zitadel rechaza el login con «el inicio de sesión requiere que el usuario tenga al menos una concesión sobre la aplicación». Se vio en la prueba real del 2026-11-23.
 - No hay roles: el administrador sale de `ADMIN_SUBJECT` (R6).
 - `OIDC_PROJECT_ID` = ID del proyecto.
 

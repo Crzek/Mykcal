@@ -5,8 +5,9 @@ import '../../core/api/models.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../admin/invitations_screen.dart';
+import '../share/share_app_sheet.dart';
 
-enum _MenuAction { invitations, signOut }
+enum _MenuAction { invitations, shareApp, signOut }
 
 /// Inicio: saludo con el nombre visible y marcador de las siguientes features.
 class HomeScreen extends ConsumerWidget {
@@ -29,6 +30,8 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(builder: (_) => const InvitationsScreen()),
                   );
+                case _MenuAction.shareApp:
+                  showShareAppSheet(context);
                 case _MenuAction.signOut:
                   ref.read(authControllerProvider.notifier).signOut();
               }
@@ -39,6 +42,10 @@ class HomeScreen extends ConsumerWidget {
                   value: _MenuAction.invitations,
                   child: Text(l10n.menuInvitations),
                 ),
+              PopupMenuItem(
+                value: _MenuAction.shareApp,
+                child: Text(l10n.menuShareApp),
+              ),
               PopupMenuItem(value: _MenuAction.signOut, child: Text(l10n.signOut)),
             ],
           ),
