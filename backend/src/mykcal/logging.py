@@ -28,6 +28,8 @@ ALLOWED_FIELDS = frozenset(
         "from_revision",
         "to_revision",
         "sqlstate",
+        "where",
+        "fields",
     }
 )
 

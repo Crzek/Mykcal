@@ -68,6 +68,31 @@ async def migrate(settings: Settings) -> None:
         await engine.dispose()
 
 
+def _where(exc: BaseException) -> str:
+    """Último punto del traceback (módulo:función:línea). Nunca incluye valores."""
+    tb = exc.__traceback__
+    last = None
+    while tb is not None:
+        last = tb
+        tb = tb.tb_next
+    if last is None:
+        return ""
+    code = last.tb_frame.f_code
+    return f"{Path(code.co_filename).name}:{code.co_name}:{last.tb_lineno}"
+
+
+def _fields(exc: BaseException) -> str:
+    """Nombres de las variables que no validan (sin sus valores)."""
+    errors = getattr(exc, "errors", None)
+    if not callable(errors):
+        return ""
+    try:
+        names = {".".join(str(x) for x in e.get("loc", ())) or "config" for e in errors()}
+        return ",".join(sorted(names))
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def main() -> int:
     configure_logging()
     log = get_logger()
@@ -76,7 +101,13 @@ def main() -> int:
         asyncio.run(asyncio.wait_for(migrate(settings), settings.migration_timeout_s))
     except Exception as exc:  # noqa: BLE001
         sqlstate = getattr(getattr(exc, "orig", None), "sqlstate", None)
-        log.error("migrate_failed", error_class=type(exc).__name__, sqlstate=sqlstate)
+        log.error(
+            "migrate_failed",
+            error_class=type(exc).__name__,
+            sqlstate=sqlstate,
+            where=_where(exc),
+            fields=_fields(exc),
+        )
         return 1
     return 0
 
