@@ -5,11 +5,19 @@ sealed class ApiFailure implements Exception {
 
 /// El servidor respondió con un `ErrorBody` (p. ej. `INVITATION_INVALID`, `NO_SEATS`).
 class ApiError extends ApiFailure {
-  const ApiError(this.code, this.status, {this.retryAfterSeconds});
+  const ApiError(
+    this.code,
+    this.status, {
+    this.retryAfterSeconds,
+    this.fields = const [],
+  });
 
   final String code;
   final int status;
   final int? retryAfterSeconds;
+
+  /// Solo con `VALIDATION_ERROR`: nombres de los campos inválidos (research R14).
+  final List<String> fields;
 
   @override
   String toString() => 'ApiError($code, $status)';

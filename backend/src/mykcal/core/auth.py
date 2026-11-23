@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mykcal.accounts.models import UserAccount
 from mykcal.accounts.repository import get_account_by_subject
+from mykcal.consent.service import has_consent
 from mykcal.core.errors import ApiError, ErrorCode, unauthorized
 from mykcal.db import get_session
 
@@ -172,4 +173,17 @@ async def require_active_account(principal: Principal = Depends(require_register
 async def require_admin(principal: Principal = Depends(require_active_account)) -> Principal:
     if not principal.is_admin:
         raise ApiError(403, ErrorCode.FORBIDDEN, "No tienes permiso para esto.")
+    return principal
+
+
+async def require_consent(
+    principal: Principal = Depends(require_active_account),
+    session: AsyncSession = Depends(get_session),
+) -> Principal:
+    """Puerta de los datos de salud (principio IV, research R9)."""
+    assert principal.account is not None
+    if not await has_consent(session, principal.account.id):
+        raise ApiError(
+            403, ErrorCode.CONSENT_REQUIRED, "Debes aceptar el tratamiento de tus datos de salud."
+        )
     return principal

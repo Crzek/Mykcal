@@ -18,14 +18,26 @@
   "errInvitationInvalid": "El código no es válido. Comprueba que es el último que te envió Erick.",
   "errNoSeats": "Ahora mismo no hay plazas libres en Mykcal.",
   "errTooManyAttempts": "Demasiados intentos. Podrás volver a probar en {time}.",
-  "@errTooManyAttempts": {"placeholders": {"time": {"type": "String"}}},
+  "@errTooManyAttempts": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "errForbidden": "No tienes permiso para esto.",
   "errServer": "El servidor no responde. Inténtalo de nuevo en unos minutos.",
   "errGeneric": "Algo ha fallado. Inténtalo de nuevo.",
   "offlineBanner": "Necesitas conexión a Internet.",
   "retry": "Reintentar",
   "homeGreeting": "Hola, {name}",
-  "@homeGreeting": {"placeholders": {"name": {"type": "String"}}},
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homePlaceholder": "Aquí irá tu diario de comidas.",
   "menuLabel": "Menú",
   "menuInvitations": "Invitaciones",
@@ -37,7 +49,19 @@
   "invitationCopy": "Copiar código",
   "invitationCopied": "Código copiado",
   "invitationSeats": "{active} de {max} cuentas activas · {free} plazas libres",
-  "@invitationSeats": {"placeholders": {"active": {"type": "int"}, "max": {"type": "int"}, "free": {"type": "int"}}},
+  "@invitationSeats": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      },
+      "free": {
+        "type": "int"
+      }
+    }
+  },
   "invitationChange": "Cambiar código",
   "invitationGenerate": "Generar código",
   "invitationConfirmTitle": "¿Cambiar el código?",
@@ -52,7 +76,135 @@
   "shareCopied": "Enlace copiado",
   "shareCopyFailed": "No se pudo copiar el enlace",
   "shareText": "Prueba Mykcal, la app para registrar lo que comes: {link}",
-  "@shareText": {"placeholders": {"link": {"type": "String"}}},
+  "@shareText": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
   "codeAdminHint": "Si eres el administrador, puedes dejarlo vacío.",
-  "errInvitationRequired": "Escribe el código de invitación."
+  "errInvitationRequired": "Escribe el código de invitación.",
+  "errOffline": "Sin conexión. Inténtalo de nuevo.",
+  "ok": "Aceptar",
+  "consentTitle": "Tus datos de salud",
+  "consentBody": "Mykcal te pide permiso para guardar y tratar tus datos de salud: edad, sexo, altura, peso, actividad física semanal, tu objetivo (perder grasa, mantener o ganar músculo) y lo que registres cada día en tu diario de comidas.\n\nLos usamos solo para calcular tu objetivo diario y mostrarte tu progreso. Solo tú puedes verlos: ni el administrador ni otras personas de Mykcal tienen acceso a ellos.\n\nLas fotos de comida no se guardan en el servidor: se analizan en el momento y se descartan. Si usas la función de foto con tu propia clave de IA, la clave se guarda cifrada.\n\nPuedes darte de baja cuando quieras desde Ajustes. Al darte de baja tu cuenta se desactiva y tus datos se conservan, sin plazo, pero ya no podrás acceder a ellos desde la app. Sin tu consentimiento no guardamos ningún dato de salud.",
+  "consentCheckbox": "He leído y acepto el tratamiento de mis datos de salud",
+  "consentAccept": "Aceptar y continuar",
+  "consentTextVersion": "2026-11-1",
+  "errUpdateApp": "Actualiza la app para continuar.",
+  "profileTitle": "Tu perfil",
+  "profileAge": "Edad",
+  "unitYears": "años",
+  "profileSex": "Sexo",
+  "profileSexHint": "Solo se usa para el cálculo",
+  "sexMale": "Hombre",
+  "sexFemale": "Mujer",
+  "profileHeight": "Altura",
+  "unitCm": "cm",
+  "profileWeight": "Peso",
+  "unitKg": "kg",
+  "profileActivity": "Actividad física",
+  "activitySedentary": "Sedentario",
+  "activityLight": "Ligera: 1–3 días/semana",
+  "activityModerate": "Moderada: 3–5 días/semana",
+  "activityHigh": "Alta: 6–7 días/semana",
+  "activityVeryHigh": "Muy alta: trabajo físico o dos sesiones al día",
+  "profileGoal": "Objetivo",
+  "goalLose": "Perder grasa",
+  "goalMaintain": "Mantener",
+  "goalGain": "Ganar músculo",
+  "profileCalculate": "Calcular mi objetivo",
+  "profileSave": "Guardar",
+  "profileSaved": "Perfil guardado",
+  "errRequired": "Obligatorio",
+  "errAgeRange": "Entre 18 y 100 años",
+  "errHeightRange": "Entre 100 y 250 cm",
+  "errWeightRange": "Entre 30 y 300 kg, con un decimal como máximo",
+  "targetUpdatedTitle": "Tu objetivo se ha actualizado",
+  "targetBefore": "Antes",
+  "targetNow": "Ahora",
+  "proposedTitle": "Tu objetivo está editado a mano",
+  "proposedBody": "¿Recalcularlo con tus datos nuevos?",
+  "targetCurrent": "Actual",
+  "targetProposed": "Propuesto",
+  "keepMine": "Mantener el mío",
+  "recalculate": "Recalcular",
+  "macroSummary": "{kcal} kcal · P {protein} g · C {carbs} g · G {fat} g",
+  "@macroSummary": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "protein": {
+        "type": "String"
+      },
+      "carbs": {
+        "type": "String"
+      },
+      "fat": {
+        "type": "String"
+      }
+    }
+  },
+  "targetTitle": "Tu objetivo diario",
+  "targetEditedBadge": "Editado a mano",
+  "nutrientKcal": "Calorías",
+  "nutrientProtein": "Proteína",
+  "nutrientCarbs": "Carbohidratos",
+  "nutrientFat": "Grasa",
+  "nutrientFiber": "Fibra",
+  "nutrientSodium": "Sodio",
+  "nutrientPotassium": "Potasio",
+  "nutrientCalcium": "Calcio",
+  "nutrientIron": "Hierro",
+  "nutrientMagnesium": "Magnesio",
+  "nutrientVitD": "Vitamina D",
+  "nutrientVitC": "Vitamina C",
+  "kindMin": "mínimo",
+  "kindMax": "máximo",
+  "targetMicrosTitle": "Fibra y micronutrientes",
+  "noticeMinKcal": "Hemos subido tus calorías al mínimo seguro de {min} kcal.",
+  "@noticeMinKcal": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeCarbsClamped": "Tus macros no cuadran con las calorías: el objetivo no es coherente.",
+  "targetStart": "Empezar",
+  "targetEdit": "Editar",
+  "targetBackToCalc": "Volver al cálculo",
+  "backToCalcTitle": "¿Volver al cálculo automático?",
+  "backToCalcBody": "Se recalculará tu objetivo con tus datos actuales y perderás tus cambios.",
+  "targetRecalculated": "Objetivo recalculado",
+  "targetEditTitle": "Editar objetivo",
+  "targetSave": "Guardar",
+  "targetSaved": "Objetivo guardado",
+  "macroMismatch": "Las calorías de tus macros ({macros} kcal) no coinciden con tu objetivo ({kcal} kcal).",
+  "@macroMismatch": {
+    "placeholders": {
+      "macros": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "errIntMin0": "Escribe un número entero de 0 o más",
+  "errIntMin1": "Escribe un número entero de 1 o más",
+  "homeTargetTitle": "Tu objetivo de hoy",
+  "homeTargetDetail": "Ver detalle",
+  "menuSettings": "Ajustes",
+  "settingsTitle": "Ajustes",
+  "settingsProfile": "Mi perfil",
+  "settingsTarget": "Mi objetivo",
+  "settingsDeactivate": "Darse de baja",
+  "deactivateAction": "Darme de baja",
+  "deactivateTitle": "¿Darte de baja de Mykcal?",
+  "deactivateBody": "Tu cuenta se desactivará y no podrás volver a entrar. Tus datos se conservan, pero no podrás verlos ni recuperar la cuenta desde la app.",
+  "deactivatedNotice": "Tu cuenta se ha dado de baja.",
+  "errDeactivate": "No se pudo dar de baja la cuenta. Inténtalo de nuevo."
 }

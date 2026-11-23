@@ -22,6 +22,12 @@
 - Q: ¿Se puede reactivar una cuenta desactivada? → A: no desde la app en el MVP; los datos se
   conservan sin plazo (riesgo aceptado).
 
+### Session 2026-11-23
+
+- Q: Al cambiar el perfil con un objetivo calculado, ¿se pregunta antes de recalcular? → A: no; se
+  recalcula automáticamente y se muestra el objetivo anterior y el nuevo. Solo se pregunta si el
+  objetivo está editado a mano.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Consentimiento y perfil (Priority: P1)
@@ -71,8 +77,8 @@ el resultado esperado de las reglas de cálculo.
 3. **Given** el mismo perfil con objetivo perder grasa, **When** se calcula, **Then** el objetivo
    es 2.207 kcal, proteína 176 g, grasa 61 g y carbohidratos 238 g.
 4. **Given** un usuario que cambia su perfil (por ejemplo, actividad u objetivo), **When** guarda,
-   **Then** se le propone recalcular el objetivo; si el objetivo no fue editado a mano se recalcula,
-   y si lo fue, solo se recalcula si lo confirma.
+   **Then** si el objetivo no fue editado a mano se recalcula y se le muestra el anterior y el nuevo;
+   si lo fue, se le propone recalcular y solo se recalcula si lo confirma.
 
 ---
 

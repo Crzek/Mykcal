@@ -24,6 +24,13 @@ def test_lista_publica_cerrada(app):
         ("POST", "/v1/registration"),
         ("GET", "/v1/admin/invitation"),
         ("POST", "/v1/admin/invitation/rotate"),
+        ("POST", "/v1/consent"),
+        ("POST", "/v1/me/deactivation"),
+        ("GET", "/v1/profile"),
+        ("PUT", "/v1/profile"),
+        ("GET", "/v1/target"),
+        ("PUT", "/v1/target"),
+        ("POST", "/v1/target/recalculate"),
     }, "hay rutas nuevas: decide si son públicas o exigen cuenta activa"
 
 

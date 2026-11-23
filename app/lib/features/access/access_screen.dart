@@ -19,6 +19,7 @@ class AccessScreen extends ConsumerWidget {
       AccessNotice.signInFailed => l10n.signInFailed,
       AccessNotice.unavailable => l10n.signInUnavailable,
       AccessNotice.sessionExpired => l10n.sessionExpired,
+      AccessNotice.accountDeactivated => l10n.deactivatedNotice,
       null => null,
     };
     return Scaffold(
@@ -53,7 +54,9 @@ class AccessScreen extends ConsumerWidget {
                       child: Text(
                         message,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),

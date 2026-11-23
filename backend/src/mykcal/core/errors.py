@@ -17,6 +17,11 @@ class ErrorCode(StrEnum):
     INVITATION_REQUIRED = "INVITATION_REQUIRED"
     NO_SEATS = "NO_SEATS"
     TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS"
+    CONSENT_REQUIRED = "CONSENT_REQUIRED"
+    CONSENT_VERSION_MISMATCH = "CONSENT_VERSION_MISMATCH"
+    PROFILE_NOT_FOUND = "PROFILE_NOT_FOUND"
+    PROFILE_REQUIRED = "PROFILE_REQUIRED"
+    TARGET_NOT_FOUND = "TARGET_NOT_FOUND"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
@@ -25,6 +30,8 @@ class ErrorBody(BaseModel):
     code: ErrorCode
     message: str
     retry_after_s: int | None = None
+    # Solo con VALIDATION_ERROR: nombres de campo, nunca valores (research R14).
+    fields: list[str] | None = None
 
 
 class ApiError(Exception):
@@ -36,19 +43,24 @@ class ApiError(Exception):
         *,
         retry_after_s: int | None = None,
         headers: dict[str, str] | None = None,
+        fields: list[str] | None = None,
     ) -> None:
         super().__init__(code.value)
         self.status = status
         self.code = code
         self.message = message
         self.retry_after_s = retry_after_s
+        self.fields = fields
         self.headers = headers or {}
         if retry_after_s is not None:
             self.headers.setdefault("Retry-After", str(retry_after_s))
 
     def body(self) -> dict[str, Any]:
         return ErrorBody(
-            code=self.code, message=self.message, retry_after_s=self.retry_after_s
+            code=self.code,
+            message=self.message,
+            retry_after_s=self.retry_after_s,
+            fields=self.fields,
         ).model_dump(exclude_none=True, mode="json")
 
 

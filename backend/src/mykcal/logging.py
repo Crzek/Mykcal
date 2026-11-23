@@ -30,6 +30,7 @@ ALLOWED_FIELDS = frozenset(
         "sqlstate",
         "where",
         "fields",
+        "source",
     }
 )
 
