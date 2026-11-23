@@ -115,3 +115,24 @@ async def test_cuerpo_con_campos_extra_o_largo_da_400(client, zitadel):
     assert (
         await client.post("/v1/registration", headers=h, json={"invitation_code": "A", "x": 1})
     ).status_code == 400
+
+
+async def test_codigo_vacio_de_no_admin_pide_el_codigo_y_no_crea_cuenta(
+    app, client, zitadel, seed_code, contract
+):
+    from tests.contract.schema import assert_matches_contract
+
+    await seed_code()
+    before = await count(app)
+    for vacio in ("", " - "):
+        resp = await register(client, zitadel, "u1", vacio)
+        assert resp.status_code == 400 and resp.json()["code"] == "INVITATION_REQUIRED"
+        assert_matches_contract(contract, "/v1/registration", "post", 400, resp.json())
+    assert await count(app) == before
+    assert (await client.get("/v1/me", headers=zitadel.headers("u1"))).status_code == 404
+
+
+async def test_ya_registrado_con_codigo_vacio_sigue_dando_409(client, zitadel, make_account):
+    await make_account("u1")
+    resp = await register(client, zitadel, "u1", "")
+    assert resp.status_code == 409 and resp.json()["code"] == "ALREADY_REGISTERED"

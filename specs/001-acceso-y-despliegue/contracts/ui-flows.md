@@ -21,8 +21,8 @@ inicio → ¿tokens guardados?
 | Pantalla | Contenido | Acciones |
 |---|---|---|
 | **AccesoScreen** | Nombre de la app y una frase breve | «Iniciar sesión» y «Crear cuenta» abren la página de Zitadel (en registro, con el prompt `create`) |
-| **CodigoInvitacionScreen** | Campo de código (acepta minúsculas y espacios), ayuda «Pídeselo a Erick» | «Continuar» → `POST /v1/registration`; «Cerrar sesión» |
-| **InicioScreen** | Saludo con `display_name` y marcador de lo que vendrá en las siguientes features | Menú: «Invitaciones» (solo si `is_admin`), «Cerrar sesión» |
+| **CodigoInvitacionScreen** | Campo de código (acepta minúsculas y espacios), ayuda «Pídeselo a Erick» y «Si eres el administrador, puedes dejarlo vacío.» | «Continuar» (habilitado también con el campo vacío, 008) → `POST /v1/registration`; «Cerrar sesión» |
+| **InicioScreen** | Saludo con `display_name` y marcador de lo que vendrá en las siguientes features | Menú: «Invitaciones» (solo si `is_admin`), «Compartir Mykcal» (todos, 008), «Cerrar sesión» |
 | **InvitacionesScreen** (admin) | Código vigente como `ABCD-EFGH`, botón copiar, «N de 50 cuentas activas · M plazas libres» | «Cambiar código» (con confirmación en un diálogo de la app, no del sistema) |
 | **CuentaDesactivadaScreen** | «Tu cuenta está desactivada» | «Cerrar sesión» |
 
@@ -31,6 +31,7 @@ inicio → ¿tokens guardados?
 | Código API | Mensaje en pantalla |
 |---|---|
 | `INVITATION_INVALID` | «El código no es válido. Comprueba que es el último que te envió Erick.» |
+| `INVITATION_REQUIRED` (008) | «Escribe el código de invitación.» |
 | `NO_SEATS` | «Ahora mismo no hay plazas libres en Mykcal.» |
 | `TOO_MANY_ATTEMPTS` | «Demasiados intentos. Podrás volver a probar en {tiempo}.» El botón queda desactivado con una cuenta atrás |
 | `ACCOUNT_DISABLED` | Lleva a CuentaDesactivadaScreen |
@@ -44,3 +45,6 @@ inicio → ¿tokens guardados?
 - Si la renovación falla → AccesoScreen. Al volver a entrar, el borrador del código sigue ahí.
 - **Cerrar sesión**: revocar + `end_session` (plazo de 5 s), borrar los tokens y volver a
   AccesoScreen.
+
+> La hoja «Compartir Mykcal» y el cambio de la pantalla del código están detallados en
+> `specs/008-compartir-app-y-alta-admin/contracts/ui-flows.md`.

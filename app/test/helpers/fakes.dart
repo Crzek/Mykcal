@@ -9,6 +9,7 @@ import 'package:mykcal/core/api/mykcal_api.dart';
 import 'package:mykcal/core/auth/auth_controller.dart';
 import 'package:mykcal/core/auth/auth_service.dart';
 import 'package:mykcal/core/auth/session_store.dart';
+import 'package:mykcal/core/config/download_link.dart';
 
 final testNow = DateTime.utc(2026, 11, 22, 12);
 
@@ -113,6 +114,7 @@ class Harness {
         mykcalApiProvider.overrideWithValue(api),
         authClockProvider.overrideWithValue(() => testNow),
         signOutDeadlineProvider.overrideWithValue(signOutDeadline),
+        downloadLinkProvider.overrideWithValue('https://mykcal-bk-api.cruzerick.com/descargar/mykcal.apk'),
       ];
 
   ProviderContainer container() {

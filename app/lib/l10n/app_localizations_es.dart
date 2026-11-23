@@ -143,4 +143,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get confirmChange => 'Cambiar';
+
+  @override
+  String get menuShareApp => 'Compartir Mykcal';
+
+  @override
+  String get shareTitle => 'Compartir Mykcal';
+
+  @override
+  String get shareIntro =>
+      'Envía este enlace para que descarguen la app. Para crear la cuenta necesitarán un código de invitación.';
+
+  @override
+  String get shareCopy => 'Copiar';
+
+  @override
+  String get shareSend => 'Compartir';
+
+  @override
+  String get shareCopied => 'Enlace copiado';
+
+  @override
+  String get shareCopyFailed => 'No se pudo copiar el enlace';
+
+  @override
+  String shareText(String link) {
+    return 'Prueba Mykcal, la app para registrar lo que comes: $link';
+  }
+
+  @override
+  String get codeAdminHint => 'Si eres el administrador, puedes dejarlo vacío.';
+
+  @override
+  String get errInvitationRequired => 'Escribe el código de invitación.';
 }

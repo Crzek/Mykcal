@@ -98,3 +98,24 @@ async def test_se_borran_los_fallos_de_mas_de_1h(app, client, zitadel, seed_code
         assert (
             await s.execute(select(func.count()).select_from(RegistrationFailure))
         ).scalar_one() == 1
+
+
+async def test_codigo_vacio_no_cuenta_como_fallo(app, client, zitadel, seed_code):
+    await seed_code()
+    for _ in range(5):
+        resp = await register(client, zitadel, "u1", "")
+        assert resp.status_code == 400 and resp.json()["code"] == "INVITATION_REQUIRED"
+    async with app.state.sessionmaker() as s:
+        n = (await s.execute(select(func.count()).select_from(RegistrationFailure))).scalar_one()
+    assert n == 0
+    resp = await register(client, zitadel, "u1", "ZZZZ9999")
+    assert resp.status_code == 400 and resp.json()["code"] == "INVITATION_INVALID"
+
+
+async def test_codigo_vacio_se_evalua_antes_del_bloqueo(client, zitadel, seed_code):
+    await seed_code()
+    for _ in range(4):
+        await register(client, zitadel, "u1")
+    assert (await register(client, zitadel, "u1")).status_code == 429
+    resp = await register(client, zitadel, "u1", "")
+    assert resp.status_code == 400 and resp.json()["code"] == "INVITATION_REQUIRED"

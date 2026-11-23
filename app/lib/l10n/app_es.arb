@@ -43,5 +43,16 @@
   "invitationConfirmTitle": "¿Cambiar el código?",
   "invitationConfirmBody": "El código anterior dejará de valer de inmediato. Las cuentas ya creadas no se ven afectadas.",
   "cancel": "Cancelar",
-  "confirmChange": "Cambiar"
+  "confirmChange": "Cambiar",
+  "menuShareApp": "Compartir Mykcal",
+  "shareTitle": "Compartir Mykcal",
+  "shareIntro": "Envía este enlace para que descarguen la app. Para crear la cuenta necesitarán un código de invitación.",
+  "shareCopy": "Copiar",
+  "shareSend": "Compartir",
+  "shareCopied": "Enlace copiado",
+  "shareCopyFailed": "No se pudo copiar el enlace",
+  "shareText": "Prueba Mykcal, la app para registrar lo que comes: {link}",
+  "@shareText": {"placeholders": {"link": {"type": "String"}}},
+  "codeAdminHint": "Si eres el administrador, puedes dejarlo vacío.",
+  "errInvitationRequired": "Escribe el código de invitación."
 }
