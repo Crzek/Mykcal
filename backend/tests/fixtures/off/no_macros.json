@@ -1,0 +1,12 @@
+{
+  "code": "8410000000047",
+  "status": 1,
+  "product": {
+    "code": "8410000000047",
+    "product_name": "Producto sin tabla",
+    "brands": "Marca Cuatro",
+    "nutriments": {
+      "energy-kcal_100g": 100
+    }
+  }
+}

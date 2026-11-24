@@ -60,3 +60,91 @@ async def test_0002_tablas_y_restricciones(app, make_account):
         await run(insert_target, cur=True, sup=None)
     with pytest.raises(IntegrityError):  # vigente con superseded_at
         await run(insert_target, cur=True, sup=datetime.now())
+
+
+async def test_0003_alimentos_restricciones(app, make_account):
+    """T011: la migración 0003 crea food y food_import con los CHECK e índices de data-model.md."""
+    acc = await make_account("mig-food")
+
+    async def run(sql: str, **params) -> None:
+        async with app.state.engine.begin() as conn:
+            await conn.execute(text(sql), params)
+
+    cols = "(kind, owner_user_id, name, barcode, base_unit, kcal, protein_g, carbs_g, fat_g, "
+    cols += "fiber_g, search_text, source, source_code, fetched_at, deleted_at, created_at, "
+    cols += "updated_at)"
+
+    def insert(
+        kind,
+        *,
+        owner=None,
+        source="user",
+        code=None,
+        barcode=None,
+        fetched=None,
+        deleted=None,
+        kcal=100,
+        fiber=None,
+        name="x",
+    ):
+        return (
+            f"INSERT INTO food {cols} VALUES ('{kind}', :owner, :name, :barcode, 'g', :kcal, 1, 1, "
+            "1, :fiber, 'x', :source, :code, :fetched, :deleted, now(), now())",
+            dict(
+                owner=owner,
+                name=name,
+                barcode=barcode,
+                kcal=kcal,
+                fiber=fiber,
+                source=source,
+                code=code,
+                fetched=fetched,
+                deleted=deleted,
+            ),
+        )
+
+    now = datetime.now().astimezone()
+    sql, p = insert("custom", owner=acc.id, barcode="12345678")
+    await run(sql, **p)
+    for bad in (
+        insert("custom"),  # custom sin dueño
+        insert("generic", owner=acc.id, source="ciqual", code="1"),  # genérico con dueño
+        insert("generic", source="ciqual", code="2", deleted=now),  # deleted_at en un genérico
+        insert("custom", owner=acc.id, barcode="1234567"),  # 7 cifras
+        insert("custom", owner=acc.id, kcal=-1),
+        insert("custom", owner=acc.id, kcal=901),
+        insert("custom", owner=acc.id, fiber=-0.5),
+        insert("custom", owner=acc.id, name=""),
+        insert("generic", source="user", code="3"),  # origen incoherente con el tipo
+        insert("packaged", source="off", barcode="8410000000009"),  # sin fetched_at
+    ):
+        with pytest.raises(IntegrityError):
+            await run(bad[0], **bad[1])
+
+    # Copia local compartida: una sola por código
+    sql, p = insert("packaged", source="off", barcode="8410000000009", fetched=now)
+    await run(sql, **p)
+    with pytest.raises(IntegrityError):
+        await run(sql, **p)
+
+    # Mismo usuario: un personalizado activo por código; eliminado + activo sí se permite
+    sql, p = insert("custom", owner=acc.id, barcode="12345678")
+    with pytest.raises(IntegrityError):
+        await run(sql, **p)
+    await run("UPDATE food SET deleted_at = now() WHERE barcode = '12345678'")
+    await run(sql, **p)
+
+    # Genérico: único por (source, source_code); sin dato = NULL, no 0
+    sql, p = insert("generic", source="ciqual", code="9000")
+    await run(sql, **p)
+    with pytest.raises(IntegrityError):
+        await run(sql, **p)
+    async with app.state.engine.connect() as conn:
+        fiber = (
+            await conn.execute(text("SELECT fiber_g FROM food WHERE source_code = '9000'"))
+        ).scalar_one()
+        ext = (
+            await conn.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'"))
+        ).scalar_one_or_none()
+    assert fiber is None
+    assert ext == 1

@@ -9,6 +9,7 @@ from mykcal.accounts import models as _accounts  # noqa: F401
 from mykcal.config import get_settings
 from mykcal.consent import models as _consent  # noqa: F401
 from mykcal.db import Base
+from mykcal.foods import models as _foods  # noqa: F401
 from mykcal.invitations import models as _invitations  # noqa: F401
 from mykcal.profile import models as _profile  # noqa: F401
 from mykcal.targets import models as _targets  # noqa: F401

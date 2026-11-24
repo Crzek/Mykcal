@@ -31,6 +31,13 @@ def test_lista_publica_cerrada(app):
         ("GET", "/v1/target"),
         ("PUT", "/v1/target"),
         ("POST", "/v1/target/recalculate"),
+        ("GET", "/v1/foods/search"),
+        ("GET", "/v1/foods/barcode"),
+        ("GET", "/v1/foods/custom"),
+        ("POST", "/v1/foods/custom"),
+        ("PUT", "/v1/foods/custom/{food_id}"),
+        ("DELETE", "/v1/foods/custom/{food_id}"),
+        ("GET", "/v1/foods/{food_id}"),
     }, "hay rutas nuevas: decide si son públicas o exigen cuenta activa"
 
 

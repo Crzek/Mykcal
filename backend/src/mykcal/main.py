@@ -21,6 +21,7 @@ from mykcal.core.auth import OidcClient
 from mykcal.core.errors import ApiError, ErrorCode
 from mykcal.db import make_engine, make_sessionmaker
 from mykcal.distribution.router import router as distribution_router
+from mykcal.foods.router import router as foods_router
 from mykcal.invitations.router import router as invitations_router
 from mykcal.logging import configure_logging, get_logger
 from mykcal.profile.router import router as profile_router
@@ -33,6 +34,7 @@ PUBLIC_ROUTES = {("GET", "/v1/health"), ("GET", "/descargar/mykcal.apk")}
 def create_app(
     settings: Settings | None = None,
     oidc_transport: httpx.AsyncBaseTransport | None = None,
+    off_transport: httpx.AsyncBaseTransport | None = None,
 ) -> FastAPI:
     configure_logging()
     settings = settings or get_settings()
@@ -55,6 +57,7 @@ def create_app(
     app.state.settings = settings
     app.state.engine = engine
     app.state.sessionmaker = make_sessionmaker(engine)
+    app.state.off_transport = off_transport
     app.state.oidc = OidcClient(settings.oidc_issuer, settings.oidc_project_id, oidc_transport)
 
     @app.middleware("http")
@@ -113,4 +116,5 @@ def create_app(
     app.include_router(consent_router)
     app.include_router(profile_router)
     app.include_router(targets_router)
+    app.include_router(foods_router)
     return app

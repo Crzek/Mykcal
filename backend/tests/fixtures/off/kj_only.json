@@ -1,0 +1,15 @@
+{
+  "code": "8410000000030",
+  "status": 1,
+  "product": {
+    "code": "8410000000030",
+    "product_name": "Galleta",
+    "brands": "Marca Tres",
+    "nutriments": {
+      "energy-kj_100g": 1840,
+      "proteins_100g": 6,
+      "carbohydrates_100g": 70,
+      "fat_100g": 15
+    }
+  }
+}
