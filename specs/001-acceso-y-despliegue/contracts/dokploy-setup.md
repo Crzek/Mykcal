@@ -42,9 +42,17 @@ Decisiones en research R9 y R10. El esquema se copia de `../ligon/docs/deploy.md
 | `APP_ENV` | sí | no | `production` / `development` (solo para los logs) |
 | `APK_DIR` | no | no | por defecto `/data/apk` |
 | `MIGRATION_TIMEOUT_S` | no | no | por defecto 120 |
+| `OFF_USER_AGENT` | no | no | por defecto `Mykcal/0.3 (app privada)`; Open Food Facts pide identificar la app, conviene añadir un contacto |
+| `OFF_BASE_URL` | no | no | por defecto `https://world.openfoodfacts.org` (debe empezar por `https://`) |
+| `OFF_TIMEOUT_S` | no | no | por defecto 5 (de 1 a 30) |
 
 Si falta una variable obligatoria, el contenedor no arranca y el log la nombra sin mostrar su
 valor.
+
+Al arrancar, tras la migración, el contenedor carga los alimentos genéricos
+(`python -m mykcal.foods.load_generic`): `generic_import_done` la primera vez y tras cada cambio de
+la semilla, `generic_import_noop` si no hay cambios. Si falla, la API arranca igualmente y el log
+muestra `generic_import_failed`.
 
 ### Arranque
 
