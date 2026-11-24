@@ -8,14 +8,22 @@ from __future__ import annotations
 import uuid
 from datetime import date as date_type
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mykcal import clock
 from mykcal.core.auth import Principal, require_consent
 from mykcal.db import get_session
 from mykcal.diary import service
-from mykcal.diary.schemas import DiaryDay, DiaryEntryCreate, DiaryEntryUpdate
+from mykcal.diary.schemas import (
+    CopySourceList,
+    DiaryCopyCreate,
+    DiaryCopyResult,
+    DiaryDay,
+    DiaryEntryCreate,
+    DiaryEntryUpdate,
+    Meal,
+)
 
 router = APIRouter()
 
@@ -43,12 +51,13 @@ async def get_day(
 @router.post("/v1/diary/entries", response_model=DiaryDay, status_code=201)
 async def create_entry(
     body: DiaryEntryCreate,
+    response: Response,
     utc_offset_min: int = UtcOffsetMin,
     principal: Principal = Depends(require_consent),
     session: AsyncSession = Depends(get_session),
 ) -> DiaryDay:
     assert principal.account is not None
-    return await service.create_entry(
+    day, entry_id = await service.create_entry(
         session,
         principal.account.id,
         principal.account.created_at,
@@ -56,6 +65,8 @@ async def create_entry(
         utc_offset_min,
         clock.utcnow(),
     )
+    response.headers["Location"] = f"/v1/diary/entries/{entry_id}"
+    return day
 
 
 @router.patch("/v1/diary/entries/{entry_id}", response_model=DiaryDay)
@@ -95,4 +106,53 @@ async def restore_entry(
     assert principal.account is not None
     return await service.restore_entry(
         session, principal.account.id, entry_id, utc_offset_min, clock.utcnow()
+    )
+
+
+@router.get("/v1/diary/copy-sources", response_model=CopySourceList)
+async def get_copy_sources(
+    target_date: date_type,
+    target_meal: Meal,
+    principal: Principal = Depends(require_consent),
+    session: AsyncSession = Depends(get_session),
+) -> CopySourceList:
+    assert principal.account is not None
+    return await service.copy_sources(
+        session,
+        principal.account.id,
+        principal.account.created_at,
+        target_date,
+        target_meal,
+        clock.utcnow(),
+    )
+
+
+@router.post("/v1/diary/copies", response_model=DiaryCopyResult, status_code=201)
+async def create_copy(
+    body: DiaryCopyCreate,
+    utc_offset_min: int = UtcOffsetMin,
+    principal: Principal = Depends(require_consent),
+    session: AsyncSession = Depends(get_session),
+) -> DiaryCopyResult:
+    assert principal.account is not None
+    return await service.copy_meal(
+        session,
+        principal.account.id,
+        principal.account.created_at,
+        body,
+        utc_offset_min,
+        clock.utcnow(),
+    )
+
+
+@router.delete("/v1/diary/copies/{copy_id}", response_model=DiaryDay)
+async def delete_copy(
+    copy_id: uuid.UUID,
+    utc_offset_min: int = UtcOffsetMin,
+    principal: Principal = Depends(require_consent),
+    session: AsyncSession = Depends(get_session),
+) -> DiaryDay:
+    assert principal.account is not None
+    return await service.undo_copy(
+        session, principal.account.id, copy_id, utc_offset_min, clock.utcnow()
     )

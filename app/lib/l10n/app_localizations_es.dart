@@ -977,4 +977,125 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dayPastNotice => 'Este día usó el objetivo que tenías entonces';
+
+  @override
+  String get quickTabRecent => 'Recientes';
+
+  @override
+  String get quickTabFavorites => 'Favoritos';
+
+  @override
+  String get quickEmptyRecent =>
+      'Aquí aparecerán los alimentos que registres, para añadirlos con un toque.';
+
+  @override
+  String get quickEmptyFavorites =>
+      'Marca alimentos con ☆ para tenerlos a mano aquí.';
+
+  @override
+  String quickRowDetail(String amount, String kcal) {
+    return '$amount · $kcal kcal';
+  }
+
+  @override
+  String quickAddLabel(String name, String amount) {
+    return 'Añadir $name, $amount';
+  }
+
+  @override
+  String quickAmountServings(
+    String servings,
+    String unit,
+    String quantity,
+    String base,
+  ) {
+    return '$servings $unit, $quantity $base';
+  }
+
+  @override
+  String quickAdded(String name, String meal) {
+    return '$name añadido a $meal';
+  }
+
+  @override
+  String get quickUndone => 'Deshecho';
+
+  @override
+  String get quickUndoFailed =>
+      'No se pudo deshacer. Borra la entrada desde el diario.';
+
+  @override
+  String favoriteMark(String name) {
+    return 'Marcar $name como favorito';
+  }
+
+  @override
+  String favoriteUnmark(String name) {
+    return 'Quitar $name de favoritos';
+  }
+
+  @override
+  String get favoriteRemoved => 'Quitado de favoritos';
+
+  @override
+  String get favoriteUnavailable => 'Este alimento ya no está disponible';
+
+  @override
+  String get copyMenu => 'Copiar de otro día';
+
+  @override
+  String copyMenuTooltip(String meal) {
+    return 'Más opciones de $meal';
+  }
+
+  @override
+  String copyTitle(String meal, String day) {
+    return 'Copiar a $meal · $day';
+  }
+
+  @override
+  String get copyAction => 'Copiar';
+
+  @override
+  String get copyEmpty => 'No hay comidas en los 14 días anteriores.';
+
+  @override
+  String get copyValuesChanged =>
+      'Algún alimento ha cambiado: se copiará con sus valores actuales.';
+
+  @override
+  String copyMore(int count) {
+    return '+$count más';
+  }
+
+  @override
+  String copyOptionSemantics(
+    String meal,
+    String day,
+    String kcal,
+    int count,
+    String items,
+  ) {
+    return '$meal de $day, $kcal kcal, $count alimentos: $items';
+  }
+
+  @override
+  String copyDone(int count, String meal) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alimentos copiados a $meal',
+      one: '1 alimento copiado a $meal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get copyUndone => 'Copia deshecha';
+
+  @override
+  String get copySourceEmpty => 'Esa comida ya no tiene alimentos.';
+
+  @override
+  String get copyOutOfRange => 'Esa comida ya no se puede copiar.';
 }

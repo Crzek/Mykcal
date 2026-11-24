@@ -42,6 +42,10 @@ ALLOWED_FIELDS = frozenset(
         "food_id",
         # 004: diario. Solo la comida; nunca el alimento, la cantidad, la fecha ni los valores.
         "meal",
+        # 005: copia de comidas. Solo los tipos de comida y cuántas entradas; nunca qué ni cuándo.
+        "source_meal",
+        "target_meal",
+        "entries_count",
     }
 )
 

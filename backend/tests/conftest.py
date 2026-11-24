@@ -164,7 +164,7 @@ async def app(settings, migrated, zitadel):
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE diary_entry, food, food_import, registration_failure, "
+                "TRUNCATE diary_entry, favorite_food, food, food_import, registration_failure, "
                 "registration_throttle, daily_target, weight_entry, user_profile, health_consent, "
                 "invitation_code, user_account "
                 "RESTART IDENTITY CASCADE"
@@ -407,6 +407,7 @@ def make_entry(app, make_food):
         servings=None,
         deleted_at: datetime | None = None,
         created_at: datetime | None = None,
+        copy_id: uuid.UUID | None = None,
         name: str = "Pan",
         **per_100,
     ) -> uuid.UUID:
@@ -431,10 +432,29 @@ def make_entry(app, make_food):
             created_at=now,
             updated_at=now,
             deleted_at=deleted_at,
+            copy_id=copy_id,
             **{n: getattr(food, n) for n in NUTRIENTS},
         )
         async with app.state.sessionmaker() as s, s.begin():
             s.add(entry)
         return entry.id
+
+    return _make
+
+
+@pytest.fixture
+def make_favorite(app):
+    """Marca un alimento como favorito de un usuario (insertando la fila)."""
+    from mykcal.quick.models import FavoriteFood
+
+    async def _make(account: UserAccount, food_id: uuid.UUID, created_at: datetime | None = None):
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(
+                FavoriteFood(
+                    user_id=account.id,
+                    food_id=food_id,
+                    created_at=created_at or datetime.now(UTC),
+                )
+            )
 
     return _make

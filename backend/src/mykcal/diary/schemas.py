@@ -74,3 +74,45 @@ class DiaryDay(BaseModel):
     totals: NutrientTotals
     remaining: dict[str, float]
     meals: list[DiaryMeal] = Field(min_length=5, max_length=5)
+
+
+class DiaryCopyCreate(BaseModel):
+    """Copia todas las entradas de una comida a una comida del día destino (research R5)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_date: date
+    source_meal: Meal
+    target_date: date
+    target_meal: Meal
+
+
+class DiaryCopyResult(BaseModel):
+    copy_id: uuid.UUID
+    entry_ids: list[uuid.UUID] = Field(min_length=1)
+    day: DiaryDay
+
+
+class CopySourceEntry(BaseModel):
+    food_name: str
+    food_brand: str | None
+    base_unit: BaseUnit
+    quantity: float
+    servings: float | None
+    kcal: float
+
+
+class CopySourceMeal(BaseModel):
+    meal: Meal
+    entries: list[CopySourceEntry] = Field(min_length=1)
+    kcal: float
+    values_changed: bool
+
+
+class CopySourceDay(BaseModel):
+    date: date
+    meals: list[CopySourceMeal] = Field(min_length=1, max_length=5)
+
+
+class CopySourceList(BaseModel):
+    days: list[CopySourceDay] = Field(max_length=14)

@@ -30,7 +30,7 @@ abstract class MykcalApi {
   /// Diario (004). `utcOffsetMin` es el desfase de la zona del móvil al final del día afectado
   /// (research R3). Todas devuelven el día completo y recalculado (R9).
   Future<DiaryDay> diaryDay(DateTime date, int utcOffsetMin);
-  Future<DiaryDay> addEntry({
+  Future<AddedEntry> addEntry({
     required DateTime date,
     required Meal meal,
     required String foodId,
@@ -47,6 +47,21 @@ abstract class MykcalApi {
   });
   Future<DiaryDay> deleteEntry(String id, int utcOffsetMin);
   Future<DiaryDay> restoreEntry(String id, int utcOffsetMin);
+
+  /// Registro rápido (005): recientes, favoritos y copiar una comida de otro día.
+  Future<List<QuickFood>> recentFoods();
+  Future<List<QuickFood>> favoriteFoods();
+  Future<void> addFavorite(String foodId);
+  Future<void> removeFavorite(String foodId);
+  Future<List<CopySourceDay>> copySources(DateTime targetDate, Meal targetMeal);
+  Future<DiaryCopyResult> copyMeal({
+    required DateTime sourceDate,
+    required Meal sourceMeal,
+    required DateTime targetDate,
+    required Meal targetMeal,
+    required int utcOffsetMin,
+  });
+  Future<DiaryDay> undoCopy(String copyId, int utcOffsetMin);
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -182,15 +197,15 @@ class HttpMykcalApi implements MykcalApi {
       );
 
   @override
-  Future<DiaryDay> addEntry({
+  Future<AddedEntry> addEntry({
     required DateTime date,
     required Meal meal,
     required String foodId,
     double? quantity,
     double? servings,
     required int utcOffsetMin,
-  }) async => DiaryDay.fromJson(
-    await _json(
+  }) async {
+    final response = await _request(
       'POST',
       '/v1/diary/entries',
       query: {'utc_offset_min': utcOffsetMin},
@@ -201,8 +216,13 @@ class HttpMykcalApi implements MykcalApi {
         'quantity': ?quantity,
         'servings': ?servings,
       },
-    ),
-  );
+    );
+    final location = response.headers.value('location') ?? '';
+    return AddedEntry(
+      day: DiaryDay.fromJson(response.data ?? const {}),
+      entryId: location.split('/').last,
+    );
+  }
 
   @override
   Future<DiaryDay> updateEntry(
@@ -240,12 +260,93 @@ class HttpMykcalApi implements MykcalApi {
         ),
       );
 
+  @override
+  Future<List<QuickFood>> recentFoods() async =>
+      _quickList(await _json('GET', '/v1/foods/recent'));
+
+  @override
+  Future<List<QuickFood>> favoriteFoods() async =>
+      _quickList(await _json('GET', '/v1/foods/favorites'));
+
+  @override
+  Future<void> addFavorite(String foodId) async {
+    await _json('PUT', '/v1/foods/favorites/$foodId');
+  }
+
+  @override
+  Future<void> removeFavorite(String foodId) async {
+    await _json('DELETE', '/v1/foods/favorites/$foodId');
+  }
+
+  @override
+  Future<List<CopySourceDay>> copySources(
+    DateTime targetDate,
+    Meal targetMeal,
+  ) async {
+    final json = await _json(
+      'GET',
+      '/v1/diary/copy-sources',
+      query: {
+        'target_date': isoDate(targetDate),
+        'target_meal': targetMeal.wire,
+      },
+    );
+    return (json['days'] as List<dynamic>)
+        .map((e) => CopySourceDay.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<DiaryCopyResult> copyMeal({
+    required DateTime sourceDate,
+    required Meal sourceMeal,
+    required DateTime targetDate,
+    required Meal targetMeal,
+    required int utcOffsetMin,
+  }) async => DiaryCopyResult.fromJson(
+    await _json(
+      'POST',
+      '/v1/diary/copies',
+      query: {'utc_offset_min': utcOffsetMin},
+      data: {
+        'source_date': isoDate(sourceDate),
+        'source_meal': sourceMeal.wire,
+        'target_date': isoDate(targetDate),
+        'target_meal': targetMeal.wire,
+      },
+    ),
+  );
+
+  @override
+  Future<DiaryDay> undoCopy(String copyId, int utcOffsetMin) async =>
+      DiaryDay.fromJson(
+        await _json(
+          'DELETE',
+          '/v1/diary/copies/$copyId',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  List<QuickFood> _quickList(Map<String, dynamic> json) =>
+      (json['items'] as List<dynamic>)
+          .map((e) => QuickFood.fromJson(e as Map<String, dynamic>))
+          .toList();
+
   List<FoodSummary> _foodList(Map<String, dynamic> json) =>
       (json['items'] as List<dynamic>)
           .map((e) => FoodSummary.fromJson(e as Map<String, dynamic>))
           .toList();
 
   Future<Map<String, dynamic>> _json(
+    String method,
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+  }) async =>
+      (await _request(method, path, data: data, query: query)).data ?? const {};
+
+  /// Como [_json] pero devuelve la respuesta entera, para leer cabeceras (`Location`).
+  Future<Response<Map<String, dynamic>>> _request(
     String method,
     String path, {
     Object? data,
@@ -264,7 +365,7 @@ class HttpMykcalApi implements MykcalApi {
             headers: {'Authorization': 'Bearer $token'},
           ),
         );
-        return response.data ?? const {};
+        return response;
       } on DioException catch (e) {
         if (e.response?.statusCode == 401) {
           if (attempt == 1) throw const SessionExpired();

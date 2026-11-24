@@ -26,6 +26,12 @@ class DiaryEntry(Base):
             "entry_date",
             postgresql_where=text("deleted_at IS NULL"),
         ),
+        Index(
+            "ix_diary_entry_copy",
+            "user_id",
+            "copy_id",
+            postgresql_where=text("copy_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -61,6 +67,8 @@ class DiaryEntry(Base):
 
     quantity: Mapped[Decimal] = mapped_column(Numeric(7, 1), nullable=False)
     servings: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    # Igual en todas las entradas de una misma copia de comida (005); NULL en las demás.
+    copy_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

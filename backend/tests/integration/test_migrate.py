@@ -1,5 +1,6 @@
 """Migraciones al arrancar: sin cambios no hace nada; con la base al día es idempotente."""
 
+import uuid
 from datetime import datetime
 
 import pytest
@@ -196,3 +197,31 @@ async def test_0004_diario_restricciones(app, make_account, make_food):
     with pytest.raises(IntegrityError):  # nutriente negativo
         await run("UPDATE diary_entry SET fiber_g = -1")
     await run("UPDATE diary_entry SET fiber_g = NULL")  # sin dato
+
+
+async def test_0005_favoritos_y_copy_id(app, make_account, make_food, make_entry):
+    """T002 (005): favorite_food con PK (user_id, food_id), FK y diary_entry.copy_id nulo."""
+    from datetime import UTC, datetime
+
+    acc = await make_account("mig-quick")
+    food_id = await make_food("Pan")
+    entry = await make_entry(acc, datetime.now(UTC).date(), food_id=food_id)
+
+    async def run(sql: str, **params):
+        async with app.state.engine.begin() as conn:
+            return await conn.execute(text(sql), params)
+
+    insert = "INSERT INTO favorite_food (user_id, food_id, created_at) VALUES (:u, :f, now())"
+    await run(insert, u=acc.id, f=food_id)
+    with pytest.raises(IntegrityError):  # PK: no se repite
+        await run(insert, u=acc.id, f=food_id)
+    with pytest.raises(IntegrityError):  # FK food
+        await run(insert, u=acc.id, f=uuid.uuid4())
+    with pytest.raises(IntegrityError):  # FK usuario
+        await run(insert, u=uuid.uuid4(), f=food_id)
+    row = (await run("SELECT copy_id FROM diary_entry WHERE id = :e", e=entry)).one()
+    assert row.copy_id is None
+    index = (
+        await run("SELECT indexdef FROM pg_indexes WHERE indexname = 'ix_diary_entry_copy'")
+    ).scalar_one()
+    assert "copy_id IS NOT NULL" in index

@@ -6,6 +6,7 @@ import '../../core/api/models.dart';
 import '../../core/api/mykcal_api.dart';
 import '../../core/format/numbers.dart';
 import '../../l10n/app_localizations.dart';
+import '../quick/favorite_star.dart';
 import 'diary_day_controller.dart';
 import 'entry_math.dart';
 import 'local_day.dart';
@@ -20,12 +21,20 @@ Future<bool> showEntryQuantitySheet(
   required Food food,
   required DateTime date,
   required Meal meal,
+  double? initialQuantity,
+  double? initialServings,
 }) async {
   final added = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => EntryQuantitySheet(food: food, date: date, meal: meal),
+    builder: (_) => EntryQuantitySheet(
+      food: food,
+      date: date,
+      meal: meal,
+      initialQuantity: initialQuantity,
+      initialServings: initialServings,
+    ),
   );
   return added ?? false;
 }
@@ -58,6 +67,8 @@ class EntryQuantitySheet extends ConsumerStatefulWidget {
     this.food,
     this.entry,
     this.meal,
+    this.initialQuantity,
+    this.initialServings,
   }) : assert((food == null) != (entry == null)),
        assert(food == null || meal != null);
 
@@ -65,6 +76,11 @@ class EntryQuantitySheet extends ConsumerStatefulWidget {
   final DiaryEntry? entry;
   final DateTime date;
   final Meal? meal;
+
+  /// Cantidad inicial al añadir (la sugerida de Recientes o Favoritos): raciones si hay
+  /// [initialServings] y el alimento tiene ración; si no, g/ml.
+  final double? initialQuantity;
+  final double? initialServings;
 
   @override
   ConsumerState<EntryQuantitySheet> createState() => _EntryQuantitySheetState();
@@ -100,8 +116,18 @@ class _EntryQuantitySheetState extends ConsumerState<EntryQuantitySheet> {
       _servings = entry.servings != null;
       _text.text = formatDecimal(_servings ? entry.servings! : entry.quantity);
     } else {
-      _servings = _servingSize != null;
-      if (_servings) _text.text = '1';
+      final servings = widget.initialServings;
+      final quantity = widget.initialQuantity;
+      if (servings != null && _servingSize != null) {
+        _servings = true;
+        _text.text = formatDecimal(servings);
+      } else if (quantity != null) {
+        _servings = false;
+        _text.text = formatDecimal(quantity);
+      } else {
+        _servings = _servingSize != null;
+        if (_servings) _text.text = '1';
+      }
     }
     _initialText = _text.text;
     _initialServings = _servings;
@@ -174,14 +200,14 @@ class _EntryQuantitySheetState extends ConsumerState<EntryQuantitySheet> {
       final entry = widget.entry;
       final DiaryDay day;
       if (entry == null) {
-        day = await api.addEntry(
+        day = (await api.addEntry(
           date: widget.date,
           meal: _meal,
           foodId: widget.food!.id,
           quantity: _servings ? null : _value,
           servings: _servings ? _value : null,
           utcOffsetMin: _offset,
-        );
+        )).day;
       } else {
         final moved = _meal != entry.meal;
         if (!moved && !_quantityChanged) {
@@ -259,9 +285,17 @@ class _EntryQuantitySheetState extends ConsumerState<EntryQuantitySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(
-              header: true,
-              child: Text(_name, style: theme.textTheme.titleMedium),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(_name, style: theme.textTheme.titleMedium),
+                  ),
+                ),
+                if (_editing)
+                  FavoriteStar(foodId: widget.entry!.foodId, foodName: _name),
+              ],
             ),
             if (_editing)
               Padding(
