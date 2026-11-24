@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../core/api/models.dart';
 import '../../l10n/app_localizations.dart';
 import 'barcode_manual_dialog.dart';
 import 'barcode_result_flow.dart';
@@ -35,12 +36,16 @@ class BarcodeScanScreen extends ConsumerStatefulWidget {
     this.controller,
     this.viewBuilder = _defaultView,
     this.onCreate,
+    this.onSelected,
   });
 
   /// Se recibe por parámetro para poder simularlo (T050).
   final MobileScannerController? controller;
   final ScannerViewBuilder viewBuilder;
   final CreateFromBarcode? onCreate;
+
+  /// Modo selección: un «encontrado» devuelve el alimento en vez de abrir el detalle.
+  final ValueChanged<Food>? onSelected;
 
   @override
   ConsumerState<BarcodeScanScreen> createState() => _BarcodeScanScreenState();
@@ -94,7 +99,13 @@ class _BarcodeScanScreenState extends ConsumerState<BarcodeScanScreen> {
     HapticFeedback.mediumImpact();
     await _controller.stop();
     if (!mounted) return;
-    await lookupAndShowBarcode(context, ref, code, onCreate: widget.onCreate);
+    await lookupAndShowBarcode(
+      context,
+      ref,
+      code,
+      onCreate: widget.onCreate,
+      onSelected: widget.onSelected,
+    );
     _handling = false;
     if (mounted) await _controller.start();
   }

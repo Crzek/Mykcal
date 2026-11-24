@@ -19,7 +19,7 @@ class StoredSession {
 /// Almacén seguro del sistema; los tokens no van nunca a `shared_preferences`.
 class SessionStore {
   SessionStore([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -27,7 +27,12 @@ class SessionStore {
   static const refreshTokenKey = 'oidc.refresh_token';
   static const idTokenKey = 'oidc.id_token';
   static const expiresAtKey = 'oidc.access_token_expires_at';
-  static const allKeys = [accessTokenKey, refreshTokenKey, idTokenKey, expiresAtKey];
+  static const allKeys = [
+    accessTokenKey,
+    refreshTokenKey,
+    idTokenKey,
+    expiresAtKey,
+  ];
 
   Future<StoredSession?> read() async {
     final values = await _storage.readAll();

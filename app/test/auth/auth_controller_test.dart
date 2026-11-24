@@ -44,10 +44,16 @@ void main() {
     await settled(c);
     h.auth.signInError = const AuthServiceUnavailable();
     await c.read(authControllerProvider.notifier).signIn();
-    expect((c.read(authControllerProvider).value as SignedOut).notice, AccessNotice.unavailable);
+    expect(
+      (c.read(authControllerProvider).value as SignedOut).notice,
+      AccessNotice.unavailable,
+    );
     h.auth.signInError = const SignInFailed();
     await c.read(authControllerProvider.notifier).signIn();
-    expect((c.read(authControllerProvider).value as SignedOut).notice, AccessNotice.signInFailed);
+    expect(
+      (c.read(authControllerProvider).value as SignedOut).notice,
+      AccessNotice.signInFailed,
+    );
   });
 
   test('sin refresh token no se guarda la sesión', () async {
@@ -63,7 +69,9 @@ void main() {
     await seedSession(life: const Duration(seconds: 30));
     final c = h.container();
     await settled(c);
-    final token = await c.read(authControllerProvider.notifier).validAccessToken();
+    final token = await c
+        .read(authControllerProvider.notifier)
+        .validAccessToken();
     expect(token, 'access-2');
     expect(h.auth.refreshCalls, 1);
     expect((await SessionStore().read())!.refreshToken, 'refresh-2');
@@ -73,7 +81,10 @@ void main() {
     await seedSession();
     final c = h.container();
     await settled(c);
-    expect(await c.read(authControllerProvider.notifier).validAccessToken(), 'access-1');
+    expect(
+      await c.read(authControllerProvider.notifier).validAccessToken(),
+      'access-1',
+    );
     expect(h.auth.refreshCalls, 0);
   });
 
@@ -84,33 +95,49 @@ void main() {
     final c = h.container();
     await settled(c);
     final n = c.read(authControllerProvider.notifier);
-    final futures = [n.validAccessToken(), n.validAccessToken(), n.forceRefresh()];
+    final futures = [
+      n.validAccessToken(),
+      n.validAccessToken(),
+      n.forceRefresh(),
+    ];
     await Future<void>.delayed(Duration.zero);
     gate.complete(tokens(access: 'access-9', refresh: 'refresh-9'));
     expect(await Future.wait(futures), ['access-9', 'access-9', 'access-9']);
     expect(h.auth.refreshCalls, 1);
   });
 
-  test('refresh rechazado → null y la sesión se conserva hasta markExpired', () async {
-    await seedSession();
-    h.auth.onRefresh = (_) async => throw const RefreshRejected();
-    final c = h.container();
-    await settled(c);
-    final n = c.read(authControllerProvider.notifier);
-    expect(await n.forceRefresh(), isNull);
-    await n.markExpired();
-    expect((c.read(authControllerProvider).value as SignedOut).notice, AccessNotice.sessionExpired);
-    expect(await SessionStore().read(), isNull);
-  });
+  test(
+    'refresh rechazado → null y la sesión se conserva hasta markExpired',
+    () async {
+      await seedSession();
+      h.auth.onRefresh = (_) async => throw const RefreshRejected();
+      final c = h.container();
+      await settled(c);
+      final n = c.read(authControllerProvider.notifier);
+      expect(await n.forceRefresh(), isNull);
+      await n.markExpired();
+      expect(
+        (c.read(authControllerProvider).value as SignedOut).notice,
+        AccessNotice.sessionExpired,
+      );
+      expect(await SessionStore().read(), isNull);
+    },
+  );
 
-  test('fallo temporal de renovación lanza NetworkFailure y no borra la sesión', () async {
-    await seedSession();
-    h.auth.onRefresh = (_) async => throw const RefreshFailed();
-    final c = h.container();
-    await settled(c);
-    await expectLater(c.read(authControllerProvider.notifier).forceRefresh(), throwsA(isA<NetworkFailure>()));
-    expect(await SessionStore().read(), isNotNull);
-  });
+  test(
+    'fallo temporal de renovación lanza NetworkFailure y no borra la sesión',
+    () async {
+      await seedSession();
+      h.auth.onRefresh = (_) async => throw const RefreshFailed();
+      final c = h.container();
+      await settled(c);
+      await expectLater(
+        c.read(authControllerProvider.notifier).forceRefresh(),
+        throwsA(isA<NetworkFailure>()),
+      );
+      expect(await SessionStore().read(), isNotNull);
+    },
+  );
 
   test('cerrar sesión revoca, borra los tokens y cierra la sesión del navegador (US2-3)', () async {
     await seedSession();
@@ -132,14 +159,20 @@ void main() {
     expect(await SessionStore().read(), isNull);
   });
 
-  test('cerrar sesión no espera más del plazo si Zitadel no responde', () async {
-    await seedSession();
-    h.signOutDeadline = const Duration(milliseconds: 50);
-    h.auth.onRevoke = (_) => never<void>().future;
-    final c = h.container();
-    await settled(c);
-    await c.read(authControllerProvider.notifier).signOut().timeout(const Duration(seconds: 2));
-    expect(await SessionStore().read(), isNull);
-    expect(c.read(authControllerProvider).value, isA<SignedOut>());
-  });
+  test(
+    'cerrar sesión no espera más del plazo si Zitadel no responde',
+    () async {
+      await seedSession();
+      h.signOutDeadline = const Duration(milliseconds: 50);
+      h.auth.onRevoke = (_) => never<void>().future;
+      final c = h.container();
+      await settled(c);
+      await c
+          .read(authControllerProvider.notifier)
+          .signOut()
+          .timeout(const Duration(seconds: 2));
+      expect(await SessionStore().read(), isNull);
+      expect(c.read(authControllerProvider).value, isA<SignedOut>());
+    },
+  );
 }

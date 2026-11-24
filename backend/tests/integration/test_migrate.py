@@ -148,3 +148,51 @@ async def test_0003_alimentos_restricciones(app, make_account):
         ).scalar_one_or_none()
     assert fiber is None
     assert ext == 1
+
+
+async def test_0004_diario_restricciones(app, make_account, make_food):
+    """T002: la migración 0004 crea diary_entry con los CHECK e índices de data-model.md."""
+    acc = await make_account("mig-diary")
+    food_id = await make_food("Pan", serving_size=30)
+
+    async def run(sql: str, **params) -> None:
+        async with app.state.engine.begin() as conn:
+            await conn.execute(text(sql), params)
+
+    def insert(*, meal="breakfast", unit="g", quantity=100, servings=None, serving_size=30):
+        return (
+            "INSERT INTO diary_entry (user_id, entry_date, meal, food_id, food_kind, food_name, "
+            "base_unit, serving_size, kcal, protein_g, carbs_g, fat_g, quantity, servings, "
+            "created_at, updated_at) VALUES (:u, current_date, :meal, :f, 'generic', 'Pan', "
+            ":unit, :ss, 100, 10, 20, 5, :q, :sv, now(), now())",
+            dict(
+                u=acc.id,
+                f=food_id,
+                meal=meal,
+                unit=unit,
+                ss=serving_size,
+                q=quantity,
+                sv=servings,
+            ),
+        )
+
+    sql, p = insert()
+    await run(sql, **p)
+    # Sin unicidad por alimento y comida: el mismo alimento dos veces es válido (R7)
+    await run(sql, **p)
+    sql, p = insert(servings=2, quantity=60)
+    await run(sql, **p)
+    for bad in (
+        insert(meal="brunch"),
+        insert(unit="kg"),
+        insert(quantity=0),
+        insert(quantity=10000.1),
+        insert(servings=0),
+        insert(servings=100.5),
+        insert(servings=2, serving_size=None),  # raciones sin tamaño de ración
+    ):
+        with pytest.raises(IntegrityError):
+            await run(bad[0], **bad[1])
+    with pytest.raises(IntegrityError):  # nutriente negativo
+        await run("UPDATE diary_entry SET fiber_g = -1")
+    await run("UPDATE diary_entry SET fiber_g = NULL")  # sin dato

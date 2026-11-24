@@ -20,6 +20,7 @@ def _me(account: UserAccount, is_admin: bool, onboarding: str) -> Me:
         is_admin=is_admin,
         status=account.status,  # type: ignore[arg-type]
         onboarding=onboarding,  # type: ignore[arg-type]
+        registered_at=account.created_at,
     )
 
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/api/api_errors.dart';
 import '../../core/api/models.dart';
+import '../../core/api/mykcal_api.dart';
 import '../../core/format/numbers.dart';
 import '../../l10n/app_localizations.dart';
 import 'barcode_scan_screen.dart';
@@ -14,8 +16,15 @@ import 'food_search_controller.dart';
 ///
 /// Buscar alimentos (pantalla 1 de contracts/ui-flows.md). Desde aquí se crea un alimento con el
 /// nombre escrito, se escanea un código y se abre «Mis alimentos».
+///
+/// Con [onSelected] está en modo selección (diario, 004): tocar un resultado, un «encontrado» del
+/// escáner o un alimento recién creado llama a [onSelected] con el alimento en vez de abrir el
+/// detalle. [title] sustituye al título.
 class FoodSearchScreen extends ConsumerStatefulWidget {
-  const FoodSearchScreen({super.key});
+  const FoodSearchScreen({super.key, this.onSelected, this.title});
+
+  final ValueChanged<Food>? onSelected;
+  final String? title;
 
   @override
   ConsumerState<FoodSearchScreen> createState() => _FoodSearchScreenState();
@@ -33,8 +42,23 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
       initialBarcode: code,
       initialName: name,
       initialBrand: brand,
+      onSaved: widget.onSelected,
     ),
   );
+
+  /// Modo selección: pide el alimento completo (con su ración y valores) y lo devuelve.
+  Future<void> _select(FoodSummary summary) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    try {
+      final food = await ref.read(mykcalApiProvider).food(summary.id);
+      widget.onSelected!(food);
+    } on NetworkFailure {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.foodsOffline)));
+    } on ApiFailure {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errServer)));
+    }
+  }
 
   @override
   void dispose() {
@@ -49,14 +73,17 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
     final controller = ref.read(foodSearchControllerProvider.notifier);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.foodsTitle),
+        title: Text(widget.title ?? l10n.foodsTitle),
         actions: [
           IconButton(
             tooltip: l10n.foodsScan,
             icon: const Icon(Icons.qr_code_scanner),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => BarcodeScanScreen(onCreate: _createFromBarcode),
+                builder: (_) => BarcodeScanScreen(
+                  onCreate: _createFromBarcode,
+                  onSelected: widget.onSelected,
+                ),
               ),
             ),
           ),
@@ -155,7 +182,12 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
                 Text(l10n.foodsNoResults(q), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () => _push(CustomFoodFormScreen(initialName: q)),
+                  onPressed: () => _push(
+                    CustomFoodFormScreen(
+                      initialName: q,
+                      onSaved: widget.onSelected,
+                    ),
+                  ),
                   child: Text(l10n.foodsCreateNamed(q)),
                 ),
               ],
@@ -194,16 +226,21 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
             child: Text(title, style: Theme.of(context).textTheme.titleMedium),
           ),
         ),
-        for (final f in items) _FoodTile(food: f),
+        for (final f in items)
+          _FoodTile(
+            food: f,
+            onSelect: widget.onSelected == null ? null : () => _select(f),
+          ),
       ],
     );
   }
 }
 
 class _FoodTile extends StatelessWidget {
-  const _FoodTile({required this.food});
+  const _FoodTile({required this.food, this.onSelect});
 
   final FoodSummary food;
+  final VoidCallback? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +277,16 @@ class _FoodTile extends StatelessWidget {
     );
   }
 
-  void _open(BuildContext context) => Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => FoodDetailScreen(foodId: food.id)),
-  );
+  void _open(BuildContext context) {
+    final select = onSelect;
+    if (select != null) {
+      select();
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => FoodDetailScreen(foodId: food.id),
+      ),
+    );
+  }
 }

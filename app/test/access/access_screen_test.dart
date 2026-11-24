@@ -6,16 +6,21 @@ import '../helpers/a11y.dart';
 import '../helpers/fakes.dart';
 
 void main() {
-  testWidgets('sin sesión muestra el acceso con los dos botones y es accesible', (tester) async {
-    final h = Harness();
-    await h.pumpApp(tester);
-    expect(find.text('Mykcal'), findsOneWidget);
-    expect(find.text('Iniciar sesión'), findsOneWidget);
-    expect(find.text('Crear cuenta'), findsOneWidget);
-    await expectAccessible(tester);
-  });
+  testWidgets(
+    'sin sesión muestra el acceso con los dos botones y es accesible',
+    (tester) async {
+      final h = Harness();
+      await h.pumpApp(tester);
+      expect(find.text('Mykcal'), findsOneWidget);
+      expect(find.text('Iniciar sesión'), findsOneWidget);
+      expect(find.text('Crear cuenta'), findsOneWidget);
+      await expectAccessible(tester);
+    },
+  );
 
-  testWidgets('accesible en tema oscuro y con el texto al 200 %', (tester) async {
+  testWidgets('accesible en tema oscuro y con el texto al 200 %', (
+    tester,
+  ) async {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearAllTestValues);
@@ -35,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(h.auth.signInCalls, 1);
     expect(h.auth.lastSignInRegister, isFalse);
-    expect(find.text('Hola, Ana'), findsOneWidget);
+    expect(find.text('Resumen del día'), findsOneWidget);
   });
 
   testWidgets('«Crear cuenta» abre la página de registro', (tester) async {
@@ -51,7 +56,10 @@ void main() {
     await h.pumpApp(tester);
     await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
-    expect(find.text('No se pudo iniciar sesión. Inténtalo de nuevo.'), findsOneWidget);
+    expect(
+      find.text('No se pudo iniciar sesión. Inténtalo de nuevo.'),
+      findsOneWidget,
+    );
     await expectAccessible(tester);
   });
 }

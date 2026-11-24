@@ -18,10 +18,12 @@ Future<Harness> openSettings(WidgetTester tester, {Me? me}) async {
   return h;
 }
 
-Future<void> confirmInDialog(WidgetTester tester) => tester.tap(find.descendant(
-      of: find.byType(AlertDialog),
-      matching: find.text('Darme de baja'),
-    ));
+Future<void> confirmInDialog(WidgetTester tester) => tester.tap(
+  find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.text('Darme de baja'),
+  ),
+);
 
 void main() {
   testWidgets('menú: «Ajustes» para todos', (tester) async {
@@ -54,30 +56,36 @@ void main() {
     expect(find.text('Tu objetivo diario'), findsOneWidget);
   });
 
-  testWidgets('el diálogo explica las consecuencias y «Cancelar» no hace nada (US4.1)', (tester) async {
-    final h = await openSettings(tester);
-    await tester.tap(find.text('Darse de baja'));
-    await tester.pumpAndSettle();
-    expect(find.text('¿Darte de baja de Mykcal?'), findsOneWidget);
-    expect(find.textContaining('no podrás volver a entrar'), findsOneWidget);
-    expect(find.textContaining('Tus datos se conservan'), findsOneWidget);
-    await tester.tap(find.text('Cancelar'));
-    await tester.pumpAndSettle();
-    expect(h.api.deactivateCalls, 0);
-    expect(find.text('Ajustes'), findsOneWidget);
-  });
+  testWidgets(
+    'el diálogo explica las consecuencias y «Cancelar» no hace nada (US4.1)',
+    (tester) async {
+      final h = await openSettings(tester);
+      await tester.tap(find.text('Darse de baja'));
+      await tester.pumpAndSettle();
+      expect(find.text('¿Darte de baja de Mykcal?'), findsOneWidget);
+      expect(find.textContaining('no podrás volver a entrar'), findsOneWidget);
+      expect(find.textContaining('Tus datos se conservan'), findsOneWidget);
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(h.api.deactivateCalls, 0);
+      expect(find.text('Ajustes'), findsOneWidget);
+    },
+  );
 
-  testWidgets('confirmar da de baja, cierra la sesión y avisa en el acceso (US4.2)', (tester) async {
-    final h = await openSettings(tester);
-    await tester.tap(find.text('Darse de baja'));
-    await tester.pumpAndSettle();
-    await confirmInDialog(tester);
-    await tester.pumpAndSettle();
-    expect(h.api.deactivateCalls, 1);
-    expect(h.auth.revokeCalls, greaterThan(0));
-    expect(find.text('Tu cuenta se ha dado de baja.'), findsOneWidget);
-    expect(find.text('Iniciar sesión'), findsOneWidget);
-  });
+  testWidgets(
+    'confirmar da de baja, cierra la sesión y avisa en el acceso (US4.2)',
+    (tester) async {
+      final h = await openSettings(tester);
+      await tester.tap(find.text('Darse de baja'));
+      await tester.pumpAndSettle();
+      await confirmInDialog(tester);
+      await tester.pumpAndSettle();
+      expect(h.api.deactivateCalls, 1);
+      expect(h.auth.revokeCalls, greaterThan(0));
+      expect(find.text('Tu cuenta se ha dado de baja.'), findsOneWidget);
+      expect(find.text('Iniciar sesión'), findsOneWidget);
+    },
+  );
 
   testWidgets('error de red: aviso y la cuenta sigue activa', (tester) async {
     final h = await openSettings(tester);
@@ -86,7 +94,10 @@ void main() {
     await tester.pumpAndSettle();
     await confirmInDialog(tester);
     await tester.pumpAndSettle();
-    expect(find.text('No se pudo dar de baja la cuenta. Inténtalo de nuevo.'), findsOneWidget);
+    expect(
+      find.text('No se pudo dar de baja la cuenta. Inténtalo de nuevo.'),
+      findsOneWidget,
+    );
     expect(find.text('Mi perfil'), findsOneWidget); // sigue en Ajustes
     expect(h.auth.revokeCalls, 0);
   });

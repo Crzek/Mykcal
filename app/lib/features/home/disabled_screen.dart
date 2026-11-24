@@ -31,7 +31,8 @@ class DisabledScreen extends ConsumerWidget {
                 Text(l10n.disabledBody, textAlign: TextAlign.center),
                 const SizedBox(height: 32),
                 OutlinedButton(
-                  onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+                  onPressed: () =>
+                      ref.read(authControllerProvider.notifier).signOut(),
                   child: Text(l10n.signOut),
                 ),
               ],

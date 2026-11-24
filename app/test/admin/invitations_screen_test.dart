@@ -17,15 +17,22 @@ Future<Harness> pumpAdmin(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('muestra el código como ABCD-EFGH, las plazas y es accesible', (tester) async {
+  testWidgets('muestra el código como ABCD-EFGH, las plazas y es accesible', (
+    tester,
+  ) async {
     await pumpAdmin(tester);
     expect(find.text('ABCD-2345'), findsOneWidget);
-    expect(find.text('3 de 50 cuentas activas · 47 plazas libres'), findsOneWidget);
+    expect(
+      find.text('3 de 50 cuentas activas · 47 plazas libres'),
+      findsOneWidget,
+    );
     expect(find.byTooltip('Copiar código'), findsOneWidget);
     await expectAccessible(tester);
   });
 
-  testWidgets('cambiar el código pide confirmación y actualiza', (tester) async {
+  testWidgets('cambiar el código pide confirmación y actualiza', (
+    tester,
+  ) async {
     final h = await pumpAdmin(tester);
     var rotated = 0;
     h.api.onRotate = () async {
@@ -56,7 +63,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Invitaciones'));
     await tester.pumpAndSettle();
-    expect(find.text('Todavía no hay código. Genera uno para invitar a alguien.'), findsOneWidget);
+    expect(
+      find.text('Todavía no hay código. Genera uno para invitar a alguien.'),
+      findsOneWidget,
+    );
     expect(find.text('Generar código'), findsOneWidget);
   });
 }
