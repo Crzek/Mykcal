@@ -108,6 +108,23 @@ class FakeZitadel:
         return {"Authorization": f"Bearer {self.token(sub, **kw)}"}
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _no_real_open_food_facts():
+    """FR-018: ninguna prueba sale a Open Food Facts. Los clientes de OFF usan MockTransport."""
+    original = httpx.AsyncHTTPTransport.handle_async_request
+
+    async def guarded(self, request):
+        if request.url.host.endswith("openfoodfacts.org"):
+            raise AssertionError(
+                "Prueba con cliente real de Open Food Facts: inyecta un httpx.MockTransport"
+            )
+        return await original(self, request)
+
+    httpx.AsyncHTTPTransport.handle_async_request = guarded
+    yield
+    httpx.AsyncHTTPTransport.handle_async_request = original
+
+
 @pytest.fixture(scope="session")
 def contract() -> dict:
     return yaml.safe_load(SPEC_PATH.read_text(encoding="utf-8"))
@@ -147,8 +164,9 @@ async def app(settings, migrated, zitadel):
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE registration_failure, registration_throttle, daily_target, weight_entry, "
-                "user_profile, health_consent, invitation_code, user_account "
+                "TRUNCATE food, food_import, registration_failure, registration_throttle, "
+                "daily_target, weight_entry, user_profile, health_consent, invitation_code, "
+                "user_account "
                 "RESTART IDENTITY CASCADE"
             )
         )
@@ -242,3 +260,71 @@ def seed_code(app, make_account):
         return code
 
     return _seed
+
+
+@pytest.fixture
+def user_with_consent(make_account, grant_consent, zitadel):
+    """Crea una cuenta activa con consentimiento y devuelve (cuenta, cabeceras de autorización)."""
+
+    async def _make(subject: str, *, name: str = "Persona"):
+        account = await make_account(subject, name=name)
+        await grant_consent(account)
+        return account, zitadel.headers(subject)
+
+    return _make
+
+
+@pytest.fixture
+def make_food(app):
+    """Inserta un alimento directamente en la base. Devuelve su id."""
+    from mykcal.foods.models import Food
+    from mykcal.foods.text import normalize
+
+    async def _make(
+        name: str,
+        *,
+        kind: str = "generic",
+        owner=None,
+        brand: str | None = None,
+        barcode: str | None = None,
+        base_unit: str = "g",
+        synonyms: str | None = None,
+        source_code: str | None = None,
+        fetched_at: datetime | None = None,
+        archived_at: datetime | None = None,
+        deleted_at: datetime | None = None,
+        serving_size=None,
+        **nutrients,
+    ) -> uuid.UUID:
+        now = datetime.now(UTC)
+        values = {"kcal": 100, "protein_g": 10, "carbs_g": 20, "fat_g": 5, **nutrients}
+        source = {"generic": "ciqual", "packaged": "off", "custom": "user"}[kind]
+        if kind == "generic" and source_code is None:
+            source_code = uuid.uuid4().hex[:8]
+        if kind == "packaged":
+            fetched_at = fetched_at or now
+        food = Food(
+            id=uuid.uuid4(),
+            kind=kind,
+            owner_user_id=owner.id if owner is not None else None,
+            name=name,
+            brand=brand,
+            barcode=barcode,
+            base_unit=base_unit,
+            serving_size=serving_size,
+            synonyms=synonyms,
+            search_text=normalize(" ".join(p for p in (name, brand, synonyms) if p)),
+            source=source,
+            source_code=source_code,
+            fetched_at=fetched_at,
+            archived_at=archived_at,
+            deleted_at=deleted_at,
+            created_at=now,
+            updated_at=now,
+            **values,
+        )
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(food)
+        return food.id
+
+    return _make

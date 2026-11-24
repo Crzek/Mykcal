@@ -51,3 +51,7 @@ inicio → ¿tokens guardados?
 
 > Onboarding (consentimiento, perfil, objetivo), ajustes y baja: ver
 > `specs/002-onboarding-y-objetivo/contracts/ui-flows.md`. `AppGate` elige la pantalla con `Me.onboarding`.
+
+> Búsqueda de alimentos, escáner de códigos de barras, detalle, alimentos personalizados y
+> «Fuentes de datos»: ver `specs/003-base-de-alimentos/contracts/ui-flows.md`. Se abren desde el
+> botón «Alimentos» de InicioScreen y desde Ajustes.

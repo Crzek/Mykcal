@@ -5,7 +5,9 @@ import '../helpers/a11y.dart';
 import '../helpers/fakes.dart';
 
 void main() {
-  testWidgets('usuario normal: saludo y menú sin «Invitaciones»', (tester) async {
+  testWidgets('usuario normal: saludo y menú sin «Invitaciones»', (
+    tester,
+  ) async {
     final h = Harness();
     await seedSession();
     await h.pumpApp(tester);
@@ -28,7 +30,9 @@ void main() {
     expect(find.text('Invitaciones'), findsOneWidget);
   });
 
-  testWidgets('administrador: ve «Compartir Mykcal» y «Invitaciones»', (tester) async {
+  testWidgets('administrador: ve «Compartir Mykcal» y «Invitaciones»', (
+    tester,
+  ) async {
     final h = Harness();
     await seedSession();
     h.api.onMe = () async => meAdmin;
@@ -49,5 +53,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SelectableText), findsOneWidget);
     expect(find.text('Copiar'), findsOneWidget);
+  });
+
+  testWidgets('el botón «Alimentos» abre la búsqueda', (tester) async {
+    final h = Harness();
+    await seedSession();
+    await h.pumpApp(tester);
+    await tester.tap(find.text('Alimentos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Busca un alimento'), findsOneWidget);
   });
 }

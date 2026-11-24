@@ -1,0 +1,19 @@
+{
+  "code": "8410000000023",
+  "status": 1,
+  "product": {
+    "code": "8410000000023",
+    "product_name": "Zumo de naranja",
+    "brands": "Marca Dos",
+    "serving_quantity": 200,
+    "serving_quantity_unit": "ml",
+    "product_quantity_unit": "ml",
+    "nutriments": {
+      "energy-kcal_100g": 45,
+      "proteins_100g": 0.7,
+      "carbohydrates_100g": 10,
+      "fat_100g": 0.1,
+      "vitamin-c_100g": 0.04
+    }
+  }
+}

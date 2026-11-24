@@ -206,5 +206,219 @@
   "deactivateTitle": "¿Darte de baja de Mykcal?",
   "deactivateBody": "Tu cuenta se desactivará y no podrás volver a entrar. Tus datos se conservan, pero no podrás verlos ni recuperar la cuenta desde la app.",
   "deactivatedNotice": "Tu cuenta se ha dado de baja.",
-  "errDeactivate": "No se pudo dar de baja la cuenta. Inténtalo de nuevo."
+  "errDeactivate": "No se pudo dar de baja la cuenta. Inténtalo de nuevo.",
+  "foodNoData": "sin dato",
+  "foodPer100g": "Por 100 g",
+  "foodPer100ml": "Por 100 ml",
+  "foodMicrosTitle": "Micronutrientes",
+  "homeFoods": "Alimentos",
+  "foodsTitle": "Alimentos",
+  "foodsScan": "Escanear código de barras",
+  "foodsSearchHint": "Busca un alimento",
+  "foodsSearchClear": "Borrar búsqueda",
+  "foodsMinChars": "Escribe al menos 2 letras",
+  "foodsSearching": "Buscando…",
+  "foodsNoResults": "No hemos encontrado “{q}”.",
+  "@foodsNoResults": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "foodsCreateNamed": "Crear alimento “{q}”",
+  "@foodsCreateNamed": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "foodsSectionMine": "Mis alimentos",
+  "foodsSectionGeneric": "Alimentos",
+  "foodsSectionPackaged": "Productos envasados",
+  "foodsMineBadge": "Mío",
+  "foodsMyFoods": "Mis alimentos",
+  "foodsOffline": "Sin conexión. Inténtalo de nuevo.",
+  "foodsRowKcalG": "{kcal} kilocalorías por 100 gramos",
+  "@foodsRowKcalG": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "foodsRowKcalMl": "{kcal} kilocalorías por 100 mililitros",
+  "@foodsRowKcalMl": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "foodsRowMineSemantics": "tuyo",
+  "foodDetailTitle": "Alimento",
+  "foodSourceGeneric": "Genérico · CIQUAL",
+  "foodSourcePackaged": "Envasado · Open Food Facts",
+  "foodSourceCustom": "Tuyo",
+  "foodBrand": "Marca: {brand}",
+  "@foodBrand": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "foodBarcode": "Código: {code}",
+  "@foodBarcode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "foodServing": "Ración del envase: {amount}",
+  "@foodServing": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "foodMissingNotice": "Los nutrientes sin dato cuentan como 0 en los totales.",
+  "foodStaleNotice": "Datos de una copia de más de 30 días.",
+  "foodEdit": "Editar alimento",
+  "scanTitle": "Escanear",
+  "scanHint": "Apunta al código de barras del envase",
+  "scanManual": "Introducir el código a mano",
+  "scanTorch": "Linterna",
+  "scanManualLabel": "Código de barras (8 a 14 cifras)",
+  "scanManualInvalid": "Revisa el código: no es válido",
+  "scanManualSearch": "Buscar",
+  "scanLooking": "Buscando producto…",
+  "scanNotFound": "No conocemos este producto.",
+  "scanIncomplete": "{name} no tiene información nutricional suficiente.",
+  "@scanIncomplete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanIncompleteNoName": "Este producto no tiene información nutricional suficiente.",
+  "scanCreateWithCode": "Crear alimento con este código",
+  "scanSourceDown": "No hemos podido consultar la base de productos.",
+  "scanCreateFood": "Crear alimento",
+  "scanPermissionBody": "Mykcal usa la cámara solo para leer códigos de barras. No guarda fotos.",
+  "scanPermissionAllow": "Permitir cámara",
+  "scanPermissionSettings": "Puedes activarlo en Ajustes del sistema → Aplicaciones → Mykcal → Permisos.",
+  "scanUnsupported": "No se puede usar la cámara en este dispositivo.",
+  "formNewTitle": "Nuevo alimento",
+  "fieldName": "Nombre",
+  "fieldBrand": "Marca",
+  "fieldBarcode": "Código",
+  "fieldUnit": "Unidad",
+  "unitGrams": "Gramos",
+  "unitMl": "Mililitros",
+  "fieldBasis": "Valores",
+  "basisPer100g": "Por 100 g",
+  "basisPer100ml": "Por 100 ml",
+  "basisPerServing": "Por ración",
+  "fieldServing": "Ración",
+  "formMicrosExpand": "Fibra y micronutrientes (opcional)",
+  "formSave": "Guardar",
+  "errNegative": "No puede ser negativo",
+  "errNotNumber": "Escribe un número",
+  "errTooHigh": "Como máximo {max} {unit} por 100 {base}",
+  "@errTooHigh": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "errMassSum": "Proteína, carbohidratos, grasa y fibra suman más de 100 {base} por 100 {base}",
+  "@errMassSum": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "errServingRequired": "Indica cuántos {unitWord} tiene la ración",
+  "@errServingRequired": {
+    "placeholders": {
+      "unitWord": {
+        "type": "String"
+      }
+    }
+  },
+  "errBarcodeInvalid": "Revisa el código: no es válido",
+  "errBarcodeTaken": "Ya tienes un alimento con este código",
+  "errNameTooLong": "Como máximo 120 caracteres",
+  "errBrandTooLong": "Como máximo 80 caracteres",
+  "kcalMismatchWarning": "Las kcal no cuadran con los macros (calculadas: {n} kcal)",
+  "@kcalMismatchWarning": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "equivalentPer100": "= {value} {unit} por 100 {base}",
+  "@equivalentPer100": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "discardTitle": "¿Descartar los cambios?",
+  "discardConfirm": "Descartar",
+  "keepEditing": "Seguir editando",
+  "myFoodsEmpty": "Aún no has creado alimentos.",
+  "myFoodsDelete": "Eliminar",
+  "myFoodsEdit": "Editar",
+  "myFoodsMore": "Más opciones de {name}",
+  "@myFoodsMore": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myFoodsDeleteConfirm": "¿Eliminar “{name}”? Las comidas ya registradas no cambian.",
+  "@myFoodsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "foodCreate": "Crear alimento",
+  "errInvalidValue": "Valor no válido",
+  "settingsSources": "Fuentes de datos",
+  "sourcesGenericTitle": "Alimentos genéricos",
+  "sourcesGeneric": "Anses, Table de composition nutritionnelle des aliments Ciqual, edición {edition}. Licencia CC BY 4.0. Nombres traducidos y selección por Mykcal.",
+  "@sourcesGeneric": {
+    "placeholders": {
+      "edition": {
+        "type": "String"
+      }
+    }
+  },
+  "sourcesPackagedTitle": "Productos envasados",
+  "sourcesPackaged": "Open Food Facts, disponible bajo la Open Database License (ODbL)."
 }

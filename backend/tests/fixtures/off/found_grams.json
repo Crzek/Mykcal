@@ -1,0 +1,23 @@
+{
+  "code": "8410000000016",
+  "status": 1,
+  "product": {
+    "code": "8410000000016",
+    "product_name": "Yogur natural",
+    "product_name_es": "Yogur natural sin azúcar",
+    "brands": "Marca Uno, Otra",
+    "serving_quantity": 125,
+    "serving_quantity_unit": "g",
+    "product_quantity_unit": "g",
+    "nutriments": {
+      "energy-kcal_100g": 61,
+      "proteins_100g": 3.5,
+      "carbohydrates_100g": 4.7,
+      "fat_100g": 3.3,
+      "fiber_100g": 0,
+      "sodium_100g": 0.046,
+      "calcium_100g": 0.12,
+      "vitamin-d_100g": 5e-07
+    }
+  }
+}

@@ -47,3 +47,21 @@ def test_host_externo_exige_ssl():
 @pytest.mark.parametrize("host", ["localhost", "10.0.0.5", "127.0.0.1", "mykcal-db"])
 def test_host_interno_sin_tls(host):
     assert make(database_url=f"postgresql://u:p@{host}/mykcal")
+
+
+def test_open_food_facts_por_defecto():
+    s = make()
+    assert s.off_base_url == "https://world.openfoodfacts.org"
+    assert s.off_user_agent.startswith("Mykcal/")
+    assert s.off_timeout_s == 5.0
+
+
+def test_off_url_sin_https_rechazada():
+    with pytest.raises(ValidationError):
+        make(off_base_url="http://world.openfoodfacts.org")
+
+
+@pytest.mark.parametrize("timeout", [0.5, 31])
+def test_off_timeout_fuera_de_rango(timeout):
+    with pytest.raises(ValidationError):
+        make(off_timeout_s=timeout)

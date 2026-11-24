@@ -456,4 +456,313 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get errDeactivate =>
       'No se pudo dar de baja la cuenta. Inténtalo de nuevo.';
+
+  @override
+  String get foodNoData => 'sin dato';
+
+  @override
+  String get foodPer100g => 'Por 100 g';
+
+  @override
+  String get foodPer100ml => 'Por 100 ml';
+
+  @override
+  String get foodMicrosTitle => 'Micronutrientes';
+
+  @override
+  String get homeFoods => 'Alimentos';
+
+  @override
+  String get foodsTitle => 'Alimentos';
+
+  @override
+  String get foodsScan => 'Escanear código de barras';
+
+  @override
+  String get foodsSearchHint => 'Busca un alimento';
+
+  @override
+  String get foodsSearchClear => 'Borrar búsqueda';
+
+  @override
+  String get foodsMinChars => 'Escribe al menos 2 letras';
+
+  @override
+  String get foodsSearching => 'Buscando…';
+
+  @override
+  String foodsNoResults(String q) {
+    return 'No hemos encontrado “$q”.';
+  }
+
+  @override
+  String foodsCreateNamed(String q) {
+    return 'Crear alimento “$q”';
+  }
+
+  @override
+  String get foodsSectionMine => 'Mis alimentos';
+
+  @override
+  String get foodsSectionGeneric => 'Alimentos';
+
+  @override
+  String get foodsSectionPackaged => 'Productos envasados';
+
+  @override
+  String get foodsMineBadge => 'Mío';
+
+  @override
+  String get foodsMyFoods => 'Mis alimentos';
+
+  @override
+  String get foodsOffline => 'Sin conexión. Inténtalo de nuevo.';
+
+  @override
+  String foodsRowKcalG(String kcal) {
+    return '$kcal kilocalorías por 100 gramos';
+  }
+
+  @override
+  String foodsRowKcalMl(String kcal) {
+    return '$kcal kilocalorías por 100 mililitros';
+  }
+
+  @override
+  String get foodsRowMineSemantics => 'tuyo';
+
+  @override
+  String get foodDetailTitle => 'Alimento';
+
+  @override
+  String get foodSourceGeneric => 'Genérico · CIQUAL';
+
+  @override
+  String get foodSourcePackaged => 'Envasado · Open Food Facts';
+
+  @override
+  String get foodSourceCustom => 'Tuyo';
+
+  @override
+  String foodBrand(String brand) {
+    return 'Marca: $brand';
+  }
+
+  @override
+  String foodBarcode(String code) {
+    return 'Código: $code';
+  }
+
+  @override
+  String foodServing(String amount) {
+    return 'Ración del envase: $amount';
+  }
+
+  @override
+  String get foodMissingNotice =>
+      'Los nutrientes sin dato cuentan como 0 en los totales.';
+
+  @override
+  String get foodStaleNotice => 'Datos de una copia de más de 30 días.';
+
+  @override
+  String get foodEdit => 'Editar alimento';
+
+  @override
+  String get scanTitle => 'Escanear';
+
+  @override
+  String get scanHint => 'Apunta al código de barras del envase';
+
+  @override
+  String get scanManual => 'Introducir el código a mano';
+
+  @override
+  String get scanTorch => 'Linterna';
+
+  @override
+  String get scanManualLabel => 'Código de barras (8 a 14 cifras)';
+
+  @override
+  String get scanManualInvalid => 'Revisa el código: no es válido';
+
+  @override
+  String get scanManualSearch => 'Buscar';
+
+  @override
+  String get scanLooking => 'Buscando producto…';
+
+  @override
+  String get scanNotFound => 'No conocemos este producto.';
+
+  @override
+  String scanIncomplete(String name) {
+    return '$name no tiene información nutricional suficiente.';
+  }
+
+  @override
+  String get scanIncompleteNoName =>
+      'Este producto no tiene información nutricional suficiente.';
+
+  @override
+  String get scanCreateWithCode => 'Crear alimento con este código';
+
+  @override
+  String get scanSourceDown =>
+      'No hemos podido consultar la base de productos.';
+
+  @override
+  String get scanCreateFood => 'Crear alimento';
+
+  @override
+  String get scanPermissionBody =>
+      'Mykcal usa la cámara solo para leer códigos de barras. No guarda fotos.';
+
+  @override
+  String get scanPermissionAllow => 'Permitir cámara';
+
+  @override
+  String get scanPermissionSettings =>
+      'Puedes activarlo en Ajustes del sistema → Aplicaciones → Mykcal → Permisos.';
+
+  @override
+  String get scanUnsupported =>
+      'No se puede usar la cámara en este dispositivo.';
+
+  @override
+  String get formNewTitle => 'Nuevo alimento';
+
+  @override
+  String get fieldName => 'Nombre';
+
+  @override
+  String get fieldBrand => 'Marca';
+
+  @override
+  String get fieldBarcode => 'Código';
+
+  @override
+  String get fieldUnit => 'Unidad';
+
+  @override
+  String get unitGrams => 'Gramos';
+
+  @override
+  String get unitMl => 'Mililitros';
+
+  @override
+  String get fieldBasis => 'Valores';
+
+  @override
+  String get basisPer100g => 'Por 100 g';
+
+  @override
+  String get basisPer100ml => 'Por 100 ml';
+
+  @override
+  String get basisPerServing => 'Por ración';
+
+  @override
+  String get fieldServing => 'Ración';
+
+  @override
+  String get formMicrosExpand => 'Fibra y micronutrientes (opcional)';
+
+  @override
+  String get formSave => 'Guardar';
+
+  @override
+  String get errNegative => 'No puede ser negativo';
+
+  @override
+  String get errNotNumber => 'Escribe un número';
+
+  @override
+  String errTooHigh(String max, String unit, String base) {
+    return 'Como máximo $max $unit por 100 $base';
+  }
+
+  @override
+  String errMassSum(String base) {
+    return 'Proteína, carbohidratos, grasa y fibra suman más de 100 $base por 100 $base';
+  }
+
+  @override
+  String errServingRequired(String unitWord) {
+    return 'Indica cuántos $unitWord tiene la ración';
+  }
+
+  @override
+  String get errBarcodeInvalid => 'Revisa el código: no es válido';
+
+  @override
+  String get errBarcodeTaken => 'Ya tienes un alimento con este código';
+
+  @override
+  String get errNameTooLong => 'Como máximo 120 caracteres';
+
+  @override
+  String get errBrandTooLong => 'Como máximo 80 caracteres';
+
+  @override
+  String kcalMismatchWarning(String n) {
+    return 'Las kcal no cuadran con los macros (calculadas: $n kcal)';
+  }
+
+  @override
+  String equivalentPer100(String value, String unit, String base) {
+    return '= $value $unit por 100 $base';
+  }
+
+  @override
+  String get discardTitle => '¿Descartar los cambios?';
+
+  @override
+  String get discardConfirm => 'Descartar';
+
+  @override
+  String get keepEditing => 'Seguir editando';
+
+  @override
+  String get myFoodsEmpty => 'Aún no has creado alimentos.';
+
+  @override
+  String get myFoodsDelete => 'Eliminar';
+
+  @override
+  String get myFoodsEdit => 'Editar';
+
+  @override
+  String myFoodsMore(String name) {
+    return 'Más opciones de $name';
+  }
+
+  @override
+  String myFoodsDeleteConfirm(String name) {
+    return '¿Eliminar “$name”? Las comidas ya registradas no cambian.';
+  }
+
+  @override
+  String get foodCreate => 'Crear alimento';
+
+  @override
+  String get errInvalidValue => 'Valor no válido';
+
+  @override
+  String get settingsSources => 'Fuentes de datos';
+
+  @override
+  String get sourcesGenericTitle => 'Alimentos genéricos';
+
+  @override
+  String sourcesGeneric(String edition) {
+    return 'Anses, Table de composition nutritionnelle des aliments Ciqual, edición $edition. Licencia CC BY 4.0. Nombres traducidos y selección por Mykcal.';
+  }
+
+  @override
+  String get sourcesPackagedTitle => 'Productos envasados';
+
+  @override
+  String get sourcesPackaged =>
+      'Open Food Facts, disponible bajo la Open Database License (ODbL).';
 }

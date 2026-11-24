@@ -1,0 +1,13 @@
+{
+  "code": "8410000000061",
+  "status": 1,
+  "product": {
+    "code": "8410000000061",
+    "nutriments": {
+      "energy-kcal_100g": 50,
+      "proteins_100g": 1,
+      "carbohydrates_100g": 10,
+      "fat_100g": 0.5
+    }
+  }
+}

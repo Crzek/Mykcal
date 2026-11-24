@@ -46,12 +46,17 @@ Valores de ejemplo y dónde sacar cada una: `backend/.env.example`.
 | `OIDC_PROJECT_ID` | `400870782219059203` |
 | `ADMIN_SUBJECT` | `400872040560590851` |
 | `APP_ENV` | `production` |
+| `OFF_USER_AGENT` | opcional; por defecto `Mykcal/0.3 (app privada)`. Open Food Facts pide identificar la app: conviene añadir un contacto |
+| `OFF_BASE_URL` | opcional; por defecto `https://world.openfoodfacts.org` (con `https`) |
+| `OFF_TIMEOUT_S` | opcional; por defecto 5 (de 1 a 30) |
 
 Si falta una obligatoria, el contenedor no arranca y el log nombra cuál.
 
 ## 3. Desplegar y comprobar
 
-Al arrancar, el contenedor aplica las migraciones y luego levanta la API.
+Al arrancar, el contenedor aplica las migraciones, carga los alimentos genéricos
+(`generic_import_done` o `generic_import_noop` en el log; si falla, la API arranca igual y el log
+muestra `generic_import_failed`) y luego levanta la API.
 
 ```bash
 curl -s  https://mykcal-bk-api.cruzerick.com/v1/health      # {"status":"ok"}
