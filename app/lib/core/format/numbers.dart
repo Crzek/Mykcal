@@ -1,10 +1,14 @@
 import 'package:intl/intl.dart';
 
 final NumberFormat _intFormat = NumberFormat('#,##0', 'es');
+final NumberFormat _decimalFormat = NumberFormat('#,##0.##', 'es');
 final NumberFormat _weightFormat = NumberFormat('#,##0.0', 'es');
 
 /// Entero con separador de miles español: `2759` → `2.759`.
 String formatInt(int value) => _intFormat.format(value);
+
+/// Hasta dos decimales, sin ceros sobrantes y con coma: `1.1` → `1,1`, `90.0` → `90`.
+String formatDecimal(double value) => _decimalFormat.format(value);
 
 /// Peso con un decimal y coma: `78.4` → `78,4`.
 String formatWeight(double value) => _weightFormat.format(value);

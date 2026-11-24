@@ -5,6 +5,7 @@ import '../../core/api/models.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../admin/invitations_screen.dart';
+import '../foods/food_search_screen.dart';
 import '../settings/settings_screen.dart';
 import '../share/share_app_sheet.dart';
 import '../target/target_card.dart';
@@ -83,6 +84,16 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               const TargetCard(),
+              const SizedBox(height: 16),
+              FilledButton.tonalIcon(
+                icon: const Icon(Icons.restaurant_menu),
+                label: Text(l10n.homeFoods),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const FoodSearchScreen(),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
