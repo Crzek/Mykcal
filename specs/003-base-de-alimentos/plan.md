@@ -203,15 +203,17 @@ generada va dentro, para que entre en la imagen. En la app, una carpeta `feature
 
 Sin violaciones que justificar.
 
-## Puntos que Erick debe confirmar o hacer antes de implementar
+## Puntos que Erick debe confirmar o hacer
 
-1. **Licencia de CIQUAL 2025** (R1): Zenodo (registro 17550133) la publica bajo CC BY 4.0, que
-   exige citar la fuente (hecho en «Fuentes de datos» y `FUENTES.md`). Erick confirma en la
-   ficha de la fuente que sigue siendo así antes de fusionar.
-2. **Revisar la selección y la traducción** de `ciqual_es.csv` (unos 600 alimentos). La primera
-   versión la propone Claude a partir de los 50 casos de SC-001 y de los alimentos habituales
-   en España. Erick la revisa antes de fusionar.
-3. **`OFF_USER_AGENT` en Dokploy** (R7): el valor por defecto no lleva datos de contacto. Open
-   Food Facts recomienda incluir uno; Erick decide si lo añade en la variable de entorno.
-4. **Constitución** (hecho, 1.2.1): la restricción técnica «Alimentos» ya dice CIQUAL traducida.
-   Erick revisa la enmienda. La spec no cambia, porque su supuesto ya contemplaba otra base.
+1. **Licencia de CIQUAL 2025** (R1) — *pendiente*: Zenodo (registro 17550133) la publica bajo
+   CC BY 4.0, que exige citar la fuente (hecho en «Fuentes de datos» y `FUENTES.md`). Erick
+   confirma en la ficha de la fuente que sigue siendo así.
+2. **Revisar la selección y la traducción** de `ciqual_es.csv` — *hecho* (2026-11-24): son
+   359 alimentos, no los ~600 previstos; cubren los 50 casos de SC-001 (50/50). Mejoras
+   opcionales para una spec futura: aceite de oliva refinado, bebidas vegetales distintas de
+   la de soja y retirar «Verdura cocinada (promedio)».
+3. **`OFF_USER_AGENT` en Dokploy** (R7) — *pendiente*: el valor por defecto no lleva datos de
+   contacto. Open Food Facts recomienda incluir uno; Erick decide si lo añade en la variable
+   de entorno. No bloquea.
+4. **Constitución** — *hecho* (1.2.1, fusionada en `main`): la restricción técnica «Alimentos»
+   ya dice CIQUAL traducida. La spec no cambia, porque su supuesto ya contemplaba otra base.
