@@ -85,11 +85,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get retry => 'Reintentar';
 
   @override
-  String homeGreeting(String name) {
-    return 'Hola, $name';
-  }
-
-  @override
   String get homePlaceholder => 'Aquí irá tu diario de comidas.';
 
   @override
@@ -418,12 +413,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errIntMin1 => 'Escribe un número entero de 1 o más';
-
-  @override
-  String get homeTargetTitle => 'Tu objetivo de hoy';
-
-  @override
-  String get homeTargetDetail => 'Ver detalle';
 
   @override
   String get menuSettings => 'Ajustes';
@@ -765,4 +754,227 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get sourcesPackaged =>
       'Open Food Facts, disponible bajo la Open Database License (ODbL).';
+
+  @override
+  String get mealBreakfast => 'Desayuno';
+
+  @override
+  String get mealLunch => 'Comida';
+
+  @override
+  String get mealAfternoonSnack => 'Merienda';
+
+  @override
+  String get mealDinner => 'Cena';
+
+  @override
+  String get mealSnacks => 'Picoteo';
+
+  @override
+  String get diaryToday => 'Hoy';
+
+  @override
+  String get diaryEmptyMeal => 'Aún no hay nada';
+
+  @override
+  String diaryAddToMeal(String meal) {
+    return 'Añadir a $meal';
+  }
+
+  @override
+  String diaryMealTotal(String meal, String kcal) {
+    return '$meal: $kcal kcal';
+  }
+
+  @override
+  String diaryEntryServings(
+    String servings,
+    String unit,
+    String quantity,
+    String base,
+  ) {
+    return '$servings $unit · $quantity $base';
+  }
+
+  @override
+  String diaryEntryQuantity(String quantity, String base) {
+    return '$quantity $base';
+  }
+
+  @override
+  String get diaryServingOne => 'ración';
+
+  @override
+  String get diaryServingMany => 'raciones';
+
+  @override
+  String diaryEntryKcal(String kcal) {
+    return '$kcal kcal';
+  }
+
+  @override
+  String summaryRemaining(String value, String unit) {
+    return 'Quedan $value $unit';
+  }
+
+  @override
+  String summaryOver(String value, String unit) {
+    return '+$value $unit por encima';
+  }
+
+  @override
+  String summaryMax(String value, String unit) {
+    return 'máx. $value $unit';
+  }
+
+  @override
+  String summaryOverLimit(String value, String unit) {
+    return '$value $unit por encima del límite';
+  }
+
+  @override
+  String summarySemanticsRemaining(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String remaining,
+  ) {
+    return '$name: $consumed de $target $unit, quedan $remaining $unit';
+  }
+
+  @override
+  String summarySemanticsOver(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String over,
+  ) {
+    return '$name: $consumed de $target $unit, $over $unit por encima';
+  }
+
+  @override
+  String summarySemanticsOverLimit(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String over,
+  ) {
+    return '$name: $consumed $unit, máximo $target $unit, $over $unit por encima del límite';
+  }
+
+  @override
+  String summarySemanticsLimitRemaining(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String remaining,
+  ) {
+    return '$name: $consumed $unit, máximo $target $unit, quedan $remaining $unit';
+  }
+
+  @override
+  String get summaryIncomplete => 'incompleto';
+
+  @override
+  String get summaryIncompleteHelp =>
+      'Algún alimento de este día no tiene este dato; cuenta como 0.';
+
+  @override
+  String get summaryDetail => 'Ver detalle';
+
+  @override
+  String get summaryDetailTitle => 'Fibra y micronutrientes';
+
+  @override
+  String get summaryTarget => 'Ver objetivo';
+
+  @override
+  String get summaryTitle => 'Resumen del día';
+
+  @override
+  String get entryQuantityLabel => 'Cantidad';
+
+  @override
+  String get entryUnitServings => 'raciones';
+
+  @override
+  String entryServingEquals(String n, String unit) {
+    return '1 ración = $n $unit';
+  }
+
+  @override
+  String get entryQuantityInvalid => 'Indica una cantidad mayor que 0';
+
+  @override
+  String get entryQuantityMax => 'Máximo 10.000';
+
+  @override
+  String entryConfirmTitle(String n, String unit) {
+    return '¿Seguro? Son $n $unit';
+  }
+
+  @override
+  String get entryChange => 'Cambiar';
+
+  @override
+  String get entryConfirmAdd => 'Sí, añadir';
+
+  @override
+  String get entryAdd => 'Añadir';
+
+  @override
+  String get entryOffline =>
+      'Sin conexión. Revisa la red y vuelve a intentarlo';
+
+  @override
+  String entryAdded(String meal) {
+    return 'Añadido a $meal';
+  }
+
+  @override
+  String entryPreview(String kcal, String p, String c, String f) {
+    return '$kcal kcal · P $p · C $c · G $f g';
+  }
+
+  @override
+  String get entrySave => 'Guardar';
+
+  @override
+  String get entryDelete => 'Borrar';
+
+  @override
+  String get entryMealLabel => 'Comida';
+
+  @override
+  String entryDeleted(String name) {
+    return '$name borrado';
+  }
+
+  @override
+  String get entryUndo => 'Deshacer';
+
+  @override
+  String get entryUndoFailed => 'No se pudo deshacer';
+
+  @override
+  String get dayYesterday => 'Ayer';
+
+  @override
+  String get dayPrevious => 'Día anterior';
+
+  @override
+  String get dayNext => 'Día siguiente';
+
+  @override
+  String get dayPick => 'Elegir fecha';
+
+  @override
+  String get dayGoToday => 'Ir a hoy';
+
+  @override
+  String get dayPastNotice => 'Este día usó el objetivo que tenías entonces';
 }

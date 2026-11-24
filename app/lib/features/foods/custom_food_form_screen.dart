@@ -23,8 +23,11 @@ class CustomFoodFormScreen extends ConsumerStatefulWidget {
     this.initialName,
     this.initialBarcode,
     this.initialBrand,
+    this.onSaved,
   });
 
+  /// Modo selección: en lugar del detalle, se cierra el formulario y se devuelve el alimento.
+  final ValueChanged<Food>? onSaved;
   final Food? existing;
   final String? initialName;
   final String? initialBarcode;
@@ -209,6 +212,12 @@ class _CustomFoodFormScreenState extends ConsumerState<CustomFoodFormScreen> {
           : await api.updateCustomFood(id, _input());
       ref.invalidate(customFoodsProvider);
       if (!mounted) return;
+      final onSaved = widget.onSaved;
+      if (onSaved != null) {
+        Navigator.of(context).pop();
+        onSaved(saved.food);
+        return;
+      }
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
           builder: (_) => FoodDetailScreen(food: saved.food),

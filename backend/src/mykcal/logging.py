@@ -40,6 +40,8 @@ ALLOWED_FIELDS = frozenset(
         "rows_upserted",
         "rows_archived",
         "food_id",
+        # 004: diario. Solo la comida; nunca el alimento, la cantidad, la fecha ni los valores.
+        "meal",
     }
 )
 

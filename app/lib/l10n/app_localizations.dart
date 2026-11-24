@@ -232,12 +232,6 @@ abstract class AppLocalizations {
   /// **'Reintentar'**
   String get retry;
 
-  /// No description provided for @homeGreeting.
-  ///
-  /// In es, this message translates to:
-  /// **'Hola, {name}'**
-  String homeGreeting(String name);
-
   /// No description provided for @homePlaceholder.
   ///
   /// In es, this message translates to:
@@ -862,18 +856,6 @@ abstract class AppLocalizations {
   /// **'Escribe un número entero de 1 o más'**
   String get errIntMin1;
 
-  /// No description provided for @homeTargetTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Tu objetivo de hoy'**
-  String get homeTargetTitle;
-
-  /// No description provided for @homeTargetDetail.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver detalle'**
-  String get homeTargetDetail;
-
   /// No description provided for @menuSettings.
   ///
   /// In es, this message translates to:
@@ -1473,6 +1455,347 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Open Food Facts, disponible bajo la Open Database License (ODbL).'**
   String get sourcesPackaged;
+
+  /// No description provided for @mealBreakfast.
+  ///
+  /// In es, this message translates to:
+  /// **'Desayuno'**
+  String get mealBreakfast;
+
+  /// No description provided for @mealLunch.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida'**
+  String get mealLunch;
+
+  /// No description provided for @mealAfternoonSnack.
+  ///
+  /// In es, this message translates to:
+  /// **'Merienda'**
+  String get mealAfternoonSnack;
+
+  /// No description provided for @mealDinner.
+  ///
+  /// In es, this message translates to:
+  /// **'Cena'**
+  String get mealDinner;
+
+  /// No description provided for @mealSnacks.
+  ///
+  /// In es, this message translates to:
+  /// **'Picoteo'**
+  String get mealSnacks;
+
+  /// No description provided for @diaryToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get diaryToday;
+
+  /// No description provided for @diaryEmptyMeal.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay nada'**
+  String get diaryEmptyMeal;
+
+  /// No description provided for @diaryAddToMeal.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a {meal}'**
+  String diaryAddToMeal(String meal);
+
+  /// No description provided for @diaryMealTotal.
+  ///
+  /// In es, this message translates to:
+  /// **'{meal}: {kcal} kcal'**
+  String diaryMealTotal(String meal, String kcal);
+
+  /// No description provided for @diaryEntryServings.
+  ///
+  /// In es, this message translates to:
+  /// **'{servings} {unit} · {quantity} {base}'**
+  String diaryEntryServings(
+    String servings,
+    String unit,
+    String quantity,
+    String base,
+  );
+
+  /// No description provided for @diaryEntryQuantity.
+  ///
+  /// In es, this message translates to:
+  /// **'{quantity} {base}'**
+  String diaryEntryQuantity(String quantity, String base);
+
+  /// No description provided for @diaryServingOne.
+  ///
+  /// In es, this message translates to:
+  /// **'ración'**
+  String get diaryServingOne;
+
+  /// No description provided for @diaryServingMany.
+  ///
+  /// In es, this message translates to:
+  /// **'raciones'**
+  String get diaryServingMany;
+
+  /// No description provided for @diaryEntryKcal.
+  ///
+  /// In es, this message translates to:
+  /// **'{kcal} kcal'**
+  String diaryEntryKcal(String kcal);
+
+  /// No description provided for @summaryRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'Quedan {value} {unit}'**
+  String summaryRemaining(String value, String unit);
+
+  /// No description provided for @summaryOver.
+  ///
+  /// In es, this message translates to:
+  /// **'+{value} {unit} por encima'**
+  String summaryOver(String value, String unit);
+
+  /// No description provided for @summaryMax.
+  ///
+  /// In es, this message translates to:
+  /// **'máx. {value} {unit}'**
+  String summaryMax(String value, String unit);
+
+  /// No description provided for @summaryOverLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'{value} {unit} por encima del límite'**
+  String summaryOverLimit(String value, String unit);
+
+  /// No description provided for @summarySemanticsRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}: {consumed} de {target} {unit}, quedan {remaining} {unit}'**
+  String summarySemanticsRemaining(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String remaining,
+  );
+
+  /// No description provided for @summarySemanticsOver.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}: {consumed} de {target} {unit}, {over} {unit} por encima'**
+  String summarySemanticsOver(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String over,
+  );
+
+  /// No description provided for @summarySemanticsOverLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}: {consumed} {unit}, máximo {target} {unit}, {over} {unit} por encima del límite'**
+  String summarySemanticsOverLimit(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String over,
+  );
+
+  /// No description provided for @summarySemanticsLimitRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'{name}: {consumed} {unit}, máximo {target} {unit}, quedan {remaining} {unit}'**
+  String summarySemanticsLimitRemaining(
+    String name,
+    String consumed,
+    String target,
+    String unit,
+    String remaining,
+  );
+
+  /// No description provided for @summaryIncomplete.
+  ///
+  /// In es, this message translates to:
+  /// **'incompleto'**
+  String get summaryIncomplete;
+
+  /// No description provided for @summaryIncompleteHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Algún alimento de este día no tiene este dato; cuenta como 0.'**
+  String get summaryIncompleteHelp;
+
+  /// No description provided for @summaryDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver detalle'**
+  String get summaryDetail;
+
+  /// No description provided for @summaryDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Fibra y micronutrientes'**
+  String get summaryDetailTitle;
+
+  /// No description provided for @summaryTarget.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver objetivo'**
+  String get summaryTarget;
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen del día'**
+  String get summaryTitle;
+
+  /// No description provided for @entryQuantityLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad'**
+  String get entryQuantityLabel;
+
+  /// No description provided for @entryUnitServings.
+  ///
+  /// In es, this message translates to:
+  /// **'raciones'**
+  String get entryUnitServings;
+
+  /// No description provided for @entryServingEquals.
+  ///
+  /// In es, this message translates to:
+  /// **'1 ración = {n} {unit}'**
+  String entryServingEquals(String n, String unit);
+
+  /// No description provided for @entryQuantityInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica una cantidad mayor que 0'**
+  String get entryQuantityInvalid;
+
+  /// No description provided for @entryQuantityMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo 10.000'**
+  String get entryQuantityMax;
+
+  /// No description provided for @entryConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Seguro? Son {n} {unit}'**
+  String entryConfirmTitle(String n, String unit);
+
+  /// No description provided for @entryChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get entryChange;
+
+  /// No description provided for @entryConfirmAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Sí, añadir'**
+  String get entryConfirmAdd;
+
+  /// No description provided for @entryAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get entryAdd;
+
+  /// No description provided for @entryOffline.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión. Revisa la red y vuelve a intentarlo'**
+  String get entryOffline;
+
+  /// No description provided for @entryAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadido a {meal}'**
+  String entryAdded(String meal);
+
+  /// No description provided for @entryPreview.
+  ///
+  /// In es, this message translates to:
+  /// **'{kcal} kcal · P {p} · C {c} · G {f} g'**
+  String entryPreview(String kcal, String p, String c, String f);
+
+  /// No description provided for @entrySave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get entrySave;
+
+  /// No description provided for @entryDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar'**
+  String get entryDelete;
+
+  /// No description provided for @entryMealLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Comida'**
+  String get entryMealLabel;
+
+  /// No description provided for @entryDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} borrado'**
+  String entryDeleted(String name);
+
+  /// No description provided for @entryUndo.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer'**
+  String get entryUndo;
+
+  /// No description provided for @entryUndoFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo deshacer'**
+  String get entryUndoFailed;
+
+  /// No description provided for @dayYesterday.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayer'**
+  String get dayYesterday;
+
+  /// No description provided for @dayPrevious.
+  ///
+  /// In es, this message translates to:
+  /// **'Día anterior'**
+  String get dayPrevious;
+
+  /// No description provided for @dayNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Día siguiente'**
+  String get dayNext;
+
+  /// No description provided for @dayPick.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir fecha'**
+  String get dayPick;
+
+  /// No description provided for @dayGoToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Ir a hoy'**
+  String get dayGoToday;
+
+  /// No description provided for @dayPastNotice.
+  ///
+  /// In es, this message translates to:
+  /// **'Este día usó el objetivo que tenías entonces'**
+  String get dayPastNotice;
 }
 
 class _AppLocalizationsDelegate

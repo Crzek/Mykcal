@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/auth_controller.dart';
+import '../format/dates.dart';
 import 'api_errors.dart';
 import 'models.dart';
 
@@ -25,6 +26,27 @@ abstract class MykcalApi {
   Future<CustomFoodSaved> createCustomFood(CustomFoodInput input);
   Future<CustomFoodSaved> updateCustomFood(String id, CustomFoodInput input);
   Future<void> deleteCustomFood(String id);
+
+  /// Diario (004). `utcOffsetMin` es el desfase de la zona del móvil al final del día afectado
+  /// (research R3). Todas devuelven el día completo y recalculado (R9).
+  Future<DiaryDay> diaryDay(DateTime date, int utcOffsetMin);
+  Future<DiaryDay> addEntry({
+    required DateTime date,
+    required Meal meal,
+    required String foodId,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  });
+  Future<DiaryDay> updateEntry(
+    String id, {
+    Meal? meal,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  });
+  Future<DiaryDay> deleteEntry(String id, int utcOffsetMin);
+  Future<DiaryDay> restoreEntry(String id, int utcOffsetMin);
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -148,6 +170,75 @@ class HttpMykcalApi implements MykcalApi {
   Future<void> deleteCustomFood(String id) async {
     await _json('DELETE', '/v1/foods/custom/$id');
   }
+
+  @override
+  Future<DiaryDay> diaryDay(DateTime date, int utcOffsetMin) async =>
+      DiaryDay.fromJson(
+        await _json(
+          'GET',
+          '/v1/diary/days/${isoDate(date)}',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  @override
+  Future<DiaryDay> addEntry({
+    required DateTime date,
+    required Meal meal,
+    required String foodId,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  }) async => DiaryDay.fromJson(
+    await _json(
+      'POST',
+      '/v1/diary/entries',
+      query: {'utc_offset_min': utcOffsetMin},
+      data: {
+        'date': isoDate(date),
+        'meal': meal.wire,
+        'food_id': foodId,
+        'quantity': ?quantity,
+        'servings': ?servings,
+      },
+    ),
+  );
+
+  @override
+  Future<DiaryDay> updateEntry(
+    String id, {
+    Meal? meal,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  }) async => DiaryDay.fromJson(
+    await _json(
+      'PATCH',
+      '/v1/diary/entries/$id',
+      query: {'utc_offset_min': utcOffsetMin},
+      data: {'meal': ?meal?.wire, 'quantity': ?quantity, 'servings': ?servings},
+    ),
+  );
+
+  @override
+  Future<DiaryDay> deleteEntry(String id, int utcOffsetMin) async =>
+      DiaryDay.fromJson(
+        await _json(
+          'DELETE',
+          '/v1/diary/entries/$id',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  @override
+  Future<DiaryDay> restoreEntry(String id, int utcOffsetMin) async =>
+      DiaryDay.fromJson(
+        await _json(
+          'POST',
+          '/v1/diary/entries/$id/restore',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
 
   List<FoodSummary> _foodList(Map<String, dynamic> json) =>
       (json['items'] as List<dynamic>)

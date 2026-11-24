@@ -30,14 +30,6 @@
   "errGeneric": "Algo ha fallado. Inténtalo de nuevo.",
   "offlineBanner": "Necesitas conexión a Internet.",
   "retry": "Reintentar",
-  "homeGreeting": "Hola, {name}",
-  "@homeGreeting": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "homePlaceholder": "Aquí irá tu diario de comidas.",
   "menuLabel": "Menú",
   "menuInvitations": "Invitaciones",
@@ -195,8 +187,6 @@
   },
   "errIntMin0": "Escribe un número entero de 0 o más",
   "errIntMin1": "Escribe un número entero de 1 o más",
-  "homeTargetTitle": "Tu objetivo de hoy",
-  "homeTargetDetail": "Ver detalle",
   "menuSettings": "Ajustes",
   "settingsTitle": "Ajustes",
   "settingsProfile": "Mi perfil",
@@ -420,5 +410,273 @@
     }
   },
   "sourcesPackagedTitle": "Productos envasados",
-  "sourcesPackaged": "Open Food Facts, disponible bajo la Open Database License (ODbL)."
+  "sourcesPackaged": "Open Food Facts, disponible bajo la Open Database License (ODbL).",
+  "mealBreakfast": "Desayuno",
+  "mealLunch": "Comida",
+  "mealAfternoonSnack": "Merienda",
+  "mealDinner": "Cena",
+  "mealSnacks": "Picoteo",
+  "diaryToday": "Hoy",
+  "diaryEmptyMeal": "Aún no hay nada",
+  "diaryAddToMeal": "Añadir a {meal}",
+  "@diaryAddToMeal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryMealTotal": "{meal}: {kcal} kcal",
+  "@diaryMealTotal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryEntryServings": "{servings} {unit} · {quantity} {base}",
+  "@diaryEntryServings": {
+    "placeholders": {
+      "servings": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryEntryQuantity": "{quantity} {base}",
+  "@diaryEntryQuantity": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "diaryServingOne": "ración",
+  "diaryServingMany": "raciones",
+  "diaryEntryKcal": "{kcal} kcal",
+  "@diaryEntryKcal": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryRemaining": "Quedan {value} {unit}",
+  "@summaryRemaining": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryOver": "+{value} {unit} por encima",
+  "@summaryOver": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryMax": "máx. {value} {unit}",
+  "@summaryMax": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryOverLimit": "{value} {unit} por encima del límite",
+  "@summaryOverLimit": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySemanticsRemaining": "{name}: {consumed} de {target} {unit}, quedan {remaining} {unit}",
+  "@summarySemanticsRemaining": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "consumed": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySemanticsOver": "{name}: {consumed} de {target} {unit}, {over} {unit} por encima",
+  "@summarySemanticsOver": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "consumed": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "over": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySemanticsOverLimit": "{name}: {consumed} {unit}, máximo {target} {unit}, {over} {unit} por encima del límite",
+  "@summarySemanticsOverLimit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "consumed": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "over": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySemanticsLimitRemaining": "{name}: {consumed} {unit}, máximo {target} {unit}, quedan {remaining} {unit}",
+  "@summarySemanticsLimitRemaining": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "consumed": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryIncomplete": "incompleto",
+  "summaryIncompleteHelp": "Algún alimento de este día no tiene este dato; cuenta como 0.",
+  "summaryDetail": "Ver detalle",
+  "summaryDetailTitle": "Fibra y micronutrientes",
+  "summaryTarget": "Ver objetivo",
+  "summaryTitle": "Resumen del día",
+  "entryQuantityLabel": "Cantidad",
+  "entryUnitServings": "raciones",
+  "entryServingEquals": "1 ración = {n} {unit}",
+  "@entryServingEquals": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "entryQuantityInvalid": "Indica una cantidad mayor que 0",
+  "entryQuantityMax": "Máximo 10.000",
+  "entryConfirmTitle": "¿Seguro? Son {n} {unit}",
+  "@entryConfirmTitle": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "entryChange": "Cambiar",
+  "entryConfirmAdd": "Sí, añadir",
+  "entryAdd": "Añadir",
+  "entryOffline": "Sin conexión. Revisa la red y vuelve a intentarlo",
+  "entryAdded": "Añadido a {meal}",
+  "@entryAdded": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "entryPreview": "{kcal} kcal · P {p} · C {c} · G {f} g",
+  "@entryPreview": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "p": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      },
+      "f": {
+        "type": "String"
+      }
+    }
+  },
+  "entrySave": "Guardar",
+  "entryDelete": "Borrar",
+  "entryMealLabel": "Comida",
+  "entryDeleted": "{name} borrado",
+  "@entryDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "entryUndo": "Deshacer",
+  "entryUndoFailed": "No se pudo deshacer",
+  "dayYesterday": "Ayer",
+  "dayPrevious": "Día anterior",
+  "dayNext": "Día siguiente",
+  "dayPick": "Elegir fecha",
+  "dayGoToday": "Ir a hoy",
+  "dayPastNotice": "Este día usó el objetivo que tenías entonces"
 }

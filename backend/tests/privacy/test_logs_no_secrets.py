@@ -172,3 +172,42 @@ async def test_logs_de_alimentos_sin_consultas_codigos_ni_nombres(
         assert needle not in out, needle
     for needle in ("321", "6.7", "45.3", "13.9", "61.7"):
         assert needle not in relevant, needle
+
+
+async def test_logs_del_diario_sin_alimentos_cantidades_fechas_ni_valores(
+    client, user_with_consent, make_target_version, make_food, capsys
+):
+    """Principio X (R12): qué se come y cuánto no queda en los registros."""
+    from datetime import UTC, datetime, timedelta
+
+    account, headers = await user_with_consent("u-diario")
+    await make_target_version(account, datetime.now(UTC) - timedelta(days=3))
+    food = await make_food("Lentejas estofadas secretas", kcal=123.4)
+    day = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
+    q = "?utc_offset_min=0"
+    capsys.readouterr()
+    created = await client.post(
+        f"/v1/diary/entries{q}",
+        json={"date": day, "meal": "dinner", "food_id": str(food), "quantity": 317},
+        headers=headers,
+    )
+    entry = created.json()["meals"][3]["entries"][0]["id"]
+    await client.patch(f"/v1/diary/entries/{entry}{q}", json={"quantity": 281}, headers=headers)
+    await client.delete(f"/v1/diary/entries/{entry}{q}", headers=headers)
+    await client.post(f"/v1/diary/entries/{entry}/restore{q}", headers=headers)
+    await client.get(f"/v1/diary/days/{day}{q}", headers=headers)
+    out = "\n".join(_lines(capsys))
+    events = [json.loads(line) for line in out.splitlines()]
+    diary = [e for e in events if str(e.get("event", "")).startswith("diary_entry_")]
+    assert {e["event"] for e in diary} == {
+        "diary_entry_created",
+        "diary_entry_updated",
+        "diary_entry_deleted",
+        "diary_entry_restored",
+    }
+    for e in diary:
+        assert set(e) >= {"user_id", "meal", "duration_ms"}, e
+        for key in ("food_name", "quantity", "servings", "date", "entry_date", "values", "kcal"):
+            assert key not in e, (key, e)
+    for needle in ("Lentejas", "317", "281", "123.4", day):
+        assert needle not in out.replace(day + "T", ""), needle

@@ -27,7 +27,8 @@ void main() {
 
   test('ACCOUNT_NOT_REGISTERED → needsRegistration', () async {
     await seedSession();
-    h.api.onMe = () async => throw const ApiError('ACCOUNT_NOT_REGISTERED', 404);
+    h.api.onMe = () async =>
+        throw const ApiError('ACCOUNT_NOT_REGISTERED', 404);
     expect(await settled(h.container()), isA<NeedsRegistration>());
   });
 

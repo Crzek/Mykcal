@@ -11,7 +11,8 @@ void main() {
     final h = Harness();
     await seedSession();
     await h.pumpApp(tester);
-    expect(find.text('Hola, Ana'), findsOneWidget);
+    expect(find.text('Resumen del día'), findsOneWidget);
+    expect(find.text('Hola, Ana'), findsNothing);
     await expectAccessible(tester);
     await tester.tap(find.byTooltip('Menú'));
     await tester.pumpAndSettle();
@@ -55,10 +56,12 @@ void main() {
     expect(find.text('Copiar'), findsOneWidget);
   });
 
-  testWidgets('el botón «Alimentos» abre la búsqueda', (tester) async {
+  testWidgets('el menú ⋮ → «Alimentos» abre la búsqueda', (tester) async {
     final h = Harness();
     await seedSession();
     await h.pumpApp(tester);
+    await tester.tap(find.byTooltip('Menú'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Alimentos'));
     await tester.pumpAndSettle();
     expect(find.text('Busca un alimento'), findsOneWidget);

@@ -23,6 +23,7 @@ Future<void> lookupAndShowBarcode(
   WidgetRef ref,
   String code, {
   CreateFromBarcode? onCreate,
+  ValueChanged<Food>? onSelected,
 }) async {
   while (true) {
     if (!context.mounted) return;
@@ -40,7 +41,7 @@ Future<void> lookupAndShowBarcode(
     }
     if (!context.mounted) return;
     if (lookup != null) {
-      await _showResult(context, lookup, onCreate);
+      await _showResult(context, lookup, onCreate, onSelected);
       return;
     }
     final retry = await _showFailure(context, failure!, code, onCreate);
@@ -75,10 +76,16 @@ Future<void> _showResult(
   BuildContext context,
   BarcodeLookup lookup,
   CreateFromBarcode? onCreate,
+  ValueChanged<Food>? onSelected,
 ) async {
   final l10n = AppLocalizations.of(context);
   switch (lookup.result) {
     case BarcodeResult.found:
+      final selected = onSelected;
+      if (selected != null && lookup.food != null) {
+        selected(lookup.food!);
+        return;
+      }
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) =>

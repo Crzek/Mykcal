@@ -20,6 +20,7 @@ from mykcal.consent.router import router as consent_router
 from mykcal.core.auth import OidcClient
 from mykcal.core.errors import ApiError, ErrorCode
 from mykcal.db import make_engine, make_sessionmaker
+from mykcal.diary.router import router as diary_router
 from mykcal.distribution.router import router as distribution_router
 from mykcal.foods.router import router as foods_router
 from mykcal.invitations.router import router as invitations_router
@@ -69,7 +70,9 @@ def create_app(
         get_logger().info(
             "request",
             method=request.method,
-            path=request.url.path,
+            # La plantilla de la ruta (`/v1/diary/days/{date}`), no la URL: la fecha de un día del
+            # diario y los ids de entrada no deben quedar en los registros (principio X, R12).
+            path=getattr(request.scope.get("route"), "path", request.url.path),
             status=response.status_code,
             duration_ms=int((time.monotonic() - start) * 1000),
         )
@@ -117,4 +120,5 @@ def create_app(
     app.include_router(profile_router)
     app.include_router(targets_router)
     app.include_router(foods_router)
+    app.include_router(diary_router)
     return app

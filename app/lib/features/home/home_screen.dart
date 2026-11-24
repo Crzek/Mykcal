@@ -5,14 +5,14 @@ import '../../core/api/models.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../admin/invitations_screen.dart';
+import '../diary/diary_screen.dart';
 import '../foods/food_search_screen.dart';
 import '../settings/settings_screen.dart';
 import '../share/share_app_sheet.dart';
-import '../target/target_card.dart';
 
-enum _MenuAction { invitations, shareApp, settings, signOut }
+enum _MenuAction { foods, invitations, shareApp, settings, signOut }
 
-/// Inicio: saludo con el nombre visible y marcador de las siguientes features.
+/// Inicio: el diario del día (FR-012). El menú ⋮ da acceso a Alimentos, ajustes y cuenta.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.me});
 
@@ -29,6 +29,12 @@ class HomeScreen extends ConsumerWidget {
             tooltip: l10n.menuLabel,
             onSelected: (action) {
               switch (action) {
+                case _MenuAction.foods:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const FoodSearchScreen(),
+                    ),
+                  );
                 case _MenuAction.invitations:
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -48,6 +54,10 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: _MenuAction.foods,
+                child: Text(l10n.homeFoods),
+              ),
               if (me.isAdmin)
                 PopupMenuItem(
                   value: _MenuAction.invitations,
@@ -69,35 +79,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  l10n.homeGreeting(me.displayName),
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const TargetCard(),
-              const SizedBox(height: 16),
-              FilledButton.tonalIcon(
-                icon: const Icon(Icons.restaurant_menu),
-                label: Text(l10n.homeFoods),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const FoodSearchScreen(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: SafeArea(child: DiaryScreen(registeredAt: me.registeredAt)),
     );
   }
 }
