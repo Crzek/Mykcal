@@ -7,7 +7,8 @@ import '../../core/auth/auth_controller.dart';
 
 class InvitationsController extends AutoDisposeAsyncNotifier<InvitationStatus> {
   @override
-  Future<InvitationStatus> build() => _guard(() => ref.read(mykcalApiProvider).invitation());
+  Future<InvitationStatus> build() =>
+      _guard(() => ref.read(mykcalApiProvider).invitation());
 
   Future<void> rotate() async {
     state = const AsyncLoading<InvitationStatus>().copyWithPrevious(state);
@@ -16,7 +17,9 @@ class InvitationsController extends AutoDisposeAsyncNotifier<InvitationStatus> {
     );
   }
 
-  Future<InvitationStatus> _guard(Future<InvitationStatus> Function() call) async {
+  Future<InvitationStatus> _guard(
+    Future<InvitationStatus> Function() call,
+  ) async {
     try {
       return await call();
     } on SessionExpired {
@@ -28,4 +31,5 @@ class InvitationsController extends AutoDisposeAsyncNotifier<InvitationStatus> {
 
 final invitationsControllerProvider =
     AsyncNotifierProvider.autoDispose<InvitationsController, InvitationStatus>(
-        InvitationsController.new);
+      InvitationsController.new,
+    );

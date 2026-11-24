@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos
-  version: 0.3.0
+  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario
+  version: 0.4.0
   description: >
     Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
     fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
@@ -438,6 +438,91 @@ paths:
         "404": { $ref: "#/components/responses/FoodNotFound" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
 
+  /v1/diary/days/{date}:
+    get:
+      summary: Día del diario con resumen y comidas (FR-006–FR-012)
+      parameters:
+        - { $ref: "#/components/parameters/DiaryDate" }
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      responses:
+        "200": { $ref: "#/components/responses/DiaryDayOk" }
+        "400": { $ref: "#/components/responses/DiaryBadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/TargetNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/entries:
+    post:
+      summary: Añade un alimento a una comida (FR-002–FR-004)
+      description: >
+        Copia el nombre y los valores por 100 del alimento (research R5). Lleva `quantity` o
+        `servings`, nunca los dos. Responde con el día completo de `date`.
+      parameters:
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiaryEntryCreate" }
+      responses:
+        "201": { $ref: "#/components/responses/DiaryDayOk" }
+        "400": { $ref: "#/components/responses/DiaryBadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: Alimento no disponible para el usuario o sin objetivo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/entries/{entry_id}:
+    patch:
+      summary: Cambia la cantidad o la comida de una entrada (FR-005)
+      description: >
+        Solo dentro del mismo día. Los valores se recalculan con la copia guardada, no con el
+        alimento actual (FR-004). Enviar `quantity` pone `servings` a null.
+      parameters:
+        - { $ref: "#/components/parameters/EntryId" }
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiaryEntryUpdate" }
+      responses:
+        "200": { $ref: "#/components/responses/DiaryDayOk" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/EntryNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    delete:
+      summary: Borra una entrada; se puede deshacer (FR-005, research R8)
+      parameters:
+        - { $ref: "#/components/parameters/EntryId" }
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      responses:
+        "200": { $ref: "#/components/responses/DiaryDayOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/EntryNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/entries/{entry_id}/restore:
+    post:
+      summary: Deshace el borrado (hasta 60 s después)
+      parameters:
+        - { $ref: "#/components/parameters/EntryId" }
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      responses:
+        "200": { $ref: "#/components/responses/DiaryDayOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/EntryNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
 components:
   securitySchemes:
     bearerToken:
@@ -447,6 +532,23 @@ components:
       description: >
         Access token JWT de https://mg-zitadel.cruzerick.com con aud = ID del proyecto mykcal.
         Validado contra el JWKS (research R4).
+
+  parameters:
+    DiaryDate:
+      name: date
+      in: path
+      required: true
+      schema: { type: string, format: date }
+    EntryId:
+      name: entry_id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    UtcOffsetMin:
+      name: utc_offset_min
+      in: query
+      required: true
+      schema: { type: integer, minimum: -840, maximum: 840 }
 
   responses:
     Unauthorized:
@@ -481,12 +583,32 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorBody" }
 
+    DiaryDayOk:
+      description: Día completo y recalculado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/DiaryDay" }
+    DiaryBadRequest:
+      description: "`VALIDATION_ERROR` o `DIARY_DATE_OUT_OF_RANGE`"
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+    EntryNotFound:
+      description: "`ENTRY_NOT_FOUND`: no existe, es de otro usuario o venció el plazo de deshacer"
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+    TargetNotFound:
+      description: "`TARGET_NOT_FOUND`"
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
 
   schemas:
     Me:
       type: object
       additionalProperties: false
-      required: [id, display_name, is_admin, status, onboarding]
+      required: [id, display_name, is_admin, status, onboarding, registered_at]
       properties:
         onboarding:
           type: string
@@ -496,6 +618,7 @@ components:
         display_name: { type: string }
         is_admin: { type: boolean }
         status: { type: string, enum: [active, disabled] }
+        registered_at: { type: string, format: date-time, description: Alta de la cuenta; primer día navegable del diario (004 R2) }
 
     InvitationStatus:
       type: object
@@ -644,6 +767,8 @@ components:
             - FOOD_NOT_FOUND
             - FOOD_BARCODE_TAKEN
             - FOOD_SOURCE_UNAVAILABLE
+            - DIARY_DATE_OUT_OF_RANGE
+            - ENTRY_NOT_FOUND
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR
@@ -789,3 +914,129 @@ components:
         items:
           type: array
           items: { $ref: "#/components/schemas/FoodSummary" }
+
+    Meal:
+      type: string
+      enum: [breakfast, lunch, afternoon_snack, dinner, snacks]
+
+    DiaryEntryCreate:
+      type: object
+      additionalProperties: false
+      required: [date, meal, food_id]
+      properties:
+        date: { type: string, format: date }
+        meal: { $ref: "#/components/schemas/Meal" }
+        food_id: { type: string, format: uuid }
+        quantity: { type: number, exclusiveMinimum: 0, maximum: 10000, multipleOf: 0.1 }
+        servings: { type: number, exclusiveMinimum: 0, maximum: 100, multipleOf: 0.01 }
+      oneOf:
+        - required: [quantity]
+        - required: [servings]
+
+    DiaryEntryUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        meal: { $ref: "#/components/schemas/Meal" }
+        quantity: { type: number, exclusiveMinimum: 0, maximum: 10000, multipleOf: 0.1 }
+        servings: { type: number, exclusiveMinimum: 0, maximum: 100, multipleOf: 0.01 }
+      not:
+        required: [quantity, servings]
+
+    DiaryEntry:
+      type: object
+      additionalProperties: false
+      required: [id, meal, food_id, food_kind, food_name, food_brand, base_unit, serving_size,
+                 per_100, quantity, servings, values, incomplete, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        meal: { $ref: "#/components/schemas/Meal" }
+        food_id: { type: string, format: uuid }
+        food_kind: { type: string, enum: [generic, packaged, custom] }
+        food_name: { type: string }
+        food_brand: { type: [string, "null"] }
+        base_unit: { type: string, enum: [g, ml] }
+        serving_size: { type: [number, "null"] }
+        per_100:
+          $ref: "#/components/schemas/Nutrients"
+          description: Copia por 100 guardada al registrar; la app la usa para la vista previa al editar
+        quantity: { type: number }
+        servings: { type: [number, "null"] }
+        values:
+          $ref: "#/components/schemas/NutrientAmounts"
+          description: Valores de la entrada (no por 100), redondeados para mostrar (research R10)
+        incomplete:
+          type: array
+          items: { type: string }
+          description: Nutrientes sin dato en esta entrada
+        created_at: { type: string, format: date-time }
+
+    NutrientAmounts:
+      type: object
+      description: >
+        Cantidades de una entrada o de un total (no por 100), sin los máximos por 100 de
+        `Nutrients`. En un total ninguno es null; en una entrada, un opcional es null si la copia
+        no tenía el dato.
+      additionalProperties: false
+      required: [kcal, protein_g, carbs_g, fat_g, fiber_g, sodium_mg, potassium_mg, calcium_mg,
+                 iron_mg, magnesium_mg, vitamin_d_ug, vitamin_c_mg]
+      properties:
+        kcal: { type: number, minimum: 0 }
+        protein_g: { type: number, minimum: 0 }
+        carbs_g: { type: number, minimum: 0 }
+        fat_g: { type: number, minimum: 0 }
+        fiber_g: { type: [number, "null"], minimum: 0 }
+        sodium_mg: { type: [number, "null"], minimum: 0 }
+        potassium_mg: { type: [number, "null"], minimum: 0 }
+        calcium_mg: { type: [number, "null"], minimum: 0 }
+        iron_mg: { type: [number, "null"], minimum: 0 }
+        magnesium_mg: { type: [number, "null"], minimum: 0 }
+        vitamin_d_ug: { type: [number, "null"], minimum: 0 }
+        vitamin_c_mg: { type: [number, "null"], minimum: 0 }
+
+    NutrientTotals:
+      type: object
+      additionalProperties: false
+      required: [consumed, incomplete]
+      properties:
+        consumed: { $ref: "#/components/schemas/NutrientAmounts" }
+        incomplete:
+          type: array
+          items: { type: string }
+          description: Nutrientes con alguna entrada sin dato (FR-008)
+
+    DiaryMeal:
+      type: object
+      additionalProperties: false
+      required: [meal, entries, totals]
+      properties:
+        meal: { $ref: "#/components/schemas/Meal" }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/DiaryEntry" }
+          description: En orden de creación
+        totals: { $ref: "#/components/schemas/NutrientTotals" }
+
+    DiaryDay:
+      type: object
+      additionalProperties: false
+      required: [date, target, totals, remaining, meals]
+      properties:
+        date: { type: string, format: date }
+        target:
+          $ref: "#/components/schemas/TargetValues"
+          description: Objetivo vigente al final de ese día (FR-011, research R3)
+        totals: { $ref: "#/components/schemas/NutrientTotals" }
+        remaining:
+          type: object
+          description: >
+            objetivo − consumido, con los 12 nutrientes. Negativo = exceso. En el sodio, lo que
+            queda hasta el máximo.
+          additionalProperties: { type: number }
+        meals:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items: { $ref: "#/components/schemas/DiaryMeal" }
+          description: Siempre las 5, en orden fijo (FR-001)

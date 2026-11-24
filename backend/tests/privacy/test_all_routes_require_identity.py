@@ -38,6 +38,11 @@ def test_lista_publica_cerrada(app):
         ("PUT", "/v1/foods/custom/{food_id}"),
         ("DELETE", "/v1/foods/custom/{food_id}"),
         ("GET", "/v1/foods/{food_id}"),
+        ("GET", "/v1/diary/days/{date}"),
+        ("POST", "/v1/diary/entries"),
+        ("PATCH", "/v1/diary/entries/{entry_id}"),
+        ("DELETE", "/v1/diary/entries/{entry_id}"),
+        ("POST", "/v1/diary/entries/{entry_id}/restore"),
     }, "hay rutas nuevas: decide si son públicas o exigen cuenta activa"
 
 

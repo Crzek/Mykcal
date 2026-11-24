@@ -19,6 +19,7 @@ class Me {
     required this.isAdmin,
     required this.active,
     this.onboarding = Onboarding.done,
+    this.registeredAt,
   });
 
   factory Me.fromJson(Map<String, dynamic> json) => Me(
@@ -27,6 +28,9 @@ class Me {
     isAdmin: json['is_admin'] as bool,
     active: json['status'] == 'active',
     onboarding: Onboarding.parse(json['onboarding']),
+    registeredAt: json['registered_at'] == null
+        ? null
+        : DateTime.parse(json['registered_at'] as String),
   );
 
   final String id;
@@ -34,6 +38,10 @@ class Me {
   final bool isAdmin;
   final bool active;
   final Onboarding onboarding;
+
+  /// Alta de la cuenta: primer día navegable del diario (004 R2). El servidor siempre la envía;
+  /// `null` solo en pruebas y significa «sin límite inferior».
+  final DateTime? registeredAt;
 }
 
 /// `InvitationStatus` del contrato.
@@ -556,4 +564,164 @@ class CustomFoodSaved {
   final List<String> warnings;
 
   bool get kcalMismatch => warnings.contains('KCAL_MISMATCH');
+}
+
+/// Comida fija del día (FR-001), en el orden en que se muestran.
+enum Meal {
+  breakfast('breakfast'),
+  lunch('lunch'),
+  afternoonSnack('afternoon_snack'),
+  dinner('dinner'),
+  snacks('snacks');
+
+  const Meal(this.wire);
+
+  /// Nombre en el API.
+  final String wire;
+
+  static Meal parse(Object? value) =>
+      Meal.values.firstWhere((m) => m.wire == value, orElse: () => Meal.snacks);
+}
+
+/// Una entrada del diario: alimento con cantidad y la copia de sus valores (`DiaryEntry`).
+class DiaryEntry {
+  const DiaryEntry({
+    required this.id,
+    required this.meal,
+    required this.foodId,
+    required this.foodKind,
+    required this.foodName,
+    required this.baseUnit,
+    required this.per100,
+    required this.quantity,
+    required this.values,
+    this.foodBrand,
+    this.servingSize,
+    this.servings,
+    this.incomplete = const [],
+    this.createdAt,
+  });
+
+  factory DiaryEntry.fromJson(Map<String, dynamic> json) => DiaryEntry(
+    id: json['id'] as String,
+    meal: Meal.parse(json['meal']),
+    foodId: json['food_id'] as String,
+    foodKind: FoodKind.parse(json['food_kind']),
+    foodName: json['food_name'] as String,
+    foodBrand: json['food_brand'] as String?,
+    baseUnit: json['base_unit'] as String,
+    servingSize: _optNum(json['serving_size']),
+    per100: Nutrients.fromJson(json['per_100'] as Map<String, dynamic>),
+    quantity: (json['quantity'] as num).toDouble(),
+    servings: _optNum(json['servings']),
+    values: Nutrients.fromJson(json['values'] as Map<String, dynamic>),
+    incomplete: (json['incomplete'] as List<dynamic>).cast<String>(),
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+  );
+
+  final String id;
+  final Meal meal;
+  final String foodId;
+  final FoodKind foodKind;
+  final String foodName;
+  final String? foodBrand;
+
+  /// `g` o `ml`.
+  final String baseUnit;
+
+  /// Tamaño de la ración copiado al registrar (FR-004); `null` si el alimento no la tenía.
+  final double? servingSize;
+
+  /// Copia por 100 g/ml guardada al registrar: la vista previa al editar usa esta, no el alimento
+  /// actual (FR-004).
+  final Nutrients per100;
+  final double quantity;
+
+  /// Raciones si se registró así; `null` si se registró en g/ml.
+  final double? servings;
+
+  /// Valores de la entrada (no por 100), redondeados para mostrar.
+  final Nutrients values;
+
+  /// Nutrientes sin dato en esta entrada.
+  final List<String> incomplete;
+  final DateTime? createdAt;
+}
+
+/// Consumido y nutrientes «incompletos» de un día o de una comida (`NutrientTotals`).
+class NutrientTotals {
+  const NutrientTotals({required this.consumed, this.incomplete = const []});
+
+  factory NutrientTotals.fromJson(Map<String, dynamic> json) => NutrientTotals(
+    consumed: Nutrients.fromJson(json['consumed'] as Map<String, dynamic>),
+    incomplete: (json['incomplete'] as List<dynamic>).cast<String>(),
+  );
+
+  final Nutrients consumed;
+
+  /// Nutrientes con alguna entrada sin dato: cuentan como 0 y se marcan (FR-008).
+  final List<String> incomplete;
+}
+
+/// Una de las cinco comidas del día con sus entradas y su total.
+class DiaryMeal {
+  const DiaryMeal({
+    required this.meal,
+    required this.entries,
+    required this.totals,
+  });
+
+  factory DiaryMeal.fromJson(Map<String, dynamic> json) => DiaryMeal(
+    meal: Meal.parse(json['meal']),
+    entries: (json['entries'] as List<dynamic>)
+        .map((e) => DiaryEntry.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    totals: NutrientTotals.fromJson(json['totals'] as Map<String, dynamic>),
+  );
+
+  final Meal meal;
+  final List<DiaryEntry> entries;
+  final NutrientTotals totals;
+}
+
+/// Día del diario con resumen y comidas (`DiaryDay`).
+class DiaryDay {
+  const DiaryDay({
+    required this.date,
+    required this.target,
+    required this.totals,
+    required this.remaining,
+    required this.meals,
+  });
+
+  factory DiaryDay.fromJson(Map<String, dynamic> json) {
+    final parts = (json['date'] as String).split('-').map(int.parse).toList();
+    return DiaryDay(
+      date: DateTime(parts[0], parts[1], parts[2]),
+      target: TargetValues.fromJson(json['target'] as Map<String, dynamic>),
+      totals: NutrientTotals.fromJson(json['totals'] as Map<String, dynamic>),
+      remaining: (json['remaining'] as Map<String, dynamic>).map(
+        (k, v) => MapEntry(k, (v as num).toDouble()),
+      ),
+      meals: (json['meals'] as List<dynamic>)
+          .map((e) => DiaryMeal.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  /// Fecha local sin hora.
+  final DateTime date;
+
+  /// Objetivo vigente al terminar ese día (FR-011).
+  final TargetValues target;
+  final NutrientTotals totals;
+
+  /// `objetivo − consumido`, con los 12 nutrientes. Negativo = exceso (en el sodio, pasarse del
+  /// límite).
+  final Map<String, double> remaining;
+  final List<DiaryMeal> meals;
+
+  DiaryMeal meal(Meal meal) => meals.firstWhere((m) => m.meal == meal);
 }

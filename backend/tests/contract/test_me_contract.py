@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tests.contract.schema import assert_matches_contract
 
 
@@ -36,3 +38,12 @@ async def test_me_503(client, zitadel, contract):
     zitadel.jwks_down = True
     resp = await client.get("/v1/me", headers=zitadel.headers("u1"))
     assert_matches_contract(contract, "/v1/me", "get", 503, resp.json())
+
+
+async def test_me_incluye_registered_at(client, zitadel, make_account, contract):
+    """T010 (004, R2): `registered_at` es el alta de la cuenta y valida contra el contrato."""
+    account = await make_account("u-alta", name="Ana")
+    resp = await client.get("/v1/me", headers=zitadel.headers("u-alta"))
+    assert resp.status_code == 200
+    assert_matches_contract(contract, "/v1/me", "get", 200, resp.json())
+    assert datetime.fromisoformat(resp.json()["registered_at"]) == account.created_at

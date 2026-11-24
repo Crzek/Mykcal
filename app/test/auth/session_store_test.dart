@@ -9,12 +9,14 @@ void main() {
     final store = SessionStore();
     expect(await store.read(), isNull);
     final exp = DateTime.utc(2026, 11, 22, 12, 15);
-    await store.write(StoredSession(
-      accessToken: 'a',
-      refreshToken: 'r',
-      accessTokenExpiresAt: exp,
-      idToken: 'i',
-    ));
+    await store.write(
+      StoredSession(
+        accessToken: 'a',
+        refreshToken: 'r',
+        accessTokenExpiresAt: exp,
+        idToken: 'i',
+      ),
+    );
     final read = await store.read();
     expect(read!.accessToken, 'a');
     expect(read.refreshToken, 'r');
@@ -24,12 +26,14 @@ void main() {
 
   test('clear borra todas las claves', () async {
     final store = SessionStore();
-    await store.write(StoredSession(
-      accessToken: 'a',
-      refreshToken: 'r',
-      accessTokenExpiresAt: DateTime.utc(2026),
-      idToken: 'i',
-    ));
+    await store.write(
+      StoredSession(
+        accessToken: 'a',
+        refreshToken: 'r',
+        accessTokenExpiresAt: DateTime.utc(2026),
+        idToken: 'i',
+      ),
+    );
     await store.clear();
     expect(await store.read(), isNull);
     expect(await const FlutterSecureStorage().readAll(), isEmpty);

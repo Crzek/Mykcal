@@ -164,9 +164,9 @@ async def app(settings, migrated, zitadel):
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE food, food_import, registration_failure, registration_throttle, "
-                "daily_target, weight_entry, user_profile, health_consent, invitation_code, "
-                "user_account "
+                "TRUNCATE diary_entry, food, food_import, registration_failure, "
+                "registration_throttle, daily_target, weight_entry, user_profile, health_consent, "
+                "invitation_code, user_account "
                 "RESTART IDENTITY CASCADE"
             )
         )
@@ -326,5 +326,115 @@ def make_food(app):
         async with app.state.sessionmaker() as s, s.begin():
             s.add(food)
         return food.id
+
+    return _make
+
+
+TARGET_DEFAULTS = {
+    "kcal": 2000,
+    "protein_g": 150,
+    "carbs_g": 200,
+    "fat_g": 56,
+    "fiber_g": 25,
+    "sodium_mg": 2300,
+    "potassium_mg": 3500,
+    "calcium_mg": 1000,
+    "iron_mg": 8,
+    "magnesium_mg": 400,
+    "vitamin_d_ug": 15,
+    "vitamin_c_mg": 90,
+}
+
+
+@pytest.fixture
+def make_target_version(app):
+    """Inserta una versión de `daily_target`. La nueva pasa a ser la vigente y cierra la anterior.
+
+    Para varias versiones, créalas en orden de `effective_from`.
+    """
+    from sqlalchemy import update
+
+    from mykcal.targets.models import DailyTarget
+
+    async def _make(account: UserAccount, effective_from: datetime, **values) -> uuid.UUID:
+        nutrients = {**TARGET_DEFAULTS, **values}
+        row = DailyTarget(
+            id=uuid.uuid4(),
+            user_id=account.id,
+            is_current=True,
+            effective_from=effective_from,
+            superseded_at=None,
+            source="calculated",
+            calc_weight_kg=80,
+            calc_age=30,
+            calc_sex="male",
+            calc_height_cm=180,
+            calc_activity="moderate",
+            calc_goal="maintain",
+            calculated_at=effective_from,
+            **nutrients,
+        )
+        async with app.state.sessionmaker() as s, s.begin():
+            await s.execute(
+                update(DailyTarget)
+                .where(DailyTarget.user_id == account.id, DailyTarget.is_current.is_(True))
+                .values(is_current=False, superseded_at=effective_from)
+            )
+            s.add(row)
+        return row.id
+
+    return _make
+
+
+@pytest.fixture
+def make_entry(app, make_food):
+    """Inserta una entrada del diario copiando el alimento (como hace el servicio)."""
+    from datetime import date as date_type
+
+    from sqlalchemy import select
+
+    from mykcal.diary.models import DiaryEntry
+    from mykcal.foods.models import Food
+    from mykcal.foods.nutrients import NUTRIENTS
+
+    async def _make(
+        account: UserAccount,
+        day: date_type,
+        meal: str = "breakfast",
+        food_id: uuid.UUID | None = None,
+        *,
+        quantity=100,
+        servings=None,
+        deleted_at: datetime | None = None,
+        created_at: datetime | None = None,
+        name: str = "Pan",
+        **per_100,
+    ) -> uuid.UUID:
+        if food_id is None:
+            food_id = await make_food(name, **per_100)
+        async with app.state.sessionmaker() as s:
+            food = (await s.execute(select(Food).where(Food.id == food_id))).scalar_one()
+        now = created_at or datetime.now(UTC)
+        entry = DiaryEntry(
+            id=uuid.uuid4(),
+            user_id=account.id,
+            entry_date=day,
+            meal=meal,
+            food_id=food.id,
+            food_kind=food.kind,
+            food_name=food.name,
+            food_brand=food.brand,
+            base_unit=food.base_unit,
+            serving_size=food.serving_size,
+            quantity=quantity,
+            servings=servings,
+            created_at=now,
+            updated_at=now,
+            deleted_at=deleted_at,
+            **{n: getattr(food, n) for n in NUTRIENTS},
+        )
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(entry)
+        return entry.id
 
     return _make

@@ -52,6 +52,19 @@ async def current_target(session: AsyncSession, user_id: uuid.UUID) -> DailyTarg
     return result.scalar_one_or_none()
 
 
+async def target_for_day(
+    session: AsyncSession, user_id: uuid.UUID, day_end_utc: datetime
+) -> DailyTarget | None:
+    """Versión del objetivo vigente al terminar un día (diario, research R3).
+
+    Usa el índice `ix_daily_target_user_effective`. Un usuario tiene unas pocas versiones.
+    """
+    from mykcal.diary.day import pick_target
+
+    rows = await session.execute(select(DailyTarget).where(DailyTarget.user_id == user_id))
+    return pick_target(rows.scalars().all(), day_end_utc)
+
+
 async def save_version(
     session: AsyncSession,
     user_id: uuid.UUID,

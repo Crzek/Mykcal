@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,6 +13,7 @@ class Me(BaseModel):
     is_admin: bool
     status: Literal["active", "disabled"]
     onboarding: Literal["consent", "profile", "done"]
+    registered_at: datetime
 
 
 class RegistrationRequest(BaseModel):

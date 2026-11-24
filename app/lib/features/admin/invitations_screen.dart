@@ -43,17 +43,20 @@ class InvitationsScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         data.displayCode!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .displaySmall
-                            ?.copyWith(letterSpacing: 2, fontFeatures: const []),
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
+                              letterSpacing: 2,
+                              fontFeatures: const [],
+                            ),
                       ),
                     ),
                     IconButton(
                       tooltip: l10n.invitationCopy,
                       icon: const Icon(Icons.copy),
                       onPressed: () async {
-                        await Clipboard.setData(ClipboardData(text: data.displayCode!));
+                        await Clipboard.setData(
+                          ClipboardData(text: data.displayCode!),
+                        );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.invitationCopied)),
@@ -65,13 +68,22 @@ class InvitationsScreen extends ConsumerWidget {
                 ),
               const SizedBox(height: 16),
               Text(
-                l10n.invitationSeats(data.activeAccounts, data.maxAccounts, data.freeSeats),
+                l10n.invitationSeats(
+                  data.activeAccounts,
+                  data.maxAccounts,
+                  data.freeSeats,
+                ),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 32),
               FilledButton(
-                onPressed: () => _confirmRotate(context, ref, hasCode: data.code != null),
-                child: Text(data.code == null ? l10n.invitationGenerate : l10n.invitationChange),
+                onPressed: () =>
+                    _confirmRotate(context, ref, hasCode: data.code != null),
+                child: Text(
+                  data.code == null
+                      ? l10n.invitationGenerate
+                      : l10n.invitationChange,
+                ),
               ),
             ],
           ),
@@ -80,7 +92,11 @@ class InvitationsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmRotate(BuildContext context, WidgetRef ref, {required bool hasCode}) async {
+  Future<void> _confirmRotate(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool hasCode,
+  }) async {
     final l10n = AppLocalizations.of(context);
     if (!hasCode) {
       await ref.read(invitationsControllerProvider.notifier).rotate();
@@ -104,6 +120,7 @@ class InvitationsScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (ok == true) await ref.read(invitationsControllerProvider.notifier).rotate();
+    if (ok == true)
+      await ref.read(invitationsControllerProvider.notifier).rotate();
   }
 }

@@ -67,14 +67,19 @@ class AppAuthService implements AuthService {
     this.projectId = const String.fromEnvironment('OIDC_PROJECT_ID'),
     this.orgId = const String.fromEnvironment('OIDC_ORG_ID'),
     this.redirectUrl = const String.fromEnvironment('OIDC_REDIRECT_URL'),
-    this.postLogoutRedirectUrl = const String.fromEnvironment('OIDC_LOGOUT_URL'),
-  })  : _appAuth = appAuth ?? const FlutterAppAuth(),
-        _dio = dio ??
-            Dio(BaseOptions(
-              connectTimeout: requestTimeout,
-              sendTimeout: requestTimeout,
-              receiveTimeout: requestTimeout,
-            ));
+    this.postLogoutRedirectUrl = const String.fromEnvironment(
+      'OIDC_LOGOUT_URL',
+    ),
+  }) : _appAuth = appAuth ?? const FlutterAppAuth(),
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: requestTimeout,
+               sendTimeout: requestTimeout,
+               receiveTimeout: requestTimeout,
+             ),
+           );
 
   /// Plazo de cada llamada a Zitadel: nunca esperan sin límite.
   static const requestTimeout = Duration(seconds: 10);
@@ -93,13 +98,13 @@ class AppAuthService implements AuthService {
   String? _revocationEndpoint;
 
   List<String> get _scopes => [
-        'openid',
-        'profile',
-        'email',
-        'offline_access',
-        if (orgId.isNotEmpty) 'urn:zitadel:iam:org:id:$orgId',
-        'urn:zitadel:iam:org:project:id:$projectId:aud',
-      ];
+    'openid',
+    'profile',
+    'email',
+    'offline_access',
+    if (orgId.isNotEmpty) 'urn:zitadel:iam:org:id:$orgId',
+    'urn:zitadel:iam:org:project:id:$projectId:aud',
+  ];
 
   /// Sin TLS hacia Zitadel no se abre el navegador.
   bool get configured =>
@@ -164,7 +169,8 @@ class AppAuthService implements AuthService {
         expiresAt: response.accessTokenExpirationDateTime,
       );
     } on FlutterAppAuthPlatformException catch (e) {
-      if (e.platformErrorDetails.error == 'invalid_grant') throw const RefreshRejected();
+      if (e.platformErrorDetails.error == 'invalid_grant')
+        throw const RefreshRejected();
       throw const RefreshFailed();
     } on PlatformException {
       throw const RefreshFailed();
@@ -174,7 +180,9 @@ class AppAuthService implements AuthService {
   @override
   Future<void> revoke(String token) async {
     if (!configured) return;
-    final endpoint = _revocationEndpoint ??= await _discover('revocation_endpoint');
+    final endpoint = _revocationEndpoint ??= await _discover(
+      'revocation_endpoint',
+    );
     await _dio.post<void>(
       endpoint,
       data: {'token': token, 'client_id': clientId},
@@ -195,8 +203,9 @@ class AppAuthService implements AuthService {
   }
 
   Future<String> _discover(String field) async {
-    final response =
-        await _dio.get<Map<String, dynamic>>('$issuer/.well-known/openid-configuration');
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$issuer/.well-known/openid-configuration',
+    );
     final value = response.data?[field];
     if (value is! String || !value.startsWith('https://')) {
       throw const AuthServiceUnavailable();

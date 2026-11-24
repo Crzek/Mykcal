@@ -8,6 +8,16 @@
 
 **Input**: User description: "004-diario-de-comidas: comidas fijas, entradas, resumen diario y edición de días pasados. Épica E5."
 
+## Clarifications
+
+### Session 2026-11-24
+
+- Q: Si el usuario añade un alimento que ya está en esa comida del mismo día, ¿se suman o quedan
+  entradas separadas? → A: Quedan dos entradas separadas, cada una con su cantidad.
+- Q: Si una entrada se registró en raciones, ¿en qué unidad se edita su cantidad? → A: En la
+  misma unidad del registro, con opción de cambiar a g/ml.
+- Q: ¿Cuánto dura la opción de deshacer tras borrar una entrada? → A: 10 segundos.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver el resumen del día (Priority: P1)
@@ -70,10 +80,13 @@ valor.
 
 1. **Given** una entrada, **When** el usuario cambia su cantidad, **Then** sus valores y los totales
    se recalculan.
-2. **Given** una entrada en "Comida", **When** la mueve a "Cena", **Then** cambia de comida y los
+2. **Given** una entrada registrada como 2 raciones de 30 g, **When** el usuario la edita, **Then**
+   el formulario muestra "2 raciones" y le deja cambiar a gramos; al guardar se conserva la unidad
+   elegida.
+3. **Given** una entrada en "Comida", **When** la mueve a "Cena", **Then** cambia de comida y los
    totales por comida se actualizan.
-3. **Given** una entrada, **When** la borra, **Then** desaparece y los totales se actualizan; la app
-   permite deshacer durante unos segundos.
+4. **Given** una entrada, **When** la borra, **Then** desaparece y los totales se actualizan; la app
+   permite deshacer durante 10 segundos.
 
 ---
 
@@ -111,8 +124,12 @@ no cambia.
 - **Cambio de día con la app abierta a medianoche**: al volver a la pantalla principal se muestra
   el día nuevo.
 - **Zona horaria**: el día se determina por la fecha local del móvil del usuario.
-- **Sin conexión**: se avisa y la cantidad que el usuario estaba escribiendo no se pierde.
-- **Cantidades muy grandes** (más de 5.000 g en una entrada): se pide confirmación.
+- **Sin conexión**: al añadir, editar o borrar se avisa y la cantidad que el usuario estaba
+  escribiendo no se pierde; el diario no cambia hasta que el servidor confirma.
+- **Mismo alimento dos veces en una comida**: se crean entradas separadas, cada una con su
+  cantidad y su copia de valores; nunca se fusionan.
+- **Cantidades muy grandes** (más de 5.000 g o ml en una entrada): se pide confirmación. Por
+  encima de 10.000 g o ml (o de 100 raciones) no se admite.
 
 ## Requirements *(mandatory)*
 
@@ -122,13 +139,14 @@ no cambia.
   picoteo, en ese orden.
 - **FR-002**: Los usuarios MUST poder añadir a una comida un alimento (genérico, envasado o
   personalizado) con una cantidad en gramos o mililitros, o en raciones cuando el alimento tenga
-  tamaño de ración.
+  tamaño de ración. La cantidad MUST ser mayor que 0 y no superar 10.000 g/ml ni 100 raciones.
 - **FR-003**: Los valores de cada entrada MUST calcularse a partir de los valores por 100 g/ml del
   alimento en la base y la cantidad, nunca introducirse a mano en la entrada.
 - **FR-004**: Cada entrada MUST guardar una copia de los valores nutricionales y el nombre del
   alimento en el momento de registrarla, de modo que cambios posteriores del alimento no la alteren.
-- **FR-005**: Los usuarios MUST poder editar la cantidad, mover una entrada a otra comida del mismo
-  día y borrarla, con opción de deshacer el borrado durante unos segundos.
+- **FR-005**: Los usuarios MUST poder editar la cantidad (en la unidad con que se registró la
+  entrada, g/ml o raciones, con opción de cambiar a g/ml), mover una entrada a otra comida del mismo
+  día y borrarla, con opción de deshacer el borrado durante 10 segundos.
 - **FR-006**: El resumen diario MUST mostrar, para calorías, proteína, carbohidratos y grasa:
   consumido, objetivo y restante (o exceso).
 - **FR-007**: El detalle del resumen MUST mostrar fibra y los 7 micros con consumido y objetivo;
@@ -170,5 +188,7 @@ no cambia.
 - El registro por foto se integra en la feature 006 y el registro rápido en la 005; aquí el
   alimento llega por búsqueda o código de barras (de 003).
 - El objetivo de un día pasado es el último objetivo vigente en esa fecha.
+- Si el usuario consulta un día en que aún no tenía objetivo (entre su alta y el primer objetivo
+  calculado), se compara con su primer objetivo.
 - No hay comidas personalizables ni horas de comida; solo las cinco fijas.
 - Las calorías del ejercicio no se suman al objetivo (fase posterior).

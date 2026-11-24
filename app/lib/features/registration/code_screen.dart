@@ -55,9 +55,12 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
       RegistrationProblem.invalid => l10n.errInvitationInvalid,
       RegistrationProblem.required => l10n.errInvitationRequired,
       RegistrationProblem.noSeats => l10n.errNoSeats,
-      RegistrationProblem.tooManyAttempts => waiting
-          ? l10n.errTooManyAttempts(_formatWait(reg.retryAfter!.difference(now)))
-          : null,
+      RegistrationProblem.tooManyAttempts =>
+        waiting
+            ? l10n.errTooManyAttempts(
+                _formatWait(reg.retryAfter!.difference(now)),
+              )
+            : null,
       RegistrationProblem.forbidden => l10n.errForbidden,
       RegistrationProblem.offline => l10n.offlineBanner,
       RegistrationProblem.server => l10n.errServer,
@@ -72,7 +75,10 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(l10n.codeIntro, style: Theme.of(context).textTheme.bodyLarge),
+              Text(
+                l10n.codeIntro,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               const SizedBox(height: 8),
               Text(l10n.codeHelp),
               const SizedBox(height: 4),
@@ -98,14 +104,18 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
                   liveRegion: true,
                   child: Text(
                     message,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
               ],
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: canSubmit
-                    ? () => ref.read(registrationControllerProvider.notifier).submit()
+                    ? () => ref
+                          .read(registrationControllerProvider.notifier)
+                          .submit()
                     : null,
                 child: reg.busy
                     ? const SizedBox(
@@ -117,7 +127,8 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+                onPressed: () =>
+                    ref.read(authControllerProvider.notifier).signOut(),
                 child: Text(l10n.signOut),
               ),
             ],

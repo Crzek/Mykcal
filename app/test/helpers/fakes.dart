@@ -12,6 +12,7 @@ import 'package:mykcal/core/auth/auth_service.dart';
 import 'package:mykcal/core/auth/session_store.dart';
 import 'package:mykcal/core/config/download_link.dart';
 import 'package:mykcal/core/theme/app_theme.dart';
+import 'package:mykcal/features/diary/diary_day_controller.dart';
 import 'package:mykcal/l10n/app_localizations.dart';
 
 final testNow = DateTime.utc(2026, 11, 22, 12);
@@ -182,6 +183,162 @@ TokenSet tokens({
   expiresAt: testNow.add(life),
 );
 
+class AddEntryCall {
+  const AddEntryCall({
+    required this.date,
+    required this.meal,
+    required this.foodId,
+    required this.utcOffsetMin,
+    this.quantity,
+    this.servings,
+  });
+
+  final DateTime date;
+  final Meal meal;
+  final String foodId;
+  final double? quantity;
+  final double? servings;
+  final int utcOffsetMin;
+}
+
+class UpdateEntryCall {
+  const UpdateEntryCall({
+    required this.id,
+    required this.utcOffsetMin,
+    this.meal,
+    this.quantity,
+    this.servings,
+  });
+
+  final String id;
+  final Meal? meal;
+  final double? quantity;
+  final double? servings;
+  final int utcOffsetMin;
+}
+
+/// Valores de una entrada o de un total, con los opcionales sin dato salvo que se pasen.
+Nutrients amounts({
+  double kcal = 0,
+  double proteinG = 0,
+  double carbsG = 0,
+  double fatG = 0,
+  double? fiberG,
+  double? sodiumMg,
+  double? potassiumMg,
+  double? calciumMg,
+  double? ironMg,
+  double? magnesiumMg,
+  double? vitaminDUg,
+  double? vitaminCMg,
+}) => Nutrients(
+  kcal: kcal,
+  proteinG: proteinG,
+  carbsG: carbsG,
+  fatG: fatG,
+  fiberG: fiberG,
+  sodiumMg: sodiumMg,
+  potassiumMg: potassiumMg,
+  calciumMg: calciumMg,
+  ironMg: ironMg,
+  magnesiumMg: magnesiumMg,
+  vitaminDUg: vitaminDUg,
+  vitaminCMg: vitaminCMg,
+);
+
+/// Entrada de ejemplo: 60 g de un pan de 250 kcal/100 g (150 kcal).
+DiaryEntry sampleEntry({
+  String id = 'e1',
+  Meal meal = Meal.breakfast,
+  String name = 'Pan integral',
+  String? brand,
+  double quantity = 60,
+  double? servings,
+  double? servingSize,
+  Nutrients? per100,
+  Nutrients? values,
+}) {
+  final base =
+      per100 ??
+      const Nutrients(kcal: 250, proteinG: 9, carbsG: 42, fatG: 3, fiberG: 7);
+  final factor = quantity / 100;
+  return DiaryEntry(
+    id: id,
+    meal: meal,
+    foodId: 'food-$id',
+    foodKind: FoodKind.generic,
+    foodName: name,
+    foodBrand: brand,
+    baseUnit: 'g',
+    servingSize: servingSize,
+    per100: base,
+    quantity: quantity,
+    servings: servings,
+    values:
+        values ??
+        amounts(
+          kcal: (base.kcal * factor).roundToDouble(),
+          proteinG: base.proteinG * factor,
+          carbsG: base.carbsG * factor,
+          fatG: base.fatG * factor,
+          fiberG: base.fiberG == null ? null : base.fiberG! * factor,
+        ),
+    incomplete: [if (base.fiberG == null) 'fiber_g'],
+  );
+}
+
+const _mealOrder = Meal.values;
+
+/// Día de ejemplo con el objetivo de [sampleValues] y las entradas repartidas por comida.
+/// Los totales se calculan con los valores de las entradas, sin redondear de más.
+DiaryDay sampleDay({
+  DateTime? date,
+  TargetValues target = sampleValues,
+  List<DiaryEntry> entries = const [],
+  List<String> incomplete = const [],
+}) {
+  double sum(double Function(Nutrients) f, Iterable<DiaryEntry> es) =>
+      es.fold(0.0, (a, e) => a + f(e.values));
+  NutrientTotals totalsOf(Iterable<DiaryEntry> es, List<String> inc) =>
+      NutrientTotals(
+        consumed: amounts(
+          kcal: sum((n) => n.kcal, es),
+          proteinG: sum((n) => n.proteinG, es),
+          carbsG: sum((n) => n.carbsG, es),
+          fatG: sum((n) => n.fatG, es),
+          fiberG: sum((n) => n.fiberG ?? 0, es),
+          sodiumMg: sum((n) => n.sodiumMg ?? 0, es),
+          potassiumMg: sum((n) => n.potassiumMg ?? 0, es),
+          calciumMg: sum((n) => n.calciumMg ?? 0, es),
+          ironMg: sum((n) => n.ironMg ?? 0, es),
+          magnesiumMg: sum((n) => n.magnesiumMg ?? 0, es),
+          vitaminDUg: sum((n) => n.vitaminDUg ?? 0, es),
+          vitaminCMg: sum((n) => n.vitaminCMg ?? 0, es),
+        ),
+        incomplete: inc,
+      );
+  final day = totalsOf(entries, incomplete);
+  final t = target.toJson();
+  final c = day.consumed.toJson();
+  return DiaryDay(
+    date: date ?? DateTime(2026, 11, 22),
+    target: target,
+    totals: day,
+    remaining: {
+      for (final k in t.keys)
+        k: (t[k] as int) - ((c[k] as num?)?.toDouble() ?? 0),
+    },
+    meals: [
+      for (final m in _mealOrder)
+        DiaryMeal(
+          meal: m,
+          entries: entries.where((e) => e.meal == m).toList(),
+          totals: totalsOf(entries.where((e) => e.meal == m), const []),
+        ),
+    ],
+  );
+}
+
 class FakeAuthService implements AuthService {
   TokenSet Function() onSignIn = tokens;
   Future<TokenSet> Function(String refreshToken)? onRefresh;
@@ -251,6 +408,27 @@ class FakeApi implements MykcalApi {
   onUpdateCustom = (_, _) async =>
       CustomFoodSaved(food: sampleFood(), warnings: const []);
   Future<void> Function(String id) onDeleteCustom = (_) async {};
+  Future<DiaryDay> Function(DateTime date, int offset) onDiaryDay = (
+    date,
+    _,
+  ) async => sampleDay(date: date);
+  Future<DiaryDay> Function(AddEntryCall call) onAddEntry = (call) async =>
+      sampleDay(date: call.date);
+  Future<DiaryDay> Function(UpdateEntryCall call) onUpdateEntry = (_) async =>
+      sampleDay();
+  Future<DiaryDay> Function(String id, int offset) onDeleteEntry = (
+    _,
+    _,
+  ) async => sampleDay();
+  Future<DiaryDay> Function(String id, int offset) onRestoreEntry = (
+    _,
+    _,
+  ) async => sampleDay();
+  final diaryRequests = <(DateTime, int)>[];
+  final addedEntries = <AddEntryCall>[];
+  final updatedEntries = <UpdateEntryCall>[];
+  final deletedEntries = <String>[];
+  final restoredEntries = <String>[];
   final searchQueries = <String>[];
   final barcodeCodes = <String>[];
   final createdFoods = <CustomFoodInput>[];
@@ -322,6 +500,64 @@ class FakeApi implements MykcalApi {
   Future<Food> food(String id) => onFood(id);
 
   @override
+  Future<DiaryDay> diaryDay(DateTime date, int utcOffsetMin) {
+    diaryRequests.add((date, utcOffsetMin));
+    return onDiaryDay(date, utcOffsetMin);
+  }
+
+  @override
+  Future<DiaryDay> addEntry({
+    required DateTime date,
+    required Meal meal,
+    required String foodId,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  }) {
+    final call = AddEntryCall(
+      date: date,
+      meal: meal,
+      foodId: foodId,
+      quantity: quantity,
+      servings: servings,
+      utcOffsetMin: utcOffsetMin,
+    );
+    addedEntries.add(call);
+    return onAddEntry(call);
+  }
+
+  @override
+  Future<DiaryDay> updateEntry(
+    String id, {
+    Meal? meal,
+    double? quantity,
+    double? servings,
+    required int utcOffsetMin,
+  }) {
+    final call = UpdateEntryCall(
+      id: id,
+      meal: meal,
+      quantity: quantity,
+      servings: servings,
+      utcOffsetMin: utcOffsetMin,
+    );
+    updatedEntries.add(call);
+    return onUpdateEntry(call);
+  }
+
+  @override
+  Future<DiaryDay> deleteEntry(String id, int utcOffsetMin) {
+    deletedEntries.add(id);
+    return onDeleteEntry(id, utcOffsetMin);
+  }
+
+  @override
+  Future<DiaryDay> restoreEntry(String id, int utcOffsetMin) {
+    restoredEntries.add(id);
+    return onRestoreEntry(id, utcOffsetMin);
+  }
+
+  @override
   Future<BarcodeLookup> lookupBarcode(String code) {
     barcodeCodes.add(code);
     return onBarcode(code);
@@ -389,10 +625,14 @@ class Harness {
   final FakeApi api;
   Duration signOutDeadline = const Duration(seconds: 5);
 
+  /// «Ahora» del diario; las pruebas lo cambian para simular el paso de la medianoche.
+  DateTime diaryNow = testNow;
+
   List<Override> get overrides => [
     authServiceProvider.overrideWithValue(auth),
     mykcalApiProvider.overrideWithValue(api),
     authClockProvider.overrideWithValue(() => testNow),
+    diaryNowProvider.overrideWithValue(() => diaryNow),
     signOutDeadlineProvider.overrideWithValue(signOutDeadline),
     downloadLinkProvider.overrideWithValue(
       'https://mykcal-bk-api.cruzerick.com/descargar/mykcal.apk',

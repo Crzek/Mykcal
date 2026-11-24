@@ -7,7 +7,15 @@ import '../../core/auth/auth_controller.dart';
 /// caducar la sesión (FR-015, caso límite).
 final registrationDraftProvider = StateProvider<String>((ref) => '');
 
-enum RegistrationProblem { invalid, required, noSeats, tooManyAttempts, forbidden, offline, server }
+enum RegistrationProblem {
+  invalid,
+  required,
+  noSeats,
+  tooManyAttempts,
+  forbidden,
+  offline,
+  server,
+}
 
 class RegistrationState {
   const RegistrationState({this.busy = false, this.problem, this.retryAfter});
@@ -31,15 +39,21 @@ class RegistrationController extends Notifier<RegistrationState> {
       state = const RegistrationState();
     } on ApiError catch (e) {
       state = switch (e.code) {
-        'INVITATION_INVALID' => const RegistrationState(problem: RegistrationProblem.invalid),
-        'INVITATION_REQUIRED' => const RegistrationState(problem: RegistrationProblem.required),
-        'NO_SEATS' => const RegistrationState(problem: RegistrationProblem.noSeats),
+        'INVITATION_INVALID' => const RegistrationState(
+          problem: RegistrationProblem.invalid,
+        ),
+        'INVITATION_REQUIRED' => const RegistrationState(
+          problem: RegistrationProblem.required,
+        ),
+        'NO_SEATS' => const RegistrationState(
+          problem: RegistrationProblem.noSeats,
+        ),
         'TOO_MANY_ATTEMPTS' => RegistrationState(
-            problem: RegistrationProblem.tooManyAttempts,
-            retryAfter: ref
-                .read(authClockProvider)()
-                .add(Duration(seconds: e.retryAfterSeconds ?? 30)),
-          ),
+          problem: RegistrationProblem.tooManyAttempts,
+          retryAfter: ref
+              .read(authClockProvider)()
+              .add(Duration(seconds: e.retryAfterSeconds ?? 30)),
+        ),
         _ => const RegistrationState(problem: RegistrationProblem.forbidden),
       };
     } on NetworkFailure {
@@ -54,4 +68,6 @@ class RegistrationController extends Notifier<RegistrationState> {
 }
 
 final registrationControllerProvider =
-    NotifierProvider<RegistrationController, RegistrationState>(RegistrationController.new);
+    NotifierProvider<RegistrationController, RegistrationState>(
+      RegistrationController.new,
+    );
