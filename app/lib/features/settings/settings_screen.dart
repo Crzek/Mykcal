@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../profile/profile_screen.dart';
 import '../target/target_screen.dart';
+import 'data_sources_screen.dart';
 import 'deactivate_dialog.dart';
 
 /// Ajustes: perfil, objetivo y baja (pantalla 6 de contracts/ui-flows.md).
@@ -35,6 +36,16 @@ class SettingsScreen extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const TargetScreen()),
+              ),
+            ),
+            ListTile(
+              minTileHeight: 56,
+              title: Text(l10n.settingsSources),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DataSourcesScreen(),
+                ),
               ),
             ),
             const Divider(height: 32),

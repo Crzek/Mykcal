@@ -18,6 +18,13 @@ abstract class MykcalApi {
   Future<DailyTarget> saveTarget(TargetValues values);
   Future<DailyTarget> recalculateTarget();
   Future<void> deactivate();
+  Future<List<FoodSummary>> searchFoods(String query);
+  Future<Food> food(String id);
+  Future<BarcodeLookup> lookupBarcode(String code);
+  Future<List<FoodSummary>> customFoods();
+  Future<CustomFoodSaved> createCustomFood(CustomFoodInput input);
+  Future<CustomFoodSaved> updateCustomFood(String id, CustomFoodInput input);
+  Future<void> deleteCustomFood(String id);
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -105,10 +112,53 @@ class HttpMykcalApi implements MykcalApi {
     await _json('POST', '/v1/me/deactivation');
   }
 
+  @override
+  Future<List<FoodSummary>> searchFoods(String query) async =>
+      _foodList(await _json('GET', '/v1/foods/search', query: {'q': query}));
+
+  @override
+  Future<Food> food(String id) async =>
+      Food.fromJson(await _json('GET', '/v1/foods/$id'));
+
+  @override
+  Future<BarcodeLookup> lookupBarcode(String code) async =>
+      BarcodeLookup.fromJson(
+        await _json('GET', '/v1/foods/barcode', query: {'code': code}),
+      );
+
+  @override
+  Future<List<FoodSummary>> customFoods() async =>
+      _foodList(await _json('GET', '/v1/foods/custom'));
+
+  @override
+  Future<CustomFoodSaved> createCustomFood(CustomFoodInput input) async =>
+      CustomFoodSaved.fromJson(
+        await _json('POST', '/v1/foods/custom', data: input.toJson()),
+      );
+
+  @override
+  Future<CustomFoodSaved> updateCustomFood(
+    String id,
+    CustomFoodInput input,
+  ) async => CustomFoodSaved.fromJson(
+    await _json('PUT', '/v1/foods/custom/$id', data: input.toJson()),
+  );
+
+  @override
+  Future<void> deleteCustomFood(String id) async {
+    await _json('DELETE', '/v1/foods/custom/$id');
+  }
+
+  List<FoodSummary> _foodList(Map<String, dynamic> json) =>
+      (json['items'] as List<dynamic>)
+          .map((e) => FoodSummary.fromJson(e as Map<String, dynamic>))
+          .toList();
+
   Future<Map<String, dynamic>> _json(
     String method,
     String path, {
     Object? data,
+    Map<String, dynamic>? query,
   }) async {
     var token = await accessToken();
     if (token == null) throw const SessionExpired();
@@ -117,6 +167,7 @@ class HttpMykcalApi implements MykcalApi {
         final response = await dio.request<Map<String, dynamic>>(
           path,
           data: data,
+          queryParameters: query,
           options: Options(
             method: method,
             headers: {'Authorization': 'Bearer $token'},

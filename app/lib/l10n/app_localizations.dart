@@ -933,6 +933,546 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo dar de baja la cuenta. Inténtalo de nuevo.'**
   String get errDeactivate;
+
+  /// No description provided for @foodNoData.
+  ///
+  /// In es, this message translates to:
+  /// **'sin dato'**
+  String get foodNoData;
+
+  /// No description provided for @foodPer100g.
+  ///
+  /// In es, this message translates to:
+  /// **'Por 100 g'**
+  String get foodPer100g;
+
+  /// No description provided for @foodPer100ml.
+  ///
+  /// In es, this message translates to:
+  /// **'Por 100 ml'**
+  String get foodPer100ml;
+
+  /// No description provided for @foodMicrosTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Micronutrientes'**
+  String get foodMicrosTitle;
+
+  /// No description provided for @homeFoods.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimentos'**
+  String get homeFoods;
+
+  /// No description provided for @foodsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimentos'**
+  String get foodsTitle;
+
+  /// No description provided for @foodsScan.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear código de barras'**
+  String get foodsScan;
+
+  /// No description provided for @foodsSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca un alimento'**
+  String get foodsSearchHint;
+
+  /// No description provided for @foodsSearchClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar búsqueda'**
+  String get foodsSearchClear;
+
+  /// No description provided for @foodsMinChars.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe al menos 2 letras'**
+  String get foodsMinChars;
+
+  /// No description provided for @foodsSearching.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando…'**
+  String get foodsSearching;
+
+  /// No description provided for @foodsNoResults.
+  ///
+  /// In es, this message translates to:
+  /// **'No hemos encontrado “{q}”.'**
+  String foodsNoResults(String q);
+
+  /// No description provided for @foodsCreateNamed.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear alimento “{q}”'**
+  String foodsCreateNamed(String q);
+
+  /// No description provided for @foodsSectionMine.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis alimentos'**
+  String get foodsSectionMine;
+
+  /// No description provided for @foodsSectionGeneric.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimentos'**
+  String get foodsSectionGeneric;
+
+  /// No description provided for @foodsSectionPackaged.
+  ///
+  /// In es, this message translates to:
+  /// **'Productos envasados'**
+  String get foodsSectionPackaged;
+
+  /// No description provided for @foodsMineBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Mío'**
+  String get foodsMineBadge;
+
+  /// No description provided for @foodsMyFoods.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis alimentos'**
+  String get foodsMyFoods;
+
+  /// No description provided for @foodsOffline.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión. Inténtalo de nuevo.'**
+  String get foodsOffline;
+
+  /// No description provided for @foodsRowKcalG.
+  ///
+  /// In es, this message translates to:
+  /// **'{kcal} kilocalorías por 100 gramos'**
+  String foodsRowKcalG(String kcal);
+
+  /// No description provided for @foodsRowKcalMl.
+  ///
+  /// In es, this message translates to:
+  /// **'{kcal} kilocalorías por 100 mililitros'**
+  String foodsRowKcalMl(String kcal);
+
+  /// No description provided for @foodsRowMineSemantics.
+  ///
+  /// In es, this message translates to:
+  /// **'tuyo'**
+  String get foodsRowMineSemantics;
+
+  /// No description provided for @foodDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimento'**
+  String get foodDetailTitle;
+
+  /// No description provided for @foodSourceGeneric.
+  ///
+  /// In es, this message translates to:
+  /// **'Genérico · CIQUAL'**
+  String get foodSourceGeneric;
+
+  /// No description provided for @foodSourcePackaged.
+  ///
+  /// In es, this message translates to:
+  /// **'Envasado · Open Food Facts'**
+  String get foodSourcePackaged;
+
+  /// No description provided for @foodSourceCustom.
+  ///
+  /// In es, this message translates to:
+  /// **'Tuyo'**
+  String get foodSourceCustom;
+
+  /// No description provided for @foodBrand.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca: {brand}'**
+  String foodBrand(String brand);
+
+  /// No description provided for @foodBarcode.
+  ///
+  /// In es, this message translates to:
+  /// **'Código: {code}'**
+  String foodBarcode(String code);
+
+  /// No description provided for @foodServing.
+  ///
+  /// In es, this message translates to:
+  /// **'Ración del envase: {amount}'**
+  String foodServing(String amount);
+
+  /// No description provided for @foodMissingNotice.
+  ///
+  /// In es, this message translates to:
+  /// **'Los nutrientes sin dato cuentan como 0 en los totales.'**
+  String get foodMissingNotice;
+
+  /// No description provided for @foodStaleNotice.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de una copia de más de 30 días.'**
+  String get foodStaleNotice;
+
+  /// No description provided for @foodEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar alimento'**
+  String get foodEdit;
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear'**
+  String get scanTitle;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Apunta al código de barras del envase'**
+  String get scanHint;
+
+  /// No description provided for @scanManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Introducir el código a mano'**
+  String get scanManual;
+
+  /// No description provided for @scanTorch.
+  ///
+  /// In es, this message translates to:
+  /// **'Linterna'**
+  String get scanTorch;
+
+  /// No description provided for @scanManualLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de barras (8 a 14 cifras)'**
+  String get scanManualLabel;
+
+  /// No description provided for @scanManualInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa el código: no es válido'**
+  String get scanManualInvalid;
+
+  /// No description provided for @scanManualSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get scanManualSearch;
+
+  /// No description provided for @scanLooking.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando producto…'**
+  String get scanLooking;
+
+  /// No description provided for @scanNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No conocemos este producto.'**
+  String get scanNotFound;
+
+  /// No description provided for @scanIncomplete.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} no tiene información nutricional suficiente.'**
+  String scanIncomplete(String name);
+
+  /// No description provided for @scanIncompleteNoName.
+  ///
+  /// In es, this message translates to:
+  /// **'Este producto no tiene información nutricional suficiente.'**
+  String get scanIncompleteNoName;
+
+  /// No description provided for @scanCreateWithCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear alimento con este código'**
+  String get scanCreateWithCode;
+
+  /// No description provided for @scanSourceDown.
+  ///
+  /// In es, this message translates to:
+  /// **'No hemos podido consultar la base de productos.'**
+  String get scanSourceDown;
+
+  /// No description provided for @scanCreateFood.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear alimento'**
+  String get scanCreateFood;
+
+  /// No description provided for @scanPermissionBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Mykcal usa la cámara solo para leer códigos de barras. No guarda fotos.'**
+  String get scanPermissionBody;
+
+  /// No description provided for @scanPermissionAllow.
+  ///
+  /// In es, this message translates to:
+  /// **'Permitir cámara'**
+  String get scanPermissionAllow;
+
+  /// No description provided for @scanPermissionSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes activarlo en Ajustes del sistema → Aplicaciones → Mykcal → Permisos.'**
+  String get scanPermissionSettings;
+
+  /// No description provided for @scanUnsupported.
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede usar la cámara en este dispositivo.'**
+  String get scanUnsupported;
+
+  /// No description provided for @formNewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo alimento'**
+  String get formNewTitle;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get fieldName;
+
+  /// No description provided for @fieldBrand.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca'**
+  String get fieldBrand;
+
+  /// No description provided for @fieldBarcode.
+  ///
+  /// In es, this message translates to:
+  /// **'Código'**
+  String get fieldBarcode;
+
+  /// No description provided for @fieldUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'Unidad'**
+  String get fieldUnit;
+
+  /// No description provided for @unitGrams.
+  ///
+  /// In es, this message translates to:
+  /// **'Gramos'**
+  String get unitGrams;
+
+  /// No description provided for @unitMl.
+  ///
+  /// In es, this message translates to:
+  /// **'Mililitros'**
+  String get unitMl;
+
+  /// No description provided for @fieldBasis.
+  ///
+  /// In es, this message translates to:
+  /// **'Valores'**
+  String get fieldBasis;
+
+  /// No description provided for @basisPer100g.
+  ///
+  /// In es, this message translates to:
+  /// **'Por 100 g'**
+  String get basisPer100g;
+
+  /// No description provided for @basisPer100ml.
+  ///
+  /// In es, this message translates to:
+  /// **'Por 100 ml'**
+  String get basisPer100ml;
+
+  /// No description provided for @basisPerServing.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ración'**
+  String get basisPerServing;
+
+  /// No description provided for @fieldServing.
+  ///
+  /// In es, this message translates to:
+  /// **'Ración'**
+  String get fieldServing;
+
+  /// No description provided for @formMicrosExpand.
+  ///
+  /// In es, this message translates to:
+  /// **'Fibra y micronutrientes (opcional)'**
+  String get formMicrosExpand;
+
+  /// No description provided for @formSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get formSave;
+
+  /// No description provided for @errNegative.
+  ///
+  /// In es, this message translates to:
+  /// **'No puede ser negativo'**
+  String get errNegative;
+
+  /// No description provided for @errNotNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un número'**
+  String get errNotNumber;
+
+  /// No description provided for @errTooHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Como máximo {max} {unit} por 100 {base}'**
+  String errTooHigh(String max, String unit, String base);
+
+  /// No description provided for @errMassSum.
+  ///
+  /// In es, this message translates to:
+  /// **'Proteína, carbohidratos, grasa y fibra suman más de 100 {base} por 100 {base}'**
+  String errMassSum(String base);
+
+  /// No description provided for @errServingRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica cuántos {unitWord} tiene la ración'**
+  String errServingRequired(String unitWord);
+
+  /// No description provided for @errBarcodeInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa el código: no es válido'**
+  String get errBarcodeInvalid;
+
+  /// No description provided for @errBarcodeTaken.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes un alimento con este código'**
+  String get errBarcodeTaken;
+
+  /// No description provided for @errNameTooLong.
+  ///
+  /// In es, this message translates to:
+  /// **'Como máximo 120 caracteres'**
+  String get errNameTooLong;
+
+  /// No description provided for @errBrandTooLong.
+  ///
+  /// In es, this message translates to:
+  /// **'Como máximo 80 caracteres'**
+  String get errBrandTooLong;
+
+  /// No description provided for @kcalMismatchWarning.
+  ///
+  /// In es, this message translates to:
+  /// **'Las kcal no cuadran con los macros (calculadas: {n} kcal)'**
+  String kcalMismatchWarning(String n);
+
+  /// No description provided for @equivalentPer100.
+  ///
+  /// In es, this message translates to:
+  /// **'= {value} {unit} por 100 {base}'**
+  String equivalentPer100(String value, String unit, String base);
+
+  /// No description provided for @discardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar los cambios?'**
+  String get discardTitle;
+
+  /// No description provided for @discardConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get discardConfirm;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguir editando'**
+  String get keepEditing;
+
+  /// No description provided for @myFoodsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has creado alimentos.'**
+  String get myFoodsEmpty;
+
+  /// No description provided for @myFoodsDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get myFoodsDelete;
+
+  /// No description provided for @myFoodsEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
+  String get myFoodsEdit;
+
+  /// No description provided for @myFoodsMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Más opciones de {name}'**
+  String myFoodsMore(String name);
+
+  /// No description provided for @myFoodsDeleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar “{name}”? Las comidas ya registradas no cambian.'**
+  String myFoodsDeleteConfirm(String name);
+
+  /// No description provided for @foodCreate.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear alimento'**
+  String get foodCreate;
+
+  /// No description provided for @errInvalidValue.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor no válido'**
+  String get errInvalidValue;
+
+  /// No description provided for @settingsSources.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuentes de datos'**
+  String get settingsSources;
+
+  /// No description provided for @sourcesGenericTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alimentos genéricos'**
+  String get sourcesGenericTitle;
+
+  /// No description provided for @sourcesGeneric.
+  ///
+  /// In es, this message translates to:
+  /// **'Anses, Table de composition nutritionnelle des aliments Ciqual, edición {edition}. Licencia CC BY 4.0. Nombres traducidos y selección por Mykcal.'**
+  String sourcesGeneric(String edition);
+
+  /// No description provided for @sourcesPackagedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Productos envasados'**
+  String get sourcesPackagedTitle;
+
+  /// No description provided for @sourcesPackaged.
+  ///
+  /// In es, this message translates to:
+  /// **'Open Food Facts, disponible bajo la Open Database License (ODbL).'**
+  String get sourcesPackaged;
 }
 
 class _AppLocalizationsDelegate

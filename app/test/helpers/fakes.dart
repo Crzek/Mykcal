@@ -113,6 +113,64 @@ ProfileSaved savedProfile({
   proposed: proposed,
 );
 
+/// Plátano genérico con la vitamina D sin dato (FR-016).
+Food sampleFood({
+  String id = 'food-1',
+  String name = 'Plátano, crudo',
+  FoodKind kind = FoodKind.generic,
+  bool isMine = false,
+  double? servingSize,
+  String baseUnit = 'g',
+  String? brand,
+  String? barcode,
+  Nutrients per100 = const Nutrients(
+    kcal: 90,
+    proteinG: 1.1,
+    carbsG: 19.7,
+    fatG: 0.3,
+    fiberG: 2,
+    sodiumMg: 1,
+    potassiumMg: 358,
+    calciumMg: 5,
+    ironMg: 0.3,
+    magnesiumMg: 27,
+    vitaminCMg: 8.7,
+  ),
+}) => Food(
+  id: id,
+  kind: kind,
+  name: name,
+  brand: brand,
+  barcode: barcode,
+  baseUnit: baseUnit,
+  per100: per100,
+  servingSize: servingSize,
+  isMine: isMine,
+  source: switch (kind) {
+    FoodKind.generic => 'ciqual',
+    FoodKind.packaged => 'off',
+    FoodKind.custom => 'user',
+  },
+);
+
+FoodSummary sampleSummary({
+  String id = 'food-1',
+  String name = 'Plátano, crudo',
+  FoodKind kind = FoodKind.generic,
+  bool isMine = false,
+  double kcal = 90,
+  String? brand,
+  String baseUnit = 'g',
+}) => FoodSummary(
+  id: id,
+  kind: kind,
+  name: name,
+  brand: brand,
+  baseUnit: baseUnit,
+  kcal: kcal,
+  isMine: isMine,
+);
+
 TokenSet tokens({
   String access = 'access-1',
   String? refresh = 'refresh-1',
@@ -176,6 +234,28 @@ class FakeApi implements MykcalApi {
       sampleTarget(values: v, manual: true);
   Future<DailyTarget> Function() onRecalculate = () async => sampleTarget();
   Future<void> Function() onDeactivate = () async {};
+  Future<List<FoodSummary>> Function(String query) onSearchFoods = (_) async =>
+      const [];
+  Future<Food> Function(String id) onFood = (_) async => sampleFood();
+  Future<BarcodeLookup> Function(String code) onBarcode = (code) async =>
+      BarcodeLookup(
+        result: BarcodeResult.found,
+        code: code,
+        food: sampleFood(),
+      );
+  Future<List<FoodSummary>> Function() onCustomFoods = () async => const [];
+  Future<CustomFoodSaved> Function(CustomFoodInput input) onCreateCustom = (
+    _,
+  ) async => CustomFoodSaved(food: sampleFood(), warnings: const []);
+  Future<CustomFoodSaved> Function(String id, CustomFoodInput input)
+  onUpdateCustom = (_, _) async =>
+      CustomFoodSaved(food: sampleFood(), warnings: const []);
+  Future<void> Function(String id) onDeleteCustom = (_) async {};
+  final searchQueries = <String>[];
+  final barcodeCodes = <String>[];
+  final createdFoods = <CustomFoodInput>[];
+  final updatedFoods = <String, CustomFoodInput>{};
+  final deletedFoods = <String>[];
   final registerCodes = <String>[];
   final consentVersions = <String>[];
   final savedProfiles = <ProfileInput>[];
@@ -230,6 +310,42 @@ class FakeApi implements MykcalApi {
   Future<void> deactivate() {
     deactivateCalls++;
     return onDeactivate();
+  }
+
+  @override
+  Future<List<FoodSummary>> searchFoods(String query) {
+    searchQueries.add(query);
+    return onSearchFoods(query);
+  }
+
+  @override
+  Future<Food> food(String id) => onFood(id);
+
+  @override
+  Future<BarcodeLookup> lookupBarcode(String code) {
+    barcodeCodes.add(code);
+    return onBarcode(code);
+  }
+
+  @override
+  Future<List<FoodSummary>> customFoods() => onCustomFoods();
+
+  @override
+  Future<CustomFoodSaved> createCustomFood(CustomFoodInput input) {
+    createdFoods.add(input);
+    return onCreateCustom(input);
+  }
+
+  @override
+  Future<CustomFoodSaved> updateCustomFood(String id, CustomFoodInput input) {
+    updatedFoods[id] = input;
+    return onUpdateCustom(id, input);
+  }
+
+  @override
+  Future<void> deleteCustomFood(String id) {
+    deletedFoods.add(id);
+    return onDeleteCustom(id);
   }
 
   @override
@@ -291,15 +407,17 @@ class Harness {
 
   /// Pinta una pantalla suelta con los mismos proveedores, tema y textos que la app.
   Future<void> pumpScreen(WidgetTester tester, Widget home) async {
-    await tester.pumpWidget(ProviderScope(
-      overrides: overrides,
-      child: MaterialApp(
-        theme: AppTheme.light(),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: home,
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: home,
+        ),
       ),
-    ));
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }

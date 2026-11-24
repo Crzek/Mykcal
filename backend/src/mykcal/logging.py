@@ -31,6 +31,15 @@ ALLOWED_FIELDS = frozenset(
         "where",
         "fields",
         "source",
+        # 003: alimentos. Nunca la consulta, el código de barras ni valores nutricionales.
+        "result",
+        "result_count",
+        "sha256",
+        "edition",
+        "rows",
+        "rows_upserted",
+        "rows_archived",
+        "food_id",
     }
 )
 
@@ -41,6 +50,10 @@ def _allowlist(_logger: Any, _name: str, event_dict: dict[str, Any]) -> dict[str
 
 def configure_logging() -> None:
     logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO, force=True)
+    # httpx registra la URL completa de cada petición: con Open Food Facts incluiría el código
+    # de barras que consulta una persona (principio X, research R15).
+    for noisy in ("httpx", "httpcore"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,

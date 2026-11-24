@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     apk_dir: str = "/data/apk"
     migration_timeout_s: int = Field(default=120, ge=5, le=900)
     run_migrations: str = "1"
+    off_base_url: str = "https://world.openfoodfacts.org"
+    off_user_agent: str = "Mykcal/0.3 (app privada)"
+    off_timeout_s: float = Field(default=5.0, ge=1, le=30)
+
+    @field_validator("off_base_url")
+    @classmethod
+    def _off_url(cls, v: str) -> str:
+        if not v.startswith("https://"):
+            raise ValueError("OFF_BASE_URL debe empezar por https://")
+        return v.rstrip("/")
 
     @field_validator("oidc_issuer")
     @classmethod

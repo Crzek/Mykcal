@@ -1,6 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.1 → 1.2.0 (MINOR: se redefine el modelo de entornos; no se elimina ni
+- Version change: 1.2.0 → 1.2.1 (PATCH: aclaración de una restricción técnica; no cambia ningún
+  principio)
+- Cambios en 1.2.1:
+  - Restricciones técnicas → Alimentos: la base genérica pasa de «BEDCA, licencia a verificar» a
+    «CIQUAL (Anses) traducida al español»: decisión de Erick en la 003, porque CIQUAL se publica
+    con licencia abierta (CC BY 4.0 en la edición 2025; Licence Ouverte en las anteriores) y
+    ficheros descargables, y BEDCA no
+  - Se añade la obligación de citar la fuente en la app (pantalla «Fuentes de datos»)
+- Principios añadidos o eliminados: ninguno
+- Plantillas: no se modifican (leen la constitución en tiempo de ejecución)
+- Historial 1.2.0 — Version change: 1.1.1 → 1.2.0 (MINOR: se redefine el modelo de entornos; no se elimina ni
   renombra ningún principio)
 - Cambios en 1.2.0:
   - Solo existe un entorno desplegado: producción (`main`). Se elimina el entorno de desarrollo
@@ -145,8 +155,9 @@ exponer claves ni fotos.
   posible con el código de invitación vigente: el usuario puede existir en Zitadel sin él, pero
   sin cuenta de Mykcal ninguna función opera.
 - **IA**: Google Gemini como único proveedor en el MVP; cada usuario aporta su propia clave.
-- **Alimentos**: base genérica (BEDCA, licencia a verificar) importada en PostgreSQL; productos
-  envasados desde Open Food Facts por código de barras, con caché local.
+- **Alimentos**: base genérica CIQUAL (Anses, licencia abierta) traducida al español e importada
+  en PostgreSQL, con la fuente citada en la app; productos envasados desde Open Food Facts por
+  código de barras, con caché local.
 - **Datos**: baja = desactivar la cuenta, sin borrado; sin copias de seguridad (riesgos
   aceptados por Erick y documentados en el brief).
 
@@ -183,4 +194,4 @@ exponer claves ni fotos.
 - Cada plan y cada revisión de código MUST comprobar el cumplimiento; las excepciones se
   justifican por escrito en el plan.
 
-**Version**: 1.2.0 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-23
+**Version**: 1.2.1 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-24
