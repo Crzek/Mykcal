@@ -105,8 +105,8 @@ No hay tareas bloqueantes comunes. Cada historia empieza directamente tras el Se
 - [X] T019 [P] En `backend/`, ejecutar `uv run ruff check`, `uv run ruff format --check` y `uv run pytest` (incluido `-m privacy`; la lista de rutas públicas no cambia)
 - [X] T020 [P] En `app/`, ejecutar `flutter analyze` y `flutter test` y corregir los avisos
 - [X] T021 Actualizar `specs/001-acceso-y-despliegue/contracts/ui-flows.md`: añadir la entrada «Compartir Mykcal» al menú de inicio y el cambio de la pantalla del código, con enlace a `specs/008-compartir-app-y-alta-admin/contracts/ui-flows.md`
-- [ ] T022 Compilar con `app/scripts/build_apk.sh prod`, instalar en el móvil con `adb install -r` y recorrer los escenarios 1–9 de `specs/008-compartir-app-y-alta-admin/quickstart.md`, anotando el resultado en el PR
-- [ ] T023 Cuando el PR #3 (001 → `dev`) esté fusionado, abrir el PR de `008-compartir-app-y-alta-admin` → `dev`
+- [ ] T022 Compilar con `app/scripts/build_apk.sh prod`, instalar en el móvil con `adb install -r` y recorrer los escenarios 1–9 de `specs/008-compartir-app-y-alta-admin/quickstart.md`, anotando el resultado en el PR. **Pendiente**: APK compilado (`app-prod-release.apk`, 53.4 MB) desde `008` el 2026-11-25; falta instalarlo y recorrer los escenarios con el móvil conectado
+- [X] T023 Cuando el PR #3 (001 → `dev`) esté fusionado, abrir el PR de `008-compartir-app-y-alta-admin` → `dev`. **Hecho sin PR nuevo**: el PR #3 está fusionado y el commit `287f6c2` de la 008 ya está en `origin/dev` (PRs #4 y #5)
 
 ---
 
