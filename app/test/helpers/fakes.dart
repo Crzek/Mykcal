@@ -508,6 +508,34 @@ class FakeApi implements MykcalApi {
     _,
     _,
   ) async => sampleDay();
+  Future<List<WeightEntry>> Function() onWeightEntries = () async => const [];
+  Future<WeightEntry> Function(DateTime day, double kg) onSaveWeight = (
+    day,
+    kg,
+  ) async => WeightEntry(measuredOn: day, weightKg: kg);
+  Future<WeightEntry> Function(DateTime day, double kg) onUpdateWeight = (
+    day,
+    kg,
+  ) async => WeightEntry(measuredOn: day, weightKg: kg);
+  Future<void> Function(DateTime day) onDeleteWeight = (_) async {};
+  Future<WeightChart> Function(String period) onWeightChart = (period) async =>
+      WeightChart(
+        period: period,
+        points: const [],
+        summary: const WeightChartSummary(count: 0),
+      );
+  Future<RecalcProposal> Function() onRecalcProposal = () async =>
+      const RecalcProposal(pending: false);
+  Future<DailyTarget> Function() onAcceptRecalc = () async => sampleTarget();
+  Future<void> Function() onIgnoreRecalc = () async {};
+  final savedWeights = <(DateTime, double)>[];
+  final updatedWeights = <(DateTime, double)>[];
+  final deletedWeights = <DateTime>[];
+  final chartPeriods = <String>[];
+  final weightOffsets = <int>[];
+  int recalcChecks = 0;
+  int acceptRecalcCalls = 0;
+  int ignoreRecalcCalls = 0;
   final diaryRequests = <(DateTime, int)>[];
   final addedEntries = <AddEntryCall>[];
   final updatedEntries = <UpdateEntryCall>[];
@@ -525,6 +553,52 @@ class FakeApi implements MykcalApi {
   int recalculateCalls = 0;
   int deactivateCalls = 0;
   int meCalls = 0;
+
+  @override
+  Future<List<WeightEntry>> weightEntries() => onWeightEntries();
+
+  @override
+  Future<WeightEntry> saveWeight(DateTime day, double kg, int utcOffsetMin) {
+    savedWeights.add((day, kg));
+    weightOffsets.add(utcOffsetMin);
+    return onSaveWeight(day, kg);
+  }
+
+  @override
+  Future<WeightEntry> updateWeight(DateTime day, double kg, int utcOffsetMin) {
+    updatedWeights.add((day, kg));
+    return onUpdateWeight(day, kg);
+  }
+
+  @override
+  Future<void> deleteWeight(DateTime day, int utcOffsetMin) {
+    deletedWeights.add(day);
+    return onDeleteWeight(day);
+  }
+
+  @override
+  Future<WeightChart> weightChart(String period, int utcOffsetMin) {
+    chartPeriods.add(period);
+    return onWeightChart(period);
+  }
+
+  @override
+  Future<RecalcProposal> recalcProposal(int utcOffsetMin) {
+    recalcChecks++;
+    return onRecalcProposal();
+  }
+
+  @override
+  Future<DailyTarget> acceptRecalc(int utcOffsetMin) {
+    acceptRecalcCalls++;
+    return onAcceptRecalc();
+  }
+
+  @override
+  Future<void> ignoreRecalc(int utcOffsetMin) {
+    ignoreRecalcCalls++;
+    return onIgnoreRecalc();
+  }
 
   @override
   Future<Me> me() {

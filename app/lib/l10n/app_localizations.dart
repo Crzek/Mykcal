@@ -2437,6 +2437,204 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Borradores de fotos: {count}'**
   String draftsBadge(String count);
+
+  /// No description provided for @menuWeight.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso'**
+  String get menuWeight;
+
+  /// No description provided for @weightTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso'**
+  String get weightTitle;
+
+  /// No description provided for @weightFieldLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso de hoy'**
+  String get weightFieldLabel;
+
+  /// No description provided for @weightDayLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get weightDayLabel;
+
+  /// No description provided for @weightSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get weightSave;
+
+  /// No description provided for @weightReplacesDay.
+  ///
+  /// In es, this message translates to:
+  /// **'Sustituye el peso de ese día'**
+  String get weightReplacesDay;
+
+  /// No description provided for @weightReplaced.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso de ese día sustituido'**
+  String get weightReplaced;
+
+  /// No description provided for @weightSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso guardado'**
+  String get weightSaved;
+
+  /// No description provided for @errWeightFutureDate.
+  ///
+  /// In es, this message translates to:
+  /// **'No puedes registrar un peso en una fecha futura'**
+  String get errWeightFutureDate;
+
+  /// No description provided for @weightDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar este peso?'**
+  String get weightDeleteTitle;
+
+  /// No description provided for @weightDeleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar'**
+  String get weightDeleteConfirm;
+
+  /// No description provided for @weightEditTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir peso'**
+  String get weightEditTitle;
+
+  /// No description provided for @weightEditAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir el peso del {date}'**
+  String weightEditAction(String date);
+
+  /// No description provided for @weightDeleteAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar el peso del {date}'**
+  String weightDeleteAction(String date);
+
+  /// No description provided for @weightEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no has registrado ningún peso.'**
+  String get weightEmpty;
+
+  /// No description provided for @weightHistory.
+  ///
+  /// In es, this message translates to:
+  /// **'Registros'**
+  String get weightHistory;
+
+  /// No description provided for @weightPeriod30.
+  ///
+  /// In es, this message translates to:
+  /// **'30 días'**
+  String get weightPeriod30;
+
+  /// No description provided for @weightPeriod90.
+  ///
+  /// In es, this message translates to:
+  /// **'90 días'**
+  String get weightPeriod90;
+
+  /// No description provided for @weightPeriodAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo'**
+  String get weightPeriodAll;
+
+  /// No description provided for @weightSummaryCurrent.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso actual: {value} kg'**
+  String weightSummaryCurrent(String value);
+
+  /// No description provided for @weightSummaryAverage.
+  ///
+  /// In es, this message translates to:
+  /// **'Media semanal: {value} kg'**
+  String weightSummaryAverage(String value);
+
+  /// No description provided for @weightSummaryNoAverage.
+  ///
+  /// In es, this message translates to:
+  /// **'Media semanal: sin datos suficientes'**
+  String get weightSummaryNoAverage;
+
+  /// No description provided for @weightSummaryChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Variación en el periodo: {value} kg'**
+  String weightSummaryChange(String value);
+
+  /// No description provided for @weightSummaryNoChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Variación en el periodo: sin datos suficientes'**
+  String get weightSummaryNoChange;
+
+  /// No description provided for @weightChartNeedMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas al menos 2 registros para ver la gráfica'**
+  String get weightChartNeedMore;
+
+  /// No description provided for @weightChartLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Gráfica de peso. {summary}'**
+  String weightChartLabel(String summary);
+
+  /// No description provided for @weightChartLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar la gráfica.'**
+  String get weightChartLoadError;
+
+  /// No description provided for @recalcTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Recalcular tu objetivo?'**
+  String get recalcTitle;
+
+  /// No description provided for @recalcIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu media semanal es {average} kg y el último cálculo usó {reference} kg.'**
+  String recalcIntro(String average, String reference);
+
+  /// No description provided for @recalcManualWarning.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar sustituirá los valores que editaste.'**
+  String get recalcManualWarning;
+
+  /// No description provided for @recalcLargeChangeWarning.
+  ///
+  /// In es, this message translates to:
+  /// **'La variación es muy grande. Revisa si hay un registro erróneo.'**
+  String get recalcLargeChangeWarning;
+
+  /// No description provided for @recalcAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get recalcAccept;
+
+  /// No description provided for @recalcIgnore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ignorar'**
+  String get recalcIgnore;
 }
 
 class _AppLocalizationsDelegate

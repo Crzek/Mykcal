@@ -6,7 +6,7 @@ Guía de validación de extremo a extremo. Los detalles de reglas y esquemas est
 
 ## Prerrequisitos
 
-- Backend local con PostgreSQL (Docker Compose) y migraciones aplicadas hasta `0006`.
+- Backend local con PostgreSQL (Docker Compose) y migraciones aplicadas hasta `0007`.
 - Usuario con cuenta activa, consentimiento aceptado y objetivo creado (onboarding de 002).
 - App Flutter apuntando al backend local, o `curl` con un `bearerToken` válido.
 
@@ -15,7 +15,7 @@ Guía de validación de extremo a extremo. Los detalles de reglas y esquemas est
 ```bash
 # Backend
 cd backend
-alembic upgrade head          # incluye 0006_weight_recalc (tabla recalc_proposal)
+alembic upgrade head          # incluye 0007_weight_recalc (tabla recalc_proposal)
 uvicorn mykcal.main:create_app --factory --reload
 
 # App

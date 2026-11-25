@@ -31,6 +31,7 @@ from mykcal.logging import configure_logging, get_logger
 from mykcal.profile.router import router as profile_router
 from mykcal.quick.router import router as quick_router
 from mykcal.targets.router import router as targets_router
+from mykcal.weight.router import router as weight_router
 
 # Única lista de rutas sin identidad (principio V, Complexity Tracking del plan).
 PUBLIC_ROUTES = {("GET", "/v1/health"), ("GET", "/descargar/mykcal.apk")}
@@ -130,4 +131,5 @@ def create_app(
     app.include_router(foods_router)
     app.include_router(diary_router)
     app.include_router(ai_router)
+    app.include_router(weight_router)
     return app

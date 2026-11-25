@@ -1005,5 +1005,90 @@
         "type": "String"
       }
     }
-  }
+  },
+  "menuWeight": "Peso",
+  "weightTitle": "Peso",
+  "weightFieldLabel": "Peso de hoy",
+  "weightDayLabel": "Fecha",
+  "weightSave": "Guardar",
+  "weightReplacesDay": "Sustituye el peso de ese día",
+  "weightReplaced": "Peso de ese día sustituido",
+  "weightSaved": "Peso guardado",
+  "errWeightFutureDate": "No puedes registrar un peso en una fecha futura",
+  "weightDeleteTitle": "¿Borrar este peso?",
+  "weightDeleteConfirm": "Borrar",
+  "weightEditTitle": "Corregir peso",
+  "weightEditAction": "Corregir el peso del {date}",
+  "@weightEditAction": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weightDeleteAction": "Borrar el peso del {date}",
+  "@weightDeleteAction": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weightEmpty": "Todavía no has registrado ningún peso.",
+  "weightHistory": "Registros",
+  "weightPeriod30": "30 días",
+  "weightPeriod90": "90 días",
+  "weightPeriodAll": "Todo",
+  "weightSummaryCurrent": "Peso actual: {value} kg",
+  "@weightSummaryCurrent": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weightSummaryAverage": "Media semanal: {value} kg",
+  "@weightSummaryAverage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weightSummaryNoAverage": "Media semanal: sin datos suficientes",
+  "weightSummaryChange": "Variación en el periodo: {value} kg",
+  "@weightSummaryChange": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "weightSummaryNoChange": "Variación en el periodo: sin datos suficientes",
+  "weightChartNeedMore": "Necesitas al menos 2 registros para ver la gráfica",
+  "weightChartLabel": "Gráfica de peso. {summary}",
+  "@weightChartLabel": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "weightChartLoadError": "No se pudo cargar la gráfica.",
+  "recalcTitle": "¿Recalcular tu objetivo?",
+  "recalcIntro": "Tu media semanal es {average} kg y el último cálculo usó {reference} kg.",
+  "@recalcIntro": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "recalcManualWarning": "Aceptar sustituirá los valores que editaste.",
+  "recalcLargeChangeWarning": "La variación es muy grande. Revisa si hay un registro erróneo.",
+  "recalcAccept": "Aceptar",
+  "recalcIgnore": "Ignorar"
 }

@@ -336,3 +336,27 @@ async def test_evento_ai_analysis_no_lleva_foto_respuesta_clave_ni_descripcion(
                 "duration_ms",
                 "request_id",
             }
+
+
+async def test_logs_del_peso_sin_valores_ni_fechas(
+    client, zitadel, make_account, grant_consent, make_target_version, capsys
+):
+    """Principio X (007): ni el peso ni la fecha del registro aparecen en los logs."""
+    from datetime import UTC, datetime, timedelta
+
+    account = await make_account("u-peso")
+    await grant_consent(account)
+    await make_target_version(account, datetime.now(UTC) - timedelta(days=30))
+    h = zitadel.headers("u-peso")
+    day = datetime.now(UTC).date().isoformat()
+    capsys.readouterr()
+    resp = await client.post(
+        "/v1/weight",
+        json={"measured_on": day, "weight_kg": 83.7},
+        params={"utc_offset_min": 0},
+        headers=h,
+    )
+    assert resp.status_code == 200
+    out = _content("\n".join(_lines(capsys)))
+    assert "weight_saved" in out
+    assert "83.7" not in out and day not in out

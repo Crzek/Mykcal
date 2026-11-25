@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 import structlog
@@ -33,19 +33,30 @@ async def get_profile(session: AsyncSession, user_id: uuid.UUID) -> Profile:
     row = (
         await session.execute(select(UserProfile).where(UserProfile.user_id == user_id))
     ).scalar_one_or_none()
-    weight = await latest_weight(session, user_id)
+    weight = await current_weight(session, user_id)
     if row is None or weight is None:
         raise ApiError(404, ErrorCode.PROFILE_NOT_FOUND, "Aún no has completado tu perfil.")
-    return _profile_out(row, weight)
+    return _profile_out(row, *weight)
 
 
-def _profile_out(row: UserProfile, weight: WeightEntry) -> Profile:
+async def current_weight(session: AsyncSession, user_id: uuid.UUID) -> tuple[Decimal, date] | None:
+    """Último peso; sin registros (se pudo borrar el único), el del objetivo vigente."""
+    latest = await latest_weight(session, user_id)
+    if latest is not None:
+        return latest.weight_kg, latest.measured_on
+    target = await targets.current_target(session, user_id)
+    if target is None:
+        return None
+    return target.calc_weight_kg, target.calculated_at.date()
+
+
+def _profile_out(row: UserProfile, weight_kg: Decimal, measured_on: date) -> Profile:
     return Profile(
         age=row.age,
         sex=row.sex,  # type: ignore[arg-type]
         height_cm=row.height_cm,
-        weight_kg=float(weight.weight_kg),
-        weight_measured_on=weight.measured_on,
+        weight_kg=float(weight_kg),
+        weight_measured_on=measured_on,
         activity_level=row.activity_level,  # type: ignore[arg-type]
         goal=row.goal,  # type: ignore[arg-type]
         updated_at=row.updated_at,
@@ -119,7 +130,7 @@ async def save_profile(
     assert weight is not None
     structlog.get_logger("mykcal").info("profile_saved")
     return ProfileSaved(
-        profile=_profile_out(row, weight),
+        profile=_profile_out(row, weight.weight_kg, weight.measured_on),
         target=targets.to_out(target),
         recalculation=recalculation,
     )
@@ -132,11 +143,11 @@ async def calc_data_now(
     row = (
         await session.execute(select(UserProfile).where(UserProfile.user_id == user_id))
     ).scalar_one_or_none()
-    weight = await latest_weight(session, user_id)
+    weight = await current_weight(session, user_id)
     if row is None or weight is None:
         raise ApiError(409, ErrorCode.PROFILE_REQUIRED, "Completa tu perfil primero.")
     return CalcData(
-        weight_kg=weight_kg if weight_kg is not None else weight.weight_kg,
+        weight_kg=weight_kg if weight_kg is not None else weight[0],
         age=row.age,
         sex=row.sex,
         height_cm=row.height_cm,

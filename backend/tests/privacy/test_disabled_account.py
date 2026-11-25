@@ -41,6 +41,10 @@ async def test_rutas_de_002_rechazan_cuenta_desactivada(
         ("PUT", "/v1/profile", profile_body()),
         ("GET", "/v1/target", None),
         ("POST", "/v1/target/recalculate", None),
+        ("GET", "/v1/weight", None),
+        ("POST", "/v1/weight", {"measured_on": "2026-01-01", "weight_kg": 80}),
+        ("GET", "/v1/recalc-proposal", None),
+        ("POST", "/v1/recalc-proposal/accept", None),
     ]
     for method, path, body in calls:
         resp = await client.request(method, path, headers=h, json=body)

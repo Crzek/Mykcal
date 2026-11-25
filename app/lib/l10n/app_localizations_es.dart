@@ -1374,4 +1374,122 @@ class AppLocalizationsEs extends AppLocalizations {
   String draftsBadge(String count) {
     return 'Borradores de fotos: $count';
   }
+
+  @override
+  String get menuWeight => 'Peso';
+
+  @override
+  String get weightTitle => 'Peso';
+
+  @override
+  String get weightFieldLabel => 'Peso de hoy';
+
+  @override
+  String get weightDayLabel => 'Fecha';
+
+  @override
+  String get weightSave => 'Guardar';
+
+  @override
+  String get weightReplacesDay => 'Sustituye el peso de ese día';
+
+  @override
+  String get weightReplaced => 'Peso de ese día sustituido';
+
+  @override
+  String get weightSaved => 'Peso guardado';
+
+  @override
+  String get errWeightFutureDate =>
+      'No puedes registrar un peso en una fecha futura';
+
+  @override
+  String get weightDeleteTitle => '¿Borrar este peso?';
+
+  @override
+  String get weightDeleteConfirm => 'Borrar';
+
+  @override
+  String get weightEditTitle => 'Corregir peso';
+
+  @override
+  String weightEditAction(String date) {
+    return 'Corregir el peso del $date';
+  }
+
+  @override
+  String weightDeleteAction(String date) {
+    return 'Borrar el peso del $date';
+  }
+
+  @override
+  String get weightEmpty => 'Todavía no has registrado ningún peso.';
+
+  @override
+  String get weightHistory => 'Registros';
+
+  @override
+  String get weightPeriod30 => '30 días';
+
+  @override
+  String get weightPeriod90 => '90 días';
+
+  @override
+  String get weightPeriodAll => 'Todo';
+
+  @override
+  String weightSummaryCurrent(String value) {
+    return 'Peso actual: $value kg';
+  }
+
+  @override
+  String weightSummaryAverage(String value) {
+    return 'Media semanal: $value kg';
+  }
+
+  @override
+  String get weightSummaryNoAverage => 'Media semanal: sin datos suficientes';
+
+  @override
+  String weightSummaryChange(String value) {
+    return 'Variación en el periodo: $value kg';
+  }
+
+  @override
+  String get weightSummaryNoChange =>
+      'Variación en el periodo: sin datos suficientes';
+
+  @override
+  String get weightChartNeedMore =>
+      'Necesitas al menos 2 registros para ver la gráfica';
+
+  @override
+  String weightChartLabel(String summary) {
+    return 'Gráfica de peso. $summary';
+  }
+
+  @override
+  String get weightChartLoadError => 'No se pudo cargar la gráfica.';
+
+  @override
+  String get recalcTitle => '¿Recalcular tu objetivo?';
+
+  @override
+  String recalcIntro(String average, String reference) {
+    return 'Tu media semanal es $average kg y el último cálculo usó $reference kg.';
+  }
+
+  @override
+  String get recalcManualWarning =>
+      'Aceptar sustituirá los valores que editaste.';
+
+  @override
+  String get recalcLargeChangeWarning =>
+      'La variación es muy grande. Revisa si hay un registro erróneo.';
+
+  @override
+  String get recalcAccept => 'Aceptar';
+
+  @override
+  String get recalcIgnore => 'Ignorar';
 }
