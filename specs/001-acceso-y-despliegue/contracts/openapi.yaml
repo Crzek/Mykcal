@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario, 005 registro rápido, 006 clave de IA y foto
-  version: 0.6.0
+  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario, 005 registro rápido, 006 clave de IA y foto, 007 peso y recálculo
+  version: 0.7.0
   description: >
     Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
     fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
@@ -734,6 +734,164 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorBody" }
 
+  /v1/weight:
+    get:
+      summary: Lista los registros de peso del usuario (007, FR-002, FR-010)
+      parameters:
+        - { name: from, in: query, required: false, schema: { type: string, format: date } }
+        - { name: to, in: query, required: false, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: Registros ordenados por fecha descendente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WeightList" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    post:
+      summary: Crea o sustituye el peso de un día (007, FR-001)
+      parameters:
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WeightInput" }
+      responses:
+        "200":
+          description: Registro guardado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WeightEntry" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/weight/chart:
+    get:
+      summary: Serie de la gráfica y resumen accesible (007, FR-003, FR-004)
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema: { type: string, enum: [p30, p90, all] }
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      responses:
+        "200":
+          description: Puntos diarios, media móvil y resumen
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WeightChart" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/weight/{date}:
+    put:
+      summary: Edita el peso de un día (007, FR-002)
+      parameters:
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [weight_kg]
+              properties:
+                weight_kg: { type: number, minimum: 30, maximum: 300 }
+      responses:
+        "200":
+          description: Registro editado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WeightEntry" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: WEIGHT_NOT_FOUND. No hay registro en esa fecha
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    delete:
+      summary: Borra el peso de un día (007, FR-002)
+      parameters:
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      responses:
+        "204": { description: Borrado }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: WEIGHT_NOT_FOUND. No hay registro en esa fecha
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/recalc-proposal:
+    get:
+      summary: Propuesta de recálculo pendiente, evaluada al abrir la app (007, FR-005, FR-007)
+      parameters:
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      responses:
+        "200":
+          description: Propuesta pendiente o ninguna
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecalcProposal" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/recalc-proposal/accept:
+    post:
+      summary: Acepta la propuesta y recalcula con la media semanal (007, FR-006)
+      parameters:
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      responses:
+        "200":
+          description: Objetivo recalculado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyTarget" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: RECALC_NO_PROPOSAL. No hay propuesta pendiente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/recalc-proposal/ignore:
+    post:
+      summary: Ignora la propuesta durante 7 días (007, FR-007)
+      parameters:
+        - { name: utc_offset_min, in: query, required: true, schema: { type: integer, minimum: -840, maximum: 840 } }
+      responses:
+        "204": { description: Ignorada }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: RECALC_NO_PROPOSAL. No hay propuesta pendiente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
 components:
   securitySchemes:
     bearerToken:
@@ -995,6 +1153,8 @@ components:
             - AI_RESPONSE_INVALID
             - AI_UNRECOGNIZED
             - AI_TIMEOUT
+            - WEIGHT_NOT_FOUND
+            - RECALC_NO_PROPOSAL
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR
@@ -1381,3 +1541,64 @@ components:
         items:
           type: array
           items: { $ref: "#/components/schemas/ProposedItem" }
+
+    WeightInput:
+      type: object
+      additionalProperties: false
+      required: [measured_on, weight_kg]
+      properties:
+        measured_on: { type: string, format: date }
+        weight_kg: { type: number, minimum: 30, maximum: 300 }
+
+    WeightEntry:
+      type: object
+      required: [measured_on, weight_kg, updated_at]
+      properties:
+        measured_on: { type: string, format: date }
+        weight_kg: { type: number }
+        updated_at: { type: string, format: date-time }
+
+    WeightList:
+      type: object
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/WeightEntry" }
+
+    WeightChartPoint:
+      type: object
+      required: [date, weight_kg, average_kg]
+      properties:
+        date: { type: string, format: date }
+        weight_kg: { type: number }
+        average_kg: { type: [number, "null"] }   # null: ventana con menos de 3 registros
+
+    WeightChart:
+      type: object
+      required: [period, points, summary]
+      properties:
+        period: { type: string, enum: [p30, p90, all] }
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/WeightChartPoint" }
+        summary:
+          type: object
+          required: [count]
+          properties:
+            count: { type: integer }
+            current_weight_kg: { type: [number, "null"] }
+            weekly_average_kg: { type: [number, "null"] }
+            change_kg: { type: [number, "null"] }
+
+    RecalcProposal:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [pending, none] }
+        reference_weight_kg: { type: number }
+        weekly_average_kg: { type: number }
+        was_manual: { type: boolean }
+        large_change: { type: boolean }
+        current: { $ref: "#/components/schemas/TargetValues" }
+        proposed: { $ref: "#/components/schemas/TargetValues" }

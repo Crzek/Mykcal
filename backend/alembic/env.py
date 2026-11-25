@@ -16,6 +16,7 @@ from mykcal.invitations import models as _invitations  # noqa: F401
 from mykcal.profile import models as _profile  # noqa: F401
 from mykcal.quick import models as _quick  # noqa: F401
 from mykcal.targets import models as _targets  # noqa: F401
+from mykcal.weight import models as _weight  # noqa: F401
 
 target_metadata = Base.metadata
 config = context.config

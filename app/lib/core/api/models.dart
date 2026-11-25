@@ -951,3 +951,121 @@ class PhotoAnalysisResult {
 
   final List<ProposedItem> items;
 }
+
+/// Registro de peso de un día (007).
+class WeightEntry {
+  const WeightEntry({required this.measuredOn, required this.weightKg});
+
+  factory WeightEntry.fromJson(Map<String, dynamic> json) => WeightEntry(
+    measuredOn: DateTime.parse(json['measured_on'] as String),
+    weightKg: (json['weight_kg'] as num).toDouble(),
+  );
+
+  /// Día local del registro (sin hora).
+  final DateTime measuredOn;
+  final double weightKg;
+}
+
+/// Punto de la gráfica: un día con registro y la media móvil de 7 días si hay ≥3 registros.
+class WeightChartPoint {
+  const WeightChartPoint({
+    required this.date,
+    required this.weightKg,
+    this.averageKg,
+  });
+
+  factory WeightChartPoint.fromJson(Map<String, dynamic> json) =>
+      WeightChartPoint(
+        date: DateTime.parse(json['date'] as String),
+        weightKg: (json['weight_kg'] as num).toDouble(),
+        averageKg: (json['average_kg'] as num?)?.toDouble(),
+      );
+
+  final DateTime date;
+  final double weightKg;
+  final double? averageKg;
+}
+
+class WeightChartSummary {
+  const WeightChartSummary({
+    required this.count,
+    this.currentWeightKg,
+    this.weeklyAverageKg,
+    this.changeKg,
+  });
+
+  factory WeightChartSummary.fromJson(Map<String, dynamic> json) =>
+      WeightChartSummary(
+        count: json['count'] as int,
+        currentWeightKg: (json['current_weight_kg'] as num?)?.toDouble(),
+        weeklyAverageKg: (json['weekly_average_kg'] as num?)?.toDouble(),
+        changeKg: (json['change_kg'] as num?)?.toDouble(),
+      );
+
+  final int count;
+  final double? currentWeightKg;
+  final double? weeklyAverageKg;
+  final double? changeKg;
+}
+
+class WeightChart {
+  const WeightChart({
+    required this.period,
+    required this.points,
+    required this.summary,
+  });
+
+  factory WeightChart.fromJson(Map<String, dynamic> json) => WeightChart(
+    period: json['period'] as String,
+    points: (json['points'] as List<dynamic>)
+        .map((e) => WeightChartPoint.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    summary: WeightChartSummary.fromJson(
+      json['summary'] as Map<String, dynamic>,
+    ),
+  );
+
+  /// `p30`, `p90` o `all`.
+  final String period;
+  final List<WeightChartPoint> points;
+  final WeightChartSummary summary;
+}
+
+/// Propuesta de recálculo del objetivo (007). Sin propuesta, [pending] es `false`.
+class RecalcProposal {
+  const RecalcProposal({
+    required this.pending,
+    this.referenceWeightKg,
+    this.weeklyAverageKg,
+    this.wasManual = false,
+    this.largeChange = false,
+    this.current,
+    this.proposed,
+  });
+
+  factory RecalcProposal.fromJson(Map<String, dynamic> json) => RecalcProposal(
+    pending: json['status'] == 'pending',
+    referenceWeightKg: (json['reference_weight_kg'] as num?)?.toDouble(),
+    weeklyAverageKg: (json['weekly_average_kg'] as num?)?.toDouble(),
+    wasManual: json['was_manual'] == true,
+    largeChange: json['large_change'] == true,
+    current: json['current'] == null
+        ? null
+        : TargetValues.fromJson(json['current'] as Map<String, dynamic>),
+    proposed: json['proposed'] == null
+        ? null
+        : TargetValues.fromJson(json['proposed'] as Map<String, dynamic>),
+  );
+
+  final bool pending;
+  final double? referenceWeightKg;
+  final double? weeklyAverageKg;
+
+  /// El objetivo vigente estaba editado a mano: aceptar sustituye sus valores.
+  final bool wasManual;
+
+  /// La variación supera el 10%: avisa de un posible registro erróneo.
+  final bool largeChange;
+  final TargetValues? current;
+  final TargetValues? proposed;
+}

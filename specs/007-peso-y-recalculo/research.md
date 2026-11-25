@@ -89,6 +89,14 @@ estaba editado a mano, para el aviso de FR-008), `created_at`, `responded_at`, `
 - **Ignorar** (`POST /v1/recalc-proposal/ignore`): marca `ignored` con `responded_at` e
   `ignored_until = hoy + 7 días`; no se vuelve a proponer hasta pasada esa fecha (FR-007).
 
+**Decisiones al implementar (T045)**:
+- La fila `pending` se **borra** cuando deja de cumplirse el umbral (no hay estado «cancelada»).
+- Una propuesta ignorada el día D queda bloqueada mientras `hoy < D + 7 días`; la evaluación
+  consulta las filas `ignored` con `ignored_until > hoy`.
+- La inserción usa `ON CONFLICT` sobre el índice parcial `uq_recalc_pending`, de modo que dos
+  evaluaciones simultáneas dejan una sola fila.
+- `accept` e `ignore` reevalúan antes de actuar y por eso reciben `utc_offset_min` (obligatorio).
+
 **Razón**: la spec exige guardar la propuesta y su respuesta en el servidor y volver a mostrarla hasta
 responder; el «ignorar 7 días» también en el servidor.
 

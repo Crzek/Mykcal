@@ -76,6 +76,18 @@ abstract class MykcalApi {
     String? description,
     int? totalGrams,
   });
+
+  /// Peso y recálculo del objetivo (007). `utcOffsetMin` fija el «hoy» local del móvil.
+  Future<List<WeightEntry>> weightEntries();
+  Future<WeightEntry> saveWeight(DateTime day, double kg, int utcOffsetMin);
+  Future<WeightEntry> updateWeight(DateTime day, double kg, int utcOffsetMin);
+  Future<void> deleteWeight(DateTime day, int utcOffsetMin);
+
+  /// `period`: `p30`, `p90` o `all`.
+  Future<WeightChart> weightChart(String period, int utcOffsetMin);
+  Future<RecalcProposal> recalcProposal(int utcOffsetMin);
+  Future<DailyTarget> acceptRecalc(int utcOffsetMin);
+  Future<void> ignoreRecalc(int utcOffsetMin);
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -399,6 +411,88 @@ class HttpMykcalApi implements MykcalApi {
       (json['items'] as List<dynamic>)
           .map((e) => FoodSummary.fromJson(e as Map<String, dynamic>))
           .toList();
+
+  @override
+  Future<List<WeightEntry>> weightEntries() async =>
+      ((await _json('GET', '/v1/weight'))['entries'] as List<dynamic>)
+          .map((e) => WeightEntry.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+  @override
+  Future<WeightEntry> saveWeight(
+    DateTime day,
+    double kg,
+    int utcOffsetMin,
+  ) async => WeightEntry.fromJson(
+    await _json(
+      'POST',
+      '/v1/weight',
+      query: {'utc_offset_min': utcOffsetMin},
+      data: {'measured_on': isoDate(day), 'weight_kg': kg},
+    ),
+  );
+
+  @override
+  Future<WeightEntry> updateWeight(
+    DateTime day,
+    double kg,
+    int utcOffsetMin,
+  ) async => WeightEntry.fromJson(
+    await _json(
+      'PUT',
+      '/v1/weight/${isoDate(day)}',
+      query: {'utc_offset_min': utcOffsetMin},
+      data: {'weight_kg': kg},
+    ),
+  );
+
+  @override
+  Future<void> deleteWeight(DateTime day, int utcOffsetMin) async {
+    await _json(
+      'DELETE',
+      '/v1/weight/${isoDate(day)}',
+      query: {'utc_offset_min': utcOffsetMin},
+    );
+  }
+
+  @override
+  Future<WeightChart> weightChart(String period, int utcOffsetMin) async =>
+      WeightChart.fromJson(
+        await _json(
+          'GET',
+          '/v1/weight/chart',
+          query: {'period': period, 'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  @override
+  Future<RecalcProposal> recalcProposal(int utcOffsetMin) async =>
+      RecalcProposal.fromJson(
+        await _json(
+          'GET',
+          '/v1/recalc-proposal',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  @override
+  Future<DailyTarget> acceptRecalc(int utcOffsetMin) async =>
+      DailyTarget.fromJson(
+        await _json(
+          'POST',
+          '/v1/recalc-proposal/accept',
+          query: {'utc_offset_min': utcOffsetMin},
+        ),
+      );
+
+  @override
+  Future<void> ignoreRecalc(int utcOffsetMin) async {
+    await _json(
+      'POST',
+      '/v1/recalc-proposal/ignore',
+      query: {'utc_offset_min': utcOffsetMin},
+    );
+  }
 
   Future<Map<String, dynamic>> _json(
     String method,

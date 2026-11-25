@@ -2,7 +2,7 @@
 
 El contrato vivo sigue siendo `specs/001-acceso-y-despliegue/contracts/openapi.yaml` (lo leen las
 pruebas de contrato). Esta feature le añade las rutas de peso y de propuesta de recálculo y los
-schemas de abajo. `info.version` pasa de `0.5.0` a `0.6.0`.
+schemas de abajo. `info.version` pasa de `0.6.0` (006) a `0.7.0`.
 
 Todas las rutas nuevas exigen `bearerToken`, cuenta activa **y consentimiento** (datos de salud,
 principio IV). No hay rutas públicas nuevas. Todas pueden devolver `401`, `403`
@@ -22,7 +22,7 @@ principio IV). No hay rutas públicas nuevas. Todas pueden devolver `401`, `403`
 | `POST /v1/recalc-proposal/ignore` | Ignora 7 días | `204`, `409 RECALC_NO_PROPOSAL` |
 
 `utc_offset_min` (query, entero entre −840 y 840) es **obligatorio** en `POST`, `PUT` y `DELETE`
-`/v1/weight`, en `GET /v1/weight/chart` y en `GET /v1/recalc-proposal`: determina el «hoy» local del
+`/v1/weight`, en `GET /v1/weight/chart` y en `GET`, `accept` e `ignore` de `/v1/recalc-proposal`: determina el «hoy» local del
 móvil (igual que el diario). Una fecha de registro posterior a ese «hoy» se rechaza con
 `400 VALIDATION_ERROR` (`fields: [measured_on]`); también la anterior a la fecha de alta − 1 día.
 
@@ -172,7 +172,7 @@ components:
       required: [date, weight_kg, average_kg]
       properties:
         date: { type: string, format: date }
-        weight_kg: { type: number, nullable: true }   # null: día sin registro (no se dibuja punto)
+        weight_kg: { type: number }                   # solo hay puntos de días con registro
         average_kg: { type: number, nullable: true }  # null: ventana con <3 registros
     WeightChart:
       type: object

@@ -31,6 +31,14 @@ HEALTH_DATA_ROUTES = {
     ("DELETE", "/v1/diary/copies/{copy_id}"),
     ("GET", "/v1/diary/days/{date}"),
     ("POST", "/v1/diary/entries"),
+    ("GET", "/v1/weight"),
+    ("POST", "/v1/weight"),
+    ("PUT", "/v1/weight/{date}"),
+    ("DELETE", "/v1/weight/{date}"),
+    ("GET", "/v1/weight/chart"),
+    ("GET", "/v1/recalc-proposal"),
+    ("POST", "/v1/recalc-proposal/accept"),
+    ("POST", "/v1/recalc-proposal/ignore"),
     ("GET", "/v1/ai-key"),
     ("PUT", "/v1/ai-key"),
     ("DELETE", "/v1/ai-key"),
@@ -48,6 +56,11 @@ DIARY_QUERY = {
     "/v1/diary/entries": {"utc_offset_min": 0},
     "/v1/diary/copies": {"utc_offset_min": 0},
     "/v1/diary/copy-sources": {"target_date": "2026-01-01", "target_meal": "lunch"},
+    "/v1/weight": {"utc_offset_min": 0},
+    "/v1/weight/chart": {"utc_offset_min": 0, "period": "p30"},
+    "/v1/recalc-proposal": {"utc_offset_min": 0},
+    "/v1/recalc-proposal/accept": {"utc_offset_min": 0},
+    "/v1/recalc-proposal/ignore": {"utc_offset_min": 0},
 }
 CUSTOM_FOOD_BODY = {
     "name": "Tarta",
@@ -103,6 +116,8 @@ async def test_rutas_de_salud_exigen_consentimiento_y_no_escriben(
             "quantity": 100,
         },
         ("PATCH", "/v1/diary/entries/{entry_id}"): {"quantity": 100},
+        ("POST", "/v1/weight"): {"measured_on": "2026-01-01", "weight_kg": 80},
+        ("PUT", "/v1/weight/{date}"): {"weight_kg": 80},
         ("POST", "/v1/diary/copies"): {
             "source_date": "2025-12-31",
             "source_meal": "lunch",
@@ -127,5 +142,12 @@ async def test_rutas_de_salud_exigen_consentimiento_y_no_escriben(
         assert resp.status_code == 403, (method, path)
         assert resp.json()["code"] == "CONSENT_REQUIRED", (method, path)
     async with app.state.sessionmaker() as s:
-        for table in ("user_profile", "weight_entry", "daily_target", "food", "diary_entry"):
+        for table in (
+            "user_profile",
+            "weight_entry",
+            "daily_target",
+            "food",
+            "diary_entry",
+            "recalc_proposal",
+        ):
             assert (await s.execute(text(f"SELECT count(*) FROM {table}"))).scalar_one() == 0
