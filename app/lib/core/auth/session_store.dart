@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -34,8 +35,21 @@ class SessionStore {
     expiresAtKey,
   ];
 
+  /// Si el almacén no se puede descifrar (`BAD_DECRYPT`: la clave del sistema ya no encaja con
+  /// los datos, p. ej. tras reinstalar o restaurar una copia), la sesión se da por perdida: se
+  /// vacía y el usuario vuelve a iniciar sesión, en lugar de quedar bloqueado en el arranque.
   Future<StoredSession?> read() async {
-    final values = await _storage.readAll();
+    final Map<String, String> values;
+    try {
+      values = await _storage.readAll();
+    } on PlatformException {
+      try {
+        await _storage.deleteAll();
+      } on PlatformException {
+        // Sin poder vaciarlo, igualmente se trata como sin sesión.
+      }
+      return null;
+    }
     final access = values[accessTokenKey];
     final refresh = values[refreshTokenKey];
     final expires = DateTime.tryParse(values[expiresAtKey] ?? '');
