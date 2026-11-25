@@ -1796,6 +1796,173 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Este día usó el objetivo que tenías entonces'**
   String get dayPastNotice;
+
+  /// No description provided for @quickTabRecent.
+  ///
+  /// In es, this message translates to:
+  /// **'Recientes'**
+  String get quickTabRecent;
+
+  /// No description provided for @quickTabFavorites.
+  ///
+  /// In es, this message translates to:
+  /// **'Favoritos'**
+  String get quickTabFavorites;
+
+  /// No description provided for @quickEmptyRecent.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí aparecerán los alimentos que registres, para añadirlos con un toque.'**
+  String get quickEmptyRecent;
+
+  /// No description provided for @quickEmptyFavorites.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca alimentos con ☆ para tenerlos a mano aquí.'**
+  String get quickEmptyFavorites;
+
+  /// No description provided for @quickRowDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount} · {kcal} kcal'**
+  String quickRowDetail(String amount, String kcal);
+
+  /// No description provided for @quickAddLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir {name}, {amount}'**
+  String quickAddLabel(String name, String amount);
+
+  /// No description provided for @quickAmountServings.
+  ///
+  /// In es, this message translates to:
+  /// **'{servings} {unit}, {quantity} {base}'**
+  String quickAmountServings(
+    String servings,
+    String unit,
+    String quantity,
+    String base,
+  );
+
+  /// No description provided for @quickAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} añadido a {meal}'**
+  String quickAdded(String name, String meal);
+
+  /// No description provided for @quickUndone.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshecho'**
+  String get quickUndone;
+
+  /// No description provided for @quickUndoFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo deshacer. Borra la entrada desde el diario.'**
+  String get quickUndoFailed;
+
+  /// No description provided for @favoriteMark.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar {name} como favorito'**
+  String favoriteMark(String name);
+
+  /// No description provided for @favoriteUnmark.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar {name} de favoritos'**
+  String favoriteUnmark(String name);
+
+  /// No description provided for @favoriteRemoved.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitado de favoritos'**
+  String get favoriteRemoved;
+
+  /// No description provided for @favoriteUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Este alimento ya no está disponible'**
+  String get favoriteUnavailable;
+
+  /// No description provided for @copyMenu.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar de otro día'**
+  String get copyMenu;
+
+  /// No description provided for @copyMenuTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Más opciones de {meal}'**
+  String copyMenuTooltip(String meal);
+
+  /// No description provided for @copyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar a {meal} · {day}'**
+  String copyTitle(String meal, String day);
+
+  /// No description provided for @copyAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar'**
+  String get copyAction;
+
+  /// No description provided for @copyEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay comidas en los 14 días anteriores.'**
+  String get copyEmpty;
+
+  /// No description provided for @copyValuesChanged.
+  ///
+  /// In es, this message translates to:
+  /// **'Algún alimento ha cambiado: se copiará con sus valores actuales.'**
+  String get copyValuesChanged;
+
+  /// No description provided for @copyMore.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} más'**
+  String copyMore(int count);
+
+  /// No description provided for @copyOptionSemantics.
+  ///
+  /// In es, this message translates to:
+  /// **'{meal} de {day}, {kcal} kcal, {count} alimentos: {items}'**
+  String copyOptionSemantics(
+    String meal,
+    String day,
+    String kcal,
+    int count,
+    String items,
+  );
+
+  /// No description provided for @copyDone.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 alimento copiado a {meal}} other{{count} alimentos copiados a {meal}}}'**
+  String copyDone(int count, String meal);
+
+  /// No description provided for @copyUndone.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia deshecha'**
+  String get copyUndone;
+
+  /// No description provided for @copySourceEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Esa comida ya no tiene alimentos.'**
+  String get copySourceEmpty;
+
+  /// No description provided for @copyOutOfRange.
+  ///
+  /// In es, this message translates to:
+  /// **'Esa comida ya no se puede copiar.'**
+  String get copyOutOfRange;
 }
 
 class _AppLocalizationsDelegate

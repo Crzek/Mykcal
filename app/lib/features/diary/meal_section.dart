@@ -11,11 +11,15 @@ class MealSection extends StatelessWidget {
     super.key,
     required this.meal,
     this.onAdd,
+    this.onCopy,
     this.onTapEntry,
   });
 
   final DiaryMeal meal;
   final VoidCallback? onAdd;
+
+  /// «Copiar de otro día» del menú ⋮ (005); sin él no hay menú.
+  final VoidCallback? onCopy;
   final ValueChanged<DiaryEntry>? onTapEntry;
 
   @override
@@ -53,6 +57,17 @@ class MealSection extends StatelessWidget {
                   icon: const Icon(Icons.add),
                   onPressed: onAdd,
                 ),
+                if (onCopy != null)
+                  PopupMenuButton<void>(
+                    tooltip: l10n.copyMenuTooltip(name),
+                    constraints: const BoxConstraints(minWidth: 48),
+                    itemBuilder: (_) => [
+                      PopupMenuItem<void>(
+                        onTap: onCopy,
+                        child: Text(l10n.copyMenu),
+                      ),
+                    ],
+                  ),
               ],
             ),
             if (meal.entries.isEmpty)

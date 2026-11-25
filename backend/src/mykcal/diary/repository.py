@@ -43,3 +43,53 @@ async def get_entry(
         DiaryEntry.deleted_at.is_not(None) if deleted else DiaryEntry.deleted_at.is_(None)
     )
     return (await session.execute(stmt)).scalar_one_or_none()
+
+
+async def entries_of_meal(
+    session: AsyncSession, user_id: uuid.UUID, day: date, meal: str
+) -> list[DiaryEntry]:
+    """Entradas activas de una comida de un día, en orden de creación."""
+    stmt = (
+        select(DiaryEntry)
+        .where(
+            DiaryEntry.user_id == user_id,
+            DiaryEntry.entry_date == day,
+            DiaryEntry.meal == meal,
+            DiaryEntry.deleted_at.is_(None),
+        )
+        .order_by(DiaryEntry.created_at, DiaryEntry.id)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
+async def entries_in_range(
+    session: AsyncSession, user_id: uuid.UUID, first: date, last: date
+) -> list[DiaryEntry]:
+    """Entradas activas entre dos días (ambos incluidos), en orden de creación."""
+    stmt = (
+        select(DiaryEntry)
+        .where(
+            DiaryEntry.user_id == user_id,
+            DiaryEntry.entry_date >= first,
+            DiaryEntry.entry_date <= last,
+            DiaryEntry.deleted_at.is_(None),
+        )
+        .order_by(DiaryEntry.entry_date, DiaryEntry.created_at, DiaryEntry.id)
+    )
+    return list((await session.execute(stmt)).scalars().all())
+
+
+async def entries_of_copy(
+    session: AsyncSession, user_id: uuid.UUID, copy_id: uuid.UUID
+) -> list[DiaryEntry]:
+    """Entradas activas de una copia. Ajena o inexistente: lista vacía."""
+    stmt = (
+        select(DiaryEntry)
+        .where(
+            DiaryEntry.user_id == user_id,
+            DiaryEntry.copy_id == copy_id,
+            DiaryEntry.deleted_at.is_(None),
+        )
+        .order_by(DiaryEntry.created_at, DiaryEntry.id)
+    )
+    return list((await session.execute(stmt)).scalars().all())

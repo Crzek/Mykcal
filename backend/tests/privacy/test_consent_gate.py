@@ -21,7 +21,14 @@ HEALTH_DATA_ROUTES = {
     ("POST", "/v1/foods/custom"),
     ("PUT", "/v1/foods/custom/{food_id}"),
     ("DELETE", "/v1/foods/custom/{food_id}"),
+    ("GET", "/v1/foods/recent"),
+    ("GET", "/v1/foods/favorites"),
+    ("PUT", "/v1/foods/favorites/{food_id}"),
+    ("DELETE", "/v1/foods/favorites/{food_id}"),
     ("GET", "/v1/foods/{food_id}"),
+    ("GET", "/v1/diary/copy-sources"),
+    ("POST", "/v1/diary/copies"),
+    ("DELETE", "/v1/diary/copies/{copy_id}"),
     ("GET", "/v1/diary/days/{date}"),
     ("POST", "/v1/diary/entries"),
     ("PATCH", "/v1/diary/entries/{entry_id}"),
@@ -32,7 +39,12 @@ FOODS_QUERY = {
     "/v1/foods/search": {"q": "platano"},
     "/v1/foods/barcode": {"code": "8410000000016"},
 }
-DIARY_QUERY = {"/v1/diary/days": {"utc_offset_min": 0}, "/v1/diary/entries": {"utc_offset_min": 0}}
+DIARY_QUERY = {
+    "/v1/diary/days": {"utc_offset_min": 0},
+    "/v1/diary/entries": {"utc_offset_min": 0},
+    "/v1/diary/copies": {"utc_offset_min": 0},
+    "/v1/diary/copy-sources": {"target_date": "2026-01-01", "target_meal": "lunch"},
+}
 CUSTOM_FOOD_BODY = {
     "name": "Tarta",
     "base_unit": "g",
@@ -87,10 +99,18 @@ async def test_rutas_de_salud_exigen_consentimiento_y_no_escriben(
             "quantity": 100,
         },
         ("PATCH", "/v1/diary/entries/{entry_id}"): {"quantity": 100},
+        ("POST", "/v1/diary/copies"): {
+            "source_date": "2025-12-31",
+            "source_meal": "lunch",
+            "target_date": "2026-01-01",
+            "target_meal": "lunch",
+        },
     }
     for method, route in sorted(HEALTH_DATA_ROUTES):
-        path = route.replace("{food_id}", str(uuid.uuid4())).replace(
-            "{entry_id}", str(uuid.uuid4())
+        path = (
+            route.replace("{food_id}", str(uuid.uuid4()))
+            .replace("{entry_id}", str(uuid.uuid4()))
+            .replace("{copy_id}", str(uuid.uuid4()))
         )
         path = path.replace("{date}", "2026-01-01")
         resp = await client.request(

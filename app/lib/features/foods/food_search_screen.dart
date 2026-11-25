@@ -6,6 +6,7 @@ import '../../core/api/models.dart';
 import '../../core/api/mykcal_api.dart';
 import '../../core/format/numbers.dart';
 import '../../l10n/app_localizations.dart';
+import '../quick/favorite_star.dart';
 import 'barcode_scan_screen.dart';
 import 'custom_food_form_screen.dart';
 import 'food_detail_screen.dart';
@@ -20,11 +21,19 @@ import 'food_search_controller.dart';
 /// Con [onSelected] está en modo selección (diario, 004): tocar un resultado, un «encontrado» del
 /// escáner o un alimento recién creado llama a [onSelected] con el alimento en vez de abrir el
 /// detalle. [title] sustituye al título.
+///
+/// [emptyBuilder] pinta el cuerpo mientras el campo está vacío (Recientes y Favoritos, 005).
 class FoodSearchScreen extends ConsumerStatefulWidget {
-  const FoodSearchScreen({super.key, this.onSelected, this.title});
+  const FoodSearchScreen({
+    super.key,
+    this.onSelected,
+    this.title,
+    this.emptyBuilder,
+  });
 
   final ValueChanged<Food>? onSelected;
   final String? title;
+  final WidgetBuilder? emptyBuilder;
 
   @override
   ConsumerState<FoodSearchScreen> createState() => _FoodSearchScreenState();
@@ -146,6 +155,7 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
   ) {
     switch (s.status) {
       case FoodSearchStatus.idle:
+        return widget.emptyBuilder?.call(context) ?? const SizedBox.shrink();
       case FoodSearchStatus.tooShort:
         return const SizedBox.shrink();
       case FoodSearchStatus.offline:
@@ -255,25 +265,32 @@ class _FoodTile extends StatelessWidget {
       per,
       if (food.isMine) l10n.foodsRowMineSemantics,
     ].join(', ');
-    return Semantics(
-      label: label,
-      button: true,
-      excludeSemantics: true,
-      onTap: () => _open(context),
-      child: ListTile(
-        minTileHeight: 56,
-        title: Text(food.name),
-        subtitle: food.brand == null ? null : Text(food.brand!),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (food.isMine) Text(l10n.foodsMineBadge),
-            Text('$kcal kcal'),
-          ],
+    return Row(
+      children: [
+        Expanded(
+          child: Semantics(
+            label: label,
+            button: true,
+            excludeSemantics: true,
+            onTap: () => _open(context),
+            child: ListTile(
+              minTileHeight: 56,
+              title: Text(food.name),
+              subtitle: food.brand == null ? null : Text(food.brand!),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (food.isMine) Text(l10n.foodsMineBadge),
+                  Text('$kcal kcal'),
+                ],
+              ),
+              onTap: () => _open(context),
+            ),
+          ),
         ),
-        onTap: () => _open(context),
-      ),
+        FavoriteStar(foodId: food.id, foodName: food.name),
+      ],
     );
   }
 

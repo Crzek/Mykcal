@@ -725,3 +725,136 @@ class DiaryDay {
 
   DiaryMeal meal(Meal meal) => meals.firstWhere((m) => m.meal == meal);
 }
+
+/// Resultado de añadir una entrada: el día y el id de la entrada creada (cabecera `Location`,
+/// 005 R3), que necesita «Deshacer» del añadido rápido.
+class AddedEntry {
+  const AddedEntry({required this.day, required this.entryId});
+
+  final DiaryDay day;
+  final String entryId;
+}
+
+/// Alimento de Recientes o Favoritos con la cantidad lista para añadir (`QuickFood`, 005 R2).
+class QuickFood {
+  const QuickFood({
+    required this.food,
+    required this.suggestedQuantity,
+    required this.isFavorite,
+    this.suggestedServings,
+    this.lastUsedAt,
+  });
+
+  factory QuickFood.fromJson(Map<String, dynamic> json) => QuickFood(
+    food: Food.fromJson(json['food'] as Map<String, dynamic>),
+    suggestedQuantity: (json['suggested_quantity'] as num).toDouble(),
+    suggestedServings: _optNum(json['suggested_servings']),
+    lastUsedAt: json['last_used_at'] == null
+        ? null
+        : DateTime.parse(json['last_used_at'] as String),
+    isFavorite: json['is_favorite'] as bool,
+  );
+
+  final Food food;
+
+  /// g/ml, siempre presente.
+  final double suggestedQuantity;
+
+  /// Raciones si la última vez se registró así (o es un favorito nuevo con ración).
+  final double? suggestedServings;
+  final DateTime? lastUsedAt;
+  final bool isFavorite;
+}
+
+/// Una entrada de una comida que se puede copiar (`CopySourceEntry`).
+class CopySourceEntry {
+  const CopySourceEntry({
+    required this.foodName,
+    required this.baseUnit,
+    required this.quantity,
+    required this.kcal,
+    this.foodBrand,
+    this.servings,
+  });
+
+  factory CopySourceEntry.fromJson(Map<String, dynamic> json) =>
+      CopySourceEntry(
+        foodName: json['food_name'] as String,
+        foodBrand: json['food_brand'] as String?,
+        baseUnit: json['base_unit'] as String,
+        quantity: (json['quantity'] as num).toDouble(),
+        servings: _optNum(json['servings']),
+        kcal: (json['kcal'] as num).toDouble(),
+      );
+
+  final String foodName;
+  final String? foodBrand;
+  final String baseUnit;
+  final double quantity;
+  final double? servings;
+  final double kcal;
+}
+
+/// Una comida de un día anterior, con sus entradas (`CopySourceMeal`).
+class CopySourceMeal {
+  const CopySourceMeal({
+    required this.meal,
+    required this.entries,
+    required this.kcal,
+    required this.valuesChanged,
+  });
+
+  factory CopySourceMeal.fromJson(Map<String, dynamic> json) => CopySourceMeal(
+    meal: Meal.parse(json['meal']),
+    entries: (json['entries'] as List<dynamic>)
+        .map((e) => CopySourceEntry.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    kcal: (json['kcal'] as num).toDouble(),
+    valuesChanged: json['values_changed'] as bool,
+  );
+
+  final Meal meal;
+  final List<CopySourceEntry> entries;
+  final double kcal;
+
+  /// Algún alimento tiene hoy otros valores que la entrada: la copia usará los actuales.
+  final bool valuesChanged;
+}
+
+/// Un día anterior con las comidas que se pueden copiar (`CopySourceDay`).
+class CopySourceDay {
+  const CopySourceDay({required this.date, required this.meals});
+
+  factory CopySourceDay.fromJson(Map<String, dynamic> json) {
+    final parts = (json['date'] as String).split('-').map(int.parse).toList();
+    return CopySourceDay(
+      date: DateTime(parts[0], parts[1], parts[2]),
+      meals: (json['meals'] as List<dynamic>)
+          .map((e) => CopySourceMeal.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  final DateTime date;
+  final List<CopySourceMeal> meals;
+}
+
+/// Resultado de copiar una comida: la copia (para deshacer) y el día destino completo.
+class DiaryCopyResult {
+  const DiaryCopyResult({
+    required this.copyId,
+    required this.entryIds,
+    required this.day,
+  });
+
+  factory DiaryCopyResult.fromJson(Map<String, dynamic> json) =>
+      DiaryCopyResult(
+        copyId: json['copy_id'] as String,
+        entryIds: (json['entry_ids'] as List<dynamic>).cast<String>(),
+        day: DiaryDay.fromJson(json['day'] as Map<String, dynamic>),
+      );
+
+  final String copyId;
+  final List<String> entryIds;
+  final DiaryDay day;
+}
