@@ -7,6 +7,8 @@ import 'core/auth/auth_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/ui/connection_error_view.dart';
 import 'features/access/access_screen.dart';
+import 'features/ai_key/ai_key_guide_screen.dart';
+import 'features/ai_key/onboarding_flag.dart';
 import 'features/consent/consent_screen.dart';
 import 'features/home/disabled_screen.dart';
 import 'features/home/home_screen.dart';
@@ -67,7 +69,7 @@ class AppGate extends ConsumerWidget {
       Active(:final me) => switch (me.onboarding) {
         Onboarding.consent => const ConsentScreen(),
         Onboarding.profile => const ProfileScreen(onboarding: true),
-        Onboarding.done => HomeScreen(me: me),
+        Onboarding.done => _AfterOnboarding(me: me),
       },
       Disabled() => const DisabledScreen(),
       ConnectionError(:final offline) => Scaffold(
@@ -79,5 +81,42 @@ class AppGate extends ConsumerWidget {
         ),
       ),
     };
+  }
+}
+
+/// Tras el onboarding: una sola vez, el paso opcional de la clave de IA (research R13a).
+class _AfterOnboarding extends ConsumerStatefulWidget {
+  const _AfterOnboarding({required this.me});
+
+  final Me me;
+
+  @override
+  ConsumerState<_AfterOnboarding> createState() => _AfterOnboardingState();
+}
+
+class _AfterOnboardingState extends ConsumerState<_AfterOnboarding> {
+  bool? _seen;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(aiKeyStepSeenReaderProvider)().then((seen) {
+      if (mounted) setState(() => _seen = seen);
+    });
+  }
+
+  Future<void> _done() async {
+    await ref.read(aiKeyStepMarkerProvider)();
+    if (mounted) setState(() => _seen = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final seen = _seen;
+    if (seen == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (seen) return HomeScreen(me: widget.me);
+    return AiKeyGuideScreen(onboarding: true, onDone: _done);
   }
 }

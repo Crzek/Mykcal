@@ -287,3 +287,52 @@ async def test_logs_de_la_copia_sin_alimentos_cantidades_ni_fechas(
     content = _content(out)
     for needle in ("Cocido", "377", "143.9", ayer.isoformat(), copy_id, str(food)):
         assert needle not in content, needle
+
+
+async def test_evento_ai_analysis_no_lleva_foto_respuesta_clave_ni_descripcion(
+    client, user_with_consent, ai, capsys
+):
+    _, h = await user_with_consent("ai-logs")
+    key = "AIzaSyClaveParaLogs0123456789"
+    await client.put("/v1/ai-key", headers=h, json={"raw_key": key})
+    secret_text = "descripcion-privada-xyz"
+    ai.response_json = '{"items": [{"name": "Plato-secreto-de-la-ia", "grams": 100}]}'
+    for outcome in (
+        "success",
+        "key_invalid",
+        "quota_exceeded",
+        "invalid_json",
+        "empty_items",
+        "timeout",
+        "unavailable",
+    ):
+        ai.analyze_outcome = outcome
+        await client.post(
+            "/v1/photo-analysis",
+            headers=h,
+            files={"photo": ("p.jpg", b"\xff\xd8FOTO-SECRETA", "image/jpeg")},
+            data={"meal": "lunch", "entry_date": "2026-01-01", "description": secret_text},
+        )
+    out = capsys.readouterr().out
+    events = [json.loads(line) for line in out.splitlines() if line.strip()]
+    assert len([e for e in events if e["event"] == "ai_analysis"]) == 7
+    for forbidden in (
+        key,
+        secret_text,
+        "FOTO-SECRETA",
+        "Plato-secreto-de-la-ia",
+        "esto no es json",
+    ):
+        assert forbidden not in out
+    for e in events:
+        if e["event"] == "ai_analysis":
+            assert set(e) <= {
+                "event",
+                "level",
+                "timestamp",
+                "user_id",
+                "result",
+                "model",
+                "duration_ms",
+                "request_id",
+            }

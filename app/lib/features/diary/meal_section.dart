@@ -13,6 +13,9 @@ class MealSection extends StatelessWidget {
     this.onAdd,
     this.onCopy,
     this.onTapEntry,
+    this.onPhoto,
+    this.aiKeyConfigured = false,
+    this.analysisChip,
   });
 
   final DiaryMeal meal;
@@ -21,6 +24,14 @@ class MealSection extends StatelessWidget {
   /// «Copiar de otro día» del menú ⋮ (005); sin él no hay menú.
   final VoidCallback? onCopy;
   final ValueChanged<DiaryEntry>? onTapEntry;
+
+  /// «Registrar con foto» (006); sin él no hay icono. Sin clave de IA se ve atenuado y el toque
+  /// lleva a la guía de la clave (FR-016).
+  final VoidCallback? onPhoto;
+  final bool aiKeyConfigured;
+
+  /// Estado del análisis de foto de esta comida (006), bajo la cabecera.
+  final Widget? analysisChip;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +59,23 @@ class MealSection extends StatelessWidget {
                   ),
                 ),
                 Text(kcal, style: theme.textTheme.titleSmall),
+                if (onPhoto != null)
+                  IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    tooltip: aiKeyConfigured
+                        ? l10n.photoTooltip(name)
+                        : l10n.photoNeedsKeyTooltip(name),
+                    icon: Icon(
+                      Icons.photo_camera_outlined,
+                      color: aiKeyConfigured
+                          ? null
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: onPhoto,
+                  ),
                 IconButton(
                   constraints: const BoxConstraints(
                     minWidth: 48,
@@ -70,6 +98,7 @@ class MealSection extends StatelessWidget {
                   ),
               ],
             ),
+            ?analysisChip,
             if (meal.entries.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8, right: 8),

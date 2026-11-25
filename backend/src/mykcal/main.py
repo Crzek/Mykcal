@@ -15,6 +15,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from mykcal.accounts.router import router as accounts_router
+from mykcal.ai.gemini import GeminiProvider
+from mykcal.ai.provider import AiProvider
+from mykcal.ai.router import router as ai_router
 from mykcal.config import Settings, get_settings
 from mykcal.consent.router import router as consent_router
 from mykcal.core.auth import OidcClient
@@ -37,6 +40,7 @@ def create_app(
     settings: Settings | None = None,
     oidc_transport: httpx.AsyncBaseTransport | None = None,
     off_transport: httpx.AsyncBaseTransport | None = None,
+    ai_provider: AiProvider | None = None,
 ) -> FastAPI:
     configure_logging()
     settings = settings or get_settings()
@@ -60,6 +64,7 @@ def create_app(
     app.state.engine = engine
     app.state.sessionmaker = make_sessionmaker(engine)
     app.state.off_transport = off_transport
+    app.state.ai_provider = ai_provider or GeminiProvider(settings.ai_model, settings.ai_timeout_s)
     app.state.oidc = OidcClient(settings.oidc_issuer, settings.oidc_project_id, oidc_transport)
 
     @app.middleware("http")
@@ -124,4 +129,5 @@ def create_app(
     app.include_router(quick_router)
     app.include_router(foods_router)
     app.include_router(diary_router)
+    app.include_router(ai_router)
     return app

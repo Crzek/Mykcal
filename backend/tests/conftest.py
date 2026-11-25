@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import secrets
 import time
 import uuid
 from collections.abc import AsyncIterator
@@ -19,6 +21,7 @@ from sqlalchemy import text
 from testcontainers.community.postgres import PostgresContainer
 
 from mykcal.accounts.models import UserAccount
+from mykcal.ai.fake import FakeProvider
 from mykcal.config import Settings
 from mykcal.main import create_app
 from mykcal.migrate import migrate
@@ -125,6 +128,21 @@ def _no_real_open_food_facts():
     httpx.AsyncHTTPTransport.handle_async_request = original
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _no_real_gemini():
+    """FR-019: ninguna prueba sale a Gemini. El proveedor de las pruebas es `FakeProvider`."""
+    original = httpx.AsyncHTTPTransport.handle_async_request
+
+    async def guarded(self, request):
+        if request.url.host.endswith("googleapis.com"):
+            raise AssertionError("Prueba con cliente real de Gemini: usa FakeProvider")
+        return await original(self, request)
+
+    httpx.AsyncHTTPTransport.handle_async_request = guarded
+    yield
+    httpx.AsyncHTTPTransport.handle_async_request = original
+
+
 @pytest.fixture(scope="session")
 def contract() -> dict:
     return yaml.safe_load(SPEC_PATH.read_text(encoding="utf-8"))
@@ -144,6 +162,7 @@ def settings(pg_url, tmp_path_factory) -> Settings:
         oidc_project_id=PROJECT_ID,
         admin_subject=ADMIN_SUB,
         app_env="test",
+        ai_key_master=base64.b64encode(secrets.token_bytes(32)).decode(),
         apk_dir=str(tmp_path_factory.mktemp("apk")),
     )
 
@@ -160,11 +179,12 @@ def zitadel() -> FakeZitadel:
 
 @pytest_asyncio.fixture
 async def app(settings, migrated, zitadel):
-    application = create_app(settings, oidc_transport=zitadel.transport)
+    application = create_app(settings, oidc_transport=zitadel.transport, ai_provider=FakeProvider())
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE diary_entry, favorite_food, food, food_import, registration_failure, "
+                "TRUNCATE ai_key, diary_entry, favorite_food, food, food_import, "
+                "registration_failure, "
                 "registration_throttle, daily_target, weight_entry, user_profile, health_consent, "
                 "invitation_code, user_account "
                 "RESTART IDENTITY CASCADE"
@@ -173,6 +193,12 @@ async def app(settings, migrated, zitadel):
     yield application
     await application.state.oidc.aclose()
     await application.state.engine.dispose()
+
+
+@pytest.fixture
+def ai(app) -> FakeProvider:
+    """El proveedor de IA simulado de la app de la prueba."""
+    return app.state.ai_provider
 
 
 @pytest_asyncio.fixture

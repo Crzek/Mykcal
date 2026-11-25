@@ -225,3 +225,25 @@ async def test_0005_favoritos_y_copy_id(app, make_account, make_food, make_entry
         await run("SELECT indexdef FROM pg_indexes WHERE indexname = 'ix_diary_entry_copy'")
     ).scalar_one()
     assert "copy_id IS NOT NULL" in index
+
+
+async def test_0006_ai_key(app, make_account):
+    """T002 (006): ai_key con PK user_id, CHECK de proveedor y FK."""
+    acc = await make_account("mig-ai")
+
+    async def run(sql: str, **params):
+        async with app.state.engine.begin() as conn:
+            return await conn.execute(text(sql), params)
+
+    insert = (
+        "INSERT INTO ai_key (user_id, provider, encrypted_key, configured_at) "
+        "VALUES (:u, :p, :k, now())"
+    )
+    await run(insert, u=acc.id, p="gemini", k=b"x")
+    with pytest.raises(IntegrityError):  # PK: una clave por usuario
+        await run(insert, u=acc.id, p="gemini", k=b"x")
+    await run("DELETE FROM ai_key")
+    with pytest.raises(IntegrityError):  # CHECK del proveedor
+        await run(insert, u=acc.id, p="openai", k=b"x")
+    with pytest.raises(IntegrityError):  # FK usuario
+        await run(insert, u=uuid.uuid4(), p="gemini", k=b"x")

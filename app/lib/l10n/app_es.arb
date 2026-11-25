@@ -817,5 +817,193 @@
   },
   "copyUndone": "Copia deshecha",
   "copySourceEmpty": "Esa comida ya no tiene alimentos.",
-  "copyOutOfRange": "Esa comida ya no se puede copiar."
+  "copyOutOfRange": "Esa comida ya no se puede copiar.",
+  "aiKeyTitle": "Clave de IA",
+  "aiKeyRowConfigured": "Configurada · {date}",
+  "@aiKeyRowConfigured": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aiKeyRowNone": "No configurada",
+  "aiKeyIntro": "Para registrar un plato con una foto, Mykcal usa tu propia clave de Google Gemini. Es gratis y solo tuya.",
+  "aiKeyStep1": "Entra en aistudio.google.com",
+  "aiKeyStep2": "Accede con tu cuenta de Google",
+  "aiKeyStep3": "Pulsa «Obtener clave de API» y crea una",
+  "aiKeyStep4": "Copia la clave y pégala aquí",
+  "aiKeyStepLabel": "Paso {n}: {text}",
+  "@aiKeyStepLabel": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "aiKeyFieldLabel": "Clave de API",
+  "aiKeyFieldHint": "Pega tu clave aquí",
+  "aiKeySave": "Guardar clave",
+  "aiKeySaved": "Clave configurada",
+  "aiKeyInvalid": "La clave no es válida. Comprueba que la has copiado bien y que tu proyecto de Google tiene la API de Gemini activa.",
+  "aiKeyUnavailable": "No se ha podido comprobar la clave ahora. Inténtalo más tarde.",
+  "aiKeySkip": "Omitir",
+  "aiKeyConfiguredOn": "Clave configurada el {date}",
+  "@aiKeyConfiguredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aiKeyProvider": "Proveedor: Google Gemini",
+  "aiKeyChange": "Cambiar clave",
+  "aiKeyRemove": "Quitar clave",
+  "aiKeyRemoveTitle": "¿Quitar la clave de IA?",
+  "aiKeyRemoveBody": "No podrás registrar con foto hasta que añadas otra clave.",
+  "aiKeyRemoved": "Clave quitada",
+  "photoTooltip": "Registrar con foto en {meal}",
+  "@photoTooltip": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "photoNeedsKeyTooltip": "Registrar con foto en {meal}: necesitas una clave de IA",
+  "@photoNeedsKeyTooltip": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "photoCaptureTitle": "Foto del plato",
+  "photoPermissionDenied": "La cámara es necesaria para analizar la foto de tu plato.",
+  "photoTake": "Hacer foto",
+  "photoFromGallery": "Elegir de la galería",
+  "photoDescriptionLabel": "Descripción",
+  "photoDescriptionHint": "Ej: arroz con pollo y ensalada",
+  "photoTotalGramsLabel": "Gramos totales del plato",
+  "photoTotalGramsHint": "Opcional",
+  "photoAnalyze": "Analizar",
+  "chipAnalyzing": "Analizando…",
+  "chipReady": "Análisis listo ✓",
+  "chipFailed": "Análisis fallido ✕",
+  "snackReady": "Foto analizada — toca para revisar",
+  "snackSeeProposal": "Ver",
+  "snackSettings": "Ajustes",
+  "snackSeeDraft": "Ver borrador",
+  "failKeyInvalid": "Tu clave de IA no es válida. Revísala en ajustes.",
+  "failQuota": "Has alcanzado el límite de tu cuenta de Google.",
+  "failInvalidResponse": "El análisis no ha podido completarse. Puedes reintentar o continuar a mano.",
+  "failUnrecognized": "No se ha reconocido ningún alimento en la foto. Puedes continuar a mano.",
+  "failTimeout": "El análisis ha tardado demasiado. Puedes reintentar.",
+  "failProvider": "El proveedor de IA no responde. Inténtalo más tarde.",
+  "failKeyRequired": "Necesitas una clave de IA para analizar fotos.",
+  "failNoConnection": "Sin conexión. Se ha guardado como borrador.",
+  "failInterrupted": "El análisis se interrumpió. Puedes reintentar.",
+  "proposalTitle": "Revisa lo que ha visto la IA",
+  "proposalAiName": "{name} (IA)",
+  "@proposalAiName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalNoMatch": "Sin equivalente en tu base",
+  "proposalFlagged": "Revisa los gramos",
+  "proposalChange": "Cambiar",
+  "proposalSearch": "Buscar",
+  "proposalCreate": "Crear",
+  "proposalRemove": "Quitar",
+  "proposalAdd": "Añadir alimento",
+  "proposalGramsKcal": "{grams} g · {kcal} kcal",
+  "@proposalGramsKcal": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalGrams": "{grams} g",
+  "@proposalGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalTotals": "Total: {kcal} kcal · P {p} g · H {c} g · G {f} g",
+  "@proposalTotals": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      },
+      "p": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      },
+      "f": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalSave": "Guardar en {meal}",
+  "@proposalSave": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalSaved": "Platos guardados en {meal}",
+  "@proposalSaved": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "proposalGramsTitle": "Gramos",
+  "proposalGramsField": "Gramos",
+  "proposalSaveError": "No se ha podido guardar. Inténtalo de nuevo.",
+  "proposalEmpty": "No queda ningún alimento en la propuesta.",
+  "draftsTitle": "Borradores de fotos",
+  "draftsEmpty": "No tienes borradores.",
+  "draftsRetry": "Reintentar",
+  "draftsManual": "Añadir a mano",
+  "draftsDiscard": "Descartar",
+  "draftsDiscardTitle": "¿Descartar el borrador?",
+  "draftsDiscardBody": "Se borrará la foto de este borrador.",
+  "draftsReview": "Revisar",
+  "draftsReady": "Análisis listo",
+  "draftsRowTitle": "{meal} · {date}",
+  "@draftsRowTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "draftsBadge": "Borradores de fotos: {count}",
+  "@draftsBadge": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  }
 }
