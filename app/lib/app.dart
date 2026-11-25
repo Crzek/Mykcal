@@ -45,6 +45,17 @@ class AppGate extends ConsumerWidget {
     final state = ref.watch(authControllerProvider);
     final value = state.valueOrNull;
     if (value == null) {
+      // Un error al arrancar no es «cargando»: se ofrece reintentar el arranque entero.
+      if (state.hasError) {
+        return Scaffold(
+          body: SafeArea(
+            child: ConnectionErrorView(
+              offline: false,
+              onRetry: () => ref.invalidate(authControllerProvider),
+            ),
+          ),
+        );
+      }
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return switch (value) {
