@@ -8,6 +8,15 @@
 
 **Input**: User description: "Publicación automática del APK con GitHub Actions. Al fusionar en main (producción) se compila el APK de prod firmado y se publica en el volumen del servidor de Dokploy para que https://mykcal-bk-api.cruzerick.com/descargar/mykcal.apk sirva la versión nueva; opcionalmente lo mismo para dev con su entorno. El keystore, sus contraseñas y la clave SSH viven como secretos de GitHub, nunca en el repositorio. La publicación es atómica, se verifica que la descarga responde 200 tras publicar, y si falla la compilación o la subida el APK anterior sigue disponible. Debe poder lanzarse también a mano. Sustituye al flujo manual build_apk.sh + publish_apk.sh, que se mantiene como alternativa."
 
+## Clarifications
+
+### Session 2026-11-25
+
+- Q: ¿Cómo se calcula el número de versión del APK para que crezca entre publicaciones automáticas y manuales? → A: Se deriva de la fecha y hora de compilación (UTC, en minutos); el mismo cálculo vale para el proceso automático y el flujo manual.
+- Q: ¿Cómo se entera Erick de que falló una publicación automática? → A: Con el aviso por correo que GitHub envía por defecto al fallar la ejecución, además del historial; sin avisos propios ni secretos extra.
+- Q: ¿Cómo se detecta que la clave de firma no coincide con la de los APK ya distribuidos? → A: Se compara la huella SHA-256 del certificado del APK compilado con una huella esperada guardada como variable del repositorio (no secreta); si no coincide, falla antes de subir.
+- Q: Al lanzar la publicación a mano para producción, ¿desde qué versión del código se compila? → A: Por defecto la última de `main`; se puede indicar un commit anterior, pero solo si pertenece a `main`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Publicar producción al fusionar en `main` (Priority: P1)
@@ -123,18 +132,23 @@ solo cambia el enlace de desarrollo.
 - **FR-003**: La publicación MUST ser atómica: en ningún momento el enlace sirve un APK incompleto
   o inexistente si antes había uno correcto.
 - **FR-004**: Si falla cualquier paso (compilación, firma, subida o comprobación), el enlace MUST
-  seguir sirviendo el APK anterior y la ejecución MUST quedar marcada como fallida con su causa.
+  seguir sirviendo el APK anterior y la ejecución MUST quedar marcada como fallida con su causa, de modo que GitHub avise a Erick por
+  correo con su notificación por defecto (sin aviso propio ni secretos adicionales).
 - **FR-005**: Tras publicar, el proceso MUST comprobar que el enlace público responde
   correctamente y sirve el archivo recién subido (mismo tamaño o huella).
 - **FR-006**: Cada APK publicado MUST tener un número de versión estrictamente mayor que el
-  anterior, para que el móvil lo trate como actualización.
+  anterior, para que el móvil lo trate como actualización. El número se deriva de la fecha y hora
+  de compilación (UTC, en minutos) con el mismo cálculo en el proceso automático y en el flujo
+  manual, de modo que crece aunque se alternen ambos.
 - **FR-007**: El APK MUST firmarse con la misma clave que los ya distribuidos; si la firma no
-  coincide, MUST NOT publicarse.
+  coincide, MUST NOT publicarse. La comprobación compara la huella SHA-256 del certificado del APK
+  compilado con una huella esperada guardada como variable del repositorio y falla antes de subir.
 - **FR-008**: La clave de firma, sus contraseñas y el acceso al servidor MUST guardarse como
   secretos del repositorio y MUST NOT aparecer en el repositorio, en los registros de ejecución ni
   en los artefactos.
 - **FR-009**: Erick MUST poder lanzar la publicación a mano eligiendo el entorno (producción o
-  desarrollo).
+  desarrollo). Por defecto se compila la última versión de `main`; MAY indicar un commit anterior,
+  solo si pertenece a `main` (así se vuelve a una versión previa); nunca una rama sin fusionar.
 - **FR-010**: Dos publicaciones del mismo entorno MUST NOT ejecutarse a la vez.
 - **FR-011**: La publicación de desarrollo MUST usar su propio enlace y configuración y MUST NOT
   afectar a producción; si su configuración no existe, MUST omitirse sin marcar fallo en los
@@ -177,8 +191,7 @@ solo cambia el enlace de desarrollo.
 - El APK se sigue sirviendo desde el backend (`/descargar/mykcal.apk`); no se cambia a otro
   alojamiento (por ejemplo, GitHub Releases), porque el enlace ya se comparte y debe ser estable.
 - «Cambia la app» significa que el merge modifica archivos de `app/`.
-- El número de versión se deriva automáticamente (por ejemplo, de un contador de ejecuciones);
-  el número visible (1.0.0) se sigue cambiando a mano cuando Erick quiera.
+- El número de versión se deriva de la hora de compilación (ver Clarifications); el número visible (1.0.0) se sigue cambiando a mano cuando Erick quiera.
 - Volver a una versión anterior se hace relanzando la publicación sobre un commit anterior de
   `main` o con el flujo manual; no se guarda un historial de APK en el servidor.
 - El entorno de desarrollo sigue aplazado; esta feature lo deja preparado pero no lo crea.
