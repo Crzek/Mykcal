@@ -247,3 +247,38 @@ async def test_0006_ai_key(app, make_account):
         await run(insert, u=acc.id, p="openai", k=b"x")
     with pytest.raises(IntegrityError):  # FK usuario
         await run(insert, u=uuid.uuid4(), p="gemini", k=b"x")
+
+
+async def test_0007_recalc_proposal_restricciones(app, make_account, make_target_version):
+    """T005 (007): CHECK de estado, responded_at, ignored_until, índice parcial y FK."""
+    from datetime import UTC, datetime
+
+    acc = await make_account("mig-recalc")
+    target = await make_target_version(acc, datetime.now(UTC))
+
+    async def run(sql: str, **params):
+        async with app.state.engine.begin() as conn:
+            return await conn.execute(text(sql), params)
+
+    insert = (
+        "INSERT INTO recalc_proposal (user_id, status, reference_weight_kg, weekly_average_kg, "
+        "target_from_id, was_manual, created_at, responded_at, ignored_until) "
+        "VALUES (:u, :s, 80.0, 78.2, :t, false, now(), :r, :i)"
+    )
+    ok = {"u": acc.id, "t": target}
+    with pytest.raises(IntegrityError):  # estado fuera de catálogo
+        await run(insert, s="cancelled", r=None, i=None, **ok)
+    with pytest.raises(IntegrityError):  # pending con responded_at
+        await run(insert, s="pending", r=datetime.now(UTC), i=None, **ok)
+    with pytest.raises(IntegrityError):  # accepted sin responded_at
+        await run(insert, s="accepted", r=None, i=None, **ok)
+    with pytest.raises(IntegrityError):  # ignored_until con estado distinto de ignored
+        await run(insert, s="accepted", r=datetime.now(UTC), i=datetime.now(UTC).date(), **ok)
+    await run(insert, s="pending", r=None, i=None, **ok)
+    with pytest.raises(IntegrityError):  # una sola pending por usuario
+        await run(insert, s="pending", r=None, i=None, **ok)
+    await run(insert, s="accepted", r=datetime.now(UTC), i=None, **ok)  # histórico sí
+    with pytest.raises(IntegrityError):  # FK usuario
+        await run(insert, s="accepted", r=datetime.now(UTC), i=None, u=uuid.uuid4(), t=target)
+    with pytest.raises(IntegrityError):  # FK objetivo
+        await run(insert, s="accepted", r=datetime.now(UTC), i=None, u=acc.id, t=uuid.uuid4())

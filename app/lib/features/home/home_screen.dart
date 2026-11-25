@@ -8,18 +8,36 @@ import '../admin/invitations_screen.dart';
 import '../diary/diary_screen.dart';
 import '../foods/food_search_screen.dart';
 import '../settings/settings_screen.dart';
+import '../weight/recalc_proposal_controller.dart';
+import '../weight/weight_screen.dart';
 import '../share/share_app_sheet.dart';
 
-enum _MenuAction { foods, invitations, shareApp, settings, signOut }
+enum _MenuAction { foods, weight, invitations, shareApp, settings, signOut }
 
 /// Inicio: el diario del día (FR-012). El menú ⋮ da acceso a Alimentos, ajustes y cuenta.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.me});
 
   final Me me;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Me get me => widget.me;
+
+  @override
+  void initState() {
+    super.initState();
+    // Al abrir la app se consulta la propuesta de recálculo del objetivo (007, F3.1).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(recalcProposalControllerProvider).check(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -33,6 +51,13 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const FoodSearchScreen(),
+                    ),
+                  );
+                case _MenuAction.weight:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          WeightScreen(registeredAt: me.registeredAt),
                     ),
                   );
                 case _MenuAction.invitations:
@@ -57,6 +82,10 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                 value: _MenuAction.foods,
                 child: Text(l10n.homeFoods),
+              ),
+              PopupMenuItem(
+                value: _MenuAction.weight,
+                child: Text(l10n.menuWeight),
               ),
               if (me.isAdmin)
                 PopupMenuItem(

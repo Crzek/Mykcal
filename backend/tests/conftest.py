@@ -183,7 +183,7 @@ async def app(settings, migrated, zitadel):
     async with application.state.engine.begin() as conn:
         await conn.execute(
             text(
-                "TRUNCATE ai_key, diary_entry, favorite_food, food, food_import, "
+                "TRUNCATE recalc_proposal, ai_key, diary_entry, favorite_food, food, food_import, "
                 "registration_failure, "
                 "registration_throttle, daily_target, weight_entry, user_profile, health_consent, "
                 "invitation_code, user_account "
@@ -482,5 +482,97 @@ def make_favorite(app):
                     created_at=created_at or datetime.now(UTC),
                 )
             )
+
+    return _make
+
+
+@pytest.fixture
+def make_weight(app):
+    """Inserta (o sustituye) un registro de peso de un usuario."""
+    from datetime import date as date_type
+
+    from mykcal.profile.models import WeightEntry
+
+    async def _make(
+        account: UserAccount, measured_on: date_type, weight_kg, *, created_at=None
+    ) -> None:
+        now = created_at or datetime.now(UTC)
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(
+                WeightEntry(
+                    id=uuid.uuid4(),
+                    user_id=account.id,
+                    measured_on=measured_on,
+                    weight_kg=weight_kg,
+                    created_at=now,
+                    updated_at=now,
+                )
+            )
+
+    return _make
+
+
+@pytest.fixture
+def make_proposal(app):
+    """Inserta una `recalc_proposal` apuntando al objetivo vigente del usuario."""
+    from datetime import date as date_type
+
+    from sqlalchemy import select
+
+    from mykcal.targets.models import DailyTarget
+    from mykcal.weight.models import RecalcProposal
+
+    async def _make(
+        account: UserAccount,
+        status: str = "pending",
+        *,
+        reference=80.0,
+        average=78.2,
+        was_manual=False,
+        ignored_until: date_type | None = None,
+    ) -> uuid.UUID:
+        now = datetime.now(UTC)
+        async with app.state.sessionmaker() as s, s.begin():
+            target = (
+                await s.execute(
+                    select(DailyTarget).where(
+                        DailyTarget.user_id == account.id, DailyTarget.is_current.is_(True)
+                    )
+                )
+            ).scalar_one()
+            row = RecalcProposal(
+                id=uuid.uuid4(),
+                user_id=account.id,
+                status=status,
+                reference_weight_kg=reference,
+                weekly_average_kg=average,
+                target_from_id=target.id,
+                was_manual=was_manual,
+                created_at=now,
+                responded_at=None if status == "pending" else now,
+                ignored_until=ignored_until,
+            )
+            s.add(row)
+        return row.id
+
+    return _make
+
+
+@pytest.fixture
+def make_profile(app):
+    """Inserta el perfil de un usuario (hombre, 30, 180 cm, moderada, mantener)."""
+    from mykcal.profile.models import UserProfile
+
+    async def _make(account: UserAccount, **overrides) -> None:
+        now = datetime.now(UTC)
+        values = {
+            "age": 30,
+            "sex": "male",
+            "height_cm": 180,
+            "activity_level": "moderate",
+            "goal": "maintain",
+        } | overrides
+        async with app.state.sessionmaker() as s, s.begin():
+            s.add(UserProfile(user_id=account.id, created_at=now, updated_at=now, **values))
 
     return _make

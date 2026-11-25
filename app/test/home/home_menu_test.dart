@@ -66,4 +66,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Busca un alimento'), findsOneWidget);
   });
+
+  testWidgets('el menú ⋮ → «Peso» abre la pantalla de peso', (tester) async {
+    final h = Harness();
+    await seedSession();
+    await h.pumpApp(tester);
+    await tester.tap(find.byTooltip('Menú'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Peso'));
+    await tester.pumpAndSettle();
+    expect(find.text('Peso de hoy'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Guardar'), findsOneWidget);
+  });
 }
