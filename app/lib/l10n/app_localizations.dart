@@ -1963,6 +1963,480 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Esa comida ya no se puede copiar.'**
   String get copyOutOfRange;
+
+  /// No description provided for @aiKeyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Clave de IA'**
+  String get aiKeyTitle;
+
+  /// No description provided for @aiKeyRowConfigured.
+  ///
+  /// In es, this message translates to:
+  /// **'Configurada · {date}'**
+  String aiKeyRowConfigured(String date);
+
+  /// No description provided for @aiKeyRowNone.
+  ///
+  /// In es, this message translates to:
+  /// **'No configurada'**
+  String get aiKeyRowNone;
+
+  /// No description provided for @aiKeyIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Para registrar un plato con una foto, Mykcal usa tu propia clave de Google Gemini. Es gratis y solo tuya.'**
+  String get aiKeyIntro;
+
+  /// No description provided for @aiKeyStep1.
+  ///
+  /// In es, this message translates to:
+  /// **'Entra en aistudio.google.com'**
+  String get aiKeyStep1;
+
+  /// No description provided for @aiKeyStep2.
+  ///
+  /// In es, this message translates to:
+  /// **'Accede con tu cuenta de Google'**
+  String get aiKeyStep2;
+
+  /// No description provided for @aiKeyStep3.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa «Obtener clave de API» y crea una'**
+  String get aiKeyStep3;
+
+  /// No description provided for @aiKeyStep4.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia la clave y pégala aquí'**
+  String get aiKeyStep4;
+
+  /// No description provided for @aiKeyStepLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso {n}: {text}'**
+  String aiKeyStepLabel(String n, String text);
+
+  /// No description provided for @aiKeyFieldLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Clave de API'**
+  String get aiKeyFieldLabel;
+
+  /// No description provided for @aiKeyFieldHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pega tu clave aquí'**
+  String get aiKeyFieldHint;
+
+  /// No description provided for @aiKeySave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar clave'**
+  String get aiKeySave;
+
+  /// No description provided for @aiKeySaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Clave configurada'**
+  String get aiKeySaved;
+
+  /// No description provided for @aiKeyInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'La clave no es válida. Comprueba que la has copiado bien y que tu proyecto de Google tiene la API de Gemini activa.'**
+  String get aiKeyInvalid;
+
+  /// No description provided for @aiKeyUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido comprobar la clave ahora. Inténtalo más tarde.'**
+  String get aiKeyUnavailable;
+
+  /// No description provided for @aiKeySkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir'**
+  String get aiKeySkip;
+
+  /// No description provided for @aiKeyConfiguredOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Clave configurada el {date}'**
+  String aiKeyConfiguredOn(String date);
+
+  /// No description provided for @aiKeyProvider.
+  ///
+  /// In es, this message translates to:
+  /// **'Proveedor: Google Gemini'**
+  String get aiKeyProvider;
+
+  /// No description provided for @aiKeyChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar clave'**
+  String get aiKeyChange;
+
+  /// No description provided for @aiKeyRemove.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar clave'**
+  String get aiKeyRemove;
+
+  /// No description provided for @aiKeyRemoveTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar la clave de IA?'**
+  String get aiKeyRemoveTitle;
+
+  /// No description provided for @aiKeyRemoveBody.
+  ///
+  /// In es, this message translates to:
+  /// **'No podrás registrar con foto hasta que añadas otra clave.'**
+  String get aiKeyRemoveBody;
+
+  /// No description provided for @aiKeyRemoved.
+  ///
+  /// In es, this message translates to:
+  /// **'Clave quitada'**
+  String get aiKeyRemoved;
+
+  /// No description provided for @photoTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar con foto en {meal}'**
+  String photoTooltip(String meal);
+
+  /// No description provided for @photoNeedsKeyTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar con foto en {meal}: necesitas una clave de IA'**
+  String photoNeedsKeyTooltip(String meal);
+
+  /// No description provided for @photoCaptureTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto del plato'**
+  String get photoCaptureTitle;
+
+  /// No description provided for @photoPermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'La cámara es necesaria para analizar la foto de tu plato.'**
+  String get photoPermissionDenied;
+
+  /// No description provided for @photoTake.
+  ///
+  /// In es, this message translates to:
+  /// **'Hacer foto'**
+  String get photoTake;
+
+  /// No description provided for @photoFromGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir de la galería'**
+  String get photoFromGallery;
+
+  /// No description provided for @photoDescriptionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción'**
+  String get photoDescriptionLabel;
+
+  /// No description provided for @photoDescriptionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: arroz con pollo y ensalada'**
+  String get photoDescriptionHint;
+
+  /// No description provided for @photoTotalGramsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Gramos totales del plato'**
+  String get photoTotalGramsLabel;
+
+  /// No description provided for @photoTotalGramsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Opcional'**
+  String get photoTotalGramsHint;
+
+  /// No description provided for @photoAnalyze.
+  ///
+  /// In es, this message translates to:
+  /// **'Analizar'**
+  String get photoAnalyze;
+
+  /// No description provided for @chipAnalyzing.
+  ///
+  /// In es, this message translates to:
+  /// **'Analizando…'**
+  String get chipAnalyzing;
+
+  /// No description provided for @chipReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Análisis listo ✓'**
+  String get chipReady;
+
+  /// No description provided for @chipFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Análisis fallido ✕'**
+  String get chipFailed;
+
+  /// No description provided for @snackReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto analizada — toca para revisar'**
+  String get snackReady;
+
+  /// No description provided for @snackSeeProposal.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver'**
+  String get snackSeeProposal;
+
+  /// No description provided for @snackSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get snackSettings;
+
+  /// No description provided for @snackSeeDraft.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver borrador'**
+  String get snackSeeDraft;
+
+  /// No description provided for @failKeyInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu clave de IA no es válida. Revísala en ajustes.'**
+  String get failKeyInvalid;
+
+  /// No description provided for @failQuota.
+  ///
+  /// In es, this message translates to:
+  /// **'Has alcanzado el límite de tu cuenta de Google.'**
+  String get failQuota;
+
+  /// No description provided for @failInvalidResponse.
+  ///
+  /// In es, this message translates to:
+  /// **'El análisis no ha podido completarse. Puedes reintentar o continuar a mano.'**
+  String get failInvalidResponse;
+
+  /// No description provided for @failUnrecognized.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha reconocido ningún alimento en la foto. Puedes continuar a mano.'**
+  String get failUnrecognized;
+
+  /// No description provided for @failTimeout.
+  ///
+  /// In es, this message translates to:
+  /// **'El análisis ha tardado demasiado. Puedes reintentar.'**
+  String get failTimeout;
+
+  /// No description provided for @failProvider.
+  ///
+  /// In es, this message translates to:
+  /// **'El proveedor de IA no responde. Inténtalo más tarde.'**
+  String get failProvider;
+
+  /// No description provided for @failKeyRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas una clave de IA para analizar fotos.'**
+  String get failKeyRequired;
+
+  /// No description provided for @failNoConnection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión. Se ha guardado como borrador.'**
+  String get failNoConnection;
+
+  /// No description provided for @failInterrupted.
+  ///
+  /// In es, this message translates to:
+  /// **'El análisis se interrumpió. Puedes reintentar.'**
+  String get failInterrupted;
+
+  /// No description provided for @proposalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa lo que ha visto la IA'**
+  String get proposalTitle;
+
+  /// No description provided for @proposalAiName.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} (IA)'**
+  String proposalAiName(String name);
+
+  /// No description provided for @proposalNoMatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin equivalente en tu base'**
+  String get proposalNoMatch;
+
+  /// No description provided for @proposalFlagged.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa los gramos'**
+  String get proposalFlagged;
+
+  /// No description provided for @proposalChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get proposalChange;
+
+  /// No description provided for @proposalSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get proposalSearch;
+
+  /// No description provided for @proposalCreate.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear'**
+  String get proposalCreate;
+
+  /// No description provided for @proposalRemove.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar'**
+  String get proposalRemove;
+
+  /// No description provided for @proposalAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir alimento'**
+  String get proposalAdd;
+
+  /// No description provided for @proposalGramsKcal.
+  ///
+  /// In es, this message translates to:
+  /// **'{grams} g · {kcal} kcal'**
+  String proposalGramsKcal(String grams, String kcal);
+
+  /// No description provided for @proposalGrams.
+  ///
+  /// In es, this message translates to:
+  /// **'{grams} g'**
+  String proposalGrams(String grams);
+
+  /// No description provided for @proposalTotals.
+  ///
+  /// In es, this message translates to:
+  /// **'Total: {kcal} kcal · P {p} g · H {c} g · G {f} g'**
+  String proposalTotals(String kcal, String p, String c, String f);
+
+  /// No description provided for @proposalSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar en {meal}'**
+  String proposalSave(String meal);
+
+  /// No description provided for @proposalSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Platos guardados en {meal}'**
+  String proposalSaved(String meal);
+
+  /// No description provided for @proposalGramsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Gramos'**
+  String get proposalGramsTitle;
+
+  /// No description provided for @proposalGramsField.
+  ///
+  /// In es, this message translates to:
+  /// **'Gramos'**
+  String get proposalGramsField;
+
+  /// No description provided for @proposalSaveError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido guardar. Inténtalo de nuevo.'**
+  String get proposalSaveError;
+
+  /// No description provided for @proposalEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No queda ningún alimento en la propuesta.'**
+  String get proposalEmpty;
+
+  /// No description provided for @draftsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Borradores de fotos'**
+  String get draftsTitle;
+
+  /// No description provided for @draftsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes borradores.'**
+  String get draftsEmpty;
+
+  /// No description provided for @draftsRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get draftsRetry;
+
+  /// No description provided for @draftsManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a mano'**
+  String get draftsManual;
+
+  /// No description provided for @draftsDiscard.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get draftsDiscard;
+
+  /// No description provided for @draftsDiscardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar el borrador?'**
+  String get draftsDiscardTitle;
+
+  /// No description provided for @draftsDiscardBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrará la foto de este borrador.'**
+  String get draftsDiscardBody;
+
+  /// No description provided for @draftsReview.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisar'**
+  String get draftsReview;
+
+  /// No description provided for @draftsReady.
+  ///
+  /// In es, this message translates to:
+  /// **'Análisis listo'**
+  String get draftsReady;
+
+  /// No description provided for @draftsRowTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{meal} · {date}'**
+  String draftsRowTitle(String meal, String date);
+
+  /// No description provided for @draftsBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Borradores de fotos: {count}'**
+  String draftsBadge(String count);
 }
 
 class _AppLocalizationsDelegate

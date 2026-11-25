@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,6 +64,18 @@ abstract class MykcalApi {
     required int utcOffsetMin,
   });
   Future<DiaryDay> undoCopy(String copyId, int utcOffsetMin);
+
+  /// Clave de IA y registro por foto (006). `aiKey` devuelve `null` si no hay clave.
+  Future<AiKeyStatus?> aiKey();
+  Future<AiKeyStatus> saveAiKey(String rawKey);
+  Future<void> deleteAiKey();
+  Future<PhotoAnalysisResult> analyzePhoto({
+    required String photoPath,
+    required Meal meal,
+    required DateTime date,
+    String? description,
+    int? totalGrams,
+  });
 }
 
 typedef TokenSource = Future<String?> Function();
@@ -327,6 +341,55 @@ class HttpMykcalApi implements MykcalApi {
         ),
       );
 
+  @override
+  Future<AiKeyStatus?> aiKey() async {
+    try {
+      return AiKeyStatus.fromJson(await _json('GET', '/v1/ai-key'));
+    } on ApiError catch (e) {
+      if (e.code == 'AI_KEY_NOT_FOUND') return null;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AiKeyStatus> saveAiKey(String rawKey) async => AiKeyStatus.fromJson(
+    await _json('PUT', '/v1/ai-key', data: {'raw_key': rawKey}),
+  );
+
+  @override
+  Future<void> deleteAiKey() async {
+    await _json('DELETE', '/v1/ai-key');
+  }
+
+  /// El análisis puede tardar hasta 55 s en el servidor: se espera algo más que el resto.
+  static const analysisTimeout = Duration(seconds: 65);
+
+  @override
+  Future<PhotoAnalysisResult> analyzePhoto({
+    required String photoPath,
+    required Meal meal,
+    required DateTime date,
+    String? description,
+    int? totalGrams,
+  }) async {
+    final bytes = await File(photoPath).readAsBytes();
+    final response = await _request(
+      'POST',
+      '/v1/photo-analysis',
+      timeout: analysisTimeout,
+      // Un FormData solo se envía una vez: ante un 401 se construye otro.
+      dataFactory: () => FormData.fromMap({
+        'photo': MultipartFile.fromBytes(bytes, filename: 'photo.jpg'),
+        'meal': meal.wire,
+        'entry_date': isoDate(date),
+        if (description != null && description.isNotEmpty)
+          'description': description,
+        'total_grams': ?totalGrams,
+      }),
+    );
+    return PhotoAnalysisResult.fromJson(response.data ?? const {});
+  }
+
   List<QuickFood> _quickList(Map<String, dynamic> json) =>
       (json['items'] as List<dynamic>)
           .map((e) => QuickFood.fromJson(e as Map<String, dynamic>))
@@ -350,6 +413,8 @@ class HttpMykcalApi implements MykcalApi {
     String method,
     String path, {
     Object? data,
+    Object? Function()? dataFactory,
+    Duration? timeout,
     Map<String, dynamic>? query,
   }) async {
     var token = await accessToken();
@@ -358,11 +423,13 @@ class HttpMykcalApi implements MykcalApi {
       try {
         final response = await dio.request<Map<String, dynamic>>(
           path,
-          data: data,
+          data: dataFactory != null ? dataFactory() : data,
           queryParameters: query,
           options: Options(
             method: method,
             headers: {'Authorization': 'Bearer $token'},
+            sendTimeout: timeout,
+            receiveTimeout: timeout,
           ),
         );
         return response;
@@ -387,7 +454,11 @@ ApiFailure mapDioError(DioException e) {
   final status = response.statusCode ?? 0;
   final body = response.data;
   final code = body is Map<String, dynamic> ? body['code'] as String? : null;
-  if (status >= 500 || code == 'AUTH_UNAVAILABLE') return const ServerFailure();
+  // Los fallos de la IA (503, 504) llevan su código: la app decide qué ofrecer (006 R11).
+  final isAi = code != null && code.startsWith('AI_');
+  if (!isAi && (status >= 500 || code == 'AUTH_UNAVAILABLE')) {
+    return const ServerFailure();
+  }
   if (code == null) return const ServerFailure();
   final header = int.tryParse(response.headers.value('retry-after') ?? '');
   final fromBody = body is Map<String, dynamic>

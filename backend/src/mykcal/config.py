@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import ipaddress
 from functools import lru_cache
 from urllib.parse import parse_qs, urlsplit
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 MAX_ACTIVE_ACCOUNTS = 50
@@ -24,7 +26,9 @@ def _host_is_internal(host: str) -> bool:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="ignore", case_sensitive=False, hide_input_in_errors=True
+    )
 
     database_url: str = Field(min_length=1)
     oidc_issuer: str = Field(min_length=1)
@@ -37,6 +41,21 @@ class Settings(BaseSettings):
     off_base_url: str = "https://world.openfoodfacts.org"
     off_user_agent: str = "Mykcal/0.3 (app privada)"
     off_timeout_s: float = Field(default=5.0, ge=1, le=30)
+    # 006: clave maestra (32 bytes en base64) con la que se cifran las claves de IA de los usuarios.
+    ai_key_master: SecretStr
+    ai_model: str = "gemini-2.0-flash"
+    ai_timeout_s: float = Field(default=55.0, ge=5, le=58)
+
+    @field_validator("ai_key_master")
+    @classmethod
+    def _master(cls, v: SecretStr) -> SecretStr:
+        try:
+            ok = len(base64.b64decode(v.get_secret_value(), validate=True)) == 32
+        except (binascii.Error, ValueError):
+            ok = False
+        if not ok:
+            raise ValueError("AI_KEY_MASTER debe ser base64 de 32 bytes")
+        return v
 
     @field_validator("off_base_url")
     @classmethod

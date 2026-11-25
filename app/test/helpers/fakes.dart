@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mykcal/app.dart';
 import 'package:mykcal/core/api/models.dart';
 import 'package:mykcal/core/api/mykcal_api.dart';
@@ -12,7 +13,9 @@ import 'package:mykcal/core/auth/auth_service.dart';
 import 'package:mykcal/core/auth/session_store.dart';
 import 'package:mykcal/core/config/download_link.dart';
 import 'package:mykcal/core/theme/app_theme.dart';
+import 'package:mykcal/features/ai_key/onboarding_flag.dart';
 import 'package:mykcal/features/diary/diary_day_controller.dart';
+import 'package:mykcal/features/photo/photo_picker.dart';
 import 'package:mykcal/l10n/app_localizations.dart';
 
 final testNow = DateTime.utc(2026, 11, 22, 12);
@@ -199,6 +202,22 @@ class AddEntryCall {
   final double? quantity;
   final double? servings;
   final int utcOffsetMin;
+}
+
+class AnalyzeCall {
+  const AnalyzeCall({
+    required this.photoPath,
+    required this.meal,
+    required this.date,
+    this.description,
+    this.totalGrams,
+  });
+
+  final String photoPath;
+  final Meal meal;
+  final DateTime date;
+  final String? description;
+  final int? totalGrams;
 }
 
 class CopyMealCall {
@@ -704,6 +723,51 @@ class FakeApi implements MykcalApi {
     return onDeleteCustom(id);
   }
 
+  Future<AiKeyStatus?> Function() onAiKey = () async => null;
+  Future<AiKeyStatus> Function(String rawKey) onSaveAiKey = (_) async =>
+      AiKeyStatus(provider: 'gemini', configuredAt: DateTime.utc(2026, 11, 25));
+  Future<void> Function() onDeleteAiKey = () async {};
+  Future<PhotoAnalysisResult> Function(AnalyzeCall call) onAnalyzePhoto = (
+    _,
+  ) async => const PhotoAnalysisResult(items: []);
+  final savedAiKeys = <String>[];
+  final analyzeCalls = <AnalyzeCall>[];
+  int deleteAiKeyCalls = 0;
+
+  @override
+  Future<AiKeyStatus?> aiKey() => onAiKey();
+
+  @override
+  Future<AiKeyStatus> saveAiKey(String rawKey) {
+    savedAiKeys.add(rawKey);
+    return onSaveAiKey(rawKey);
+  }
+
+  @override
+  Future<void> deleteAiKey() {
+    deleteAiKeyCalls++;
+    return onDeleteAiKey();
+  }
+
+  @override
+  Future<PhotoAnalysisResult> analyzePhoto({
+    required String photoPath,
+    required Meal meal,
+    required DateTime date,
+    String? description,
+    int? totalGrams,
+  }) {
+    final call = AnalyzeCall(
+      photoPath: photoPath,
+      meal: meal,
+      date: date,
+      description: description,
+      totalGrams: totalGrams,
+    );
+    analyzeCalls.add(call);
+    return onAnalyzePhoto(call);
+  }
+
   @override
   Future<InvitationStatus> invitation() => onInvitation();
 
@@ -739,11 +803,17 @@ class Harness {
     : auth = auth ?? FakeAuthService(),
       api = api ?? FakeApi() {
     FlutterSecureStorage.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({});
   }
 
   final FakeAuthService auth;
   final FakeApi api;
   Duration signOutDeadline = const Duration(seconds: 5);
+
+  /// Si ya vio el paso opcional de la clave de IA (006). Por defecto sí: las pruebas arrancan en
+  /// el inicio.
+  bool aiKeyStepSeen = true;
+  final picker = FakePhotoPicker();
 
   /// «Ahora» del diario; las pruebas lo cambian para simular el paso de la medianoche.
   DateTime diaryNow = testNow;
@@ -754,6 +824,9 @@ class Harness {
     authClockProvider.overrideWithValue(() => testNow),
     diaryNowProvider.overrideWithValue(() => diaryNow),
     signOutDeadlineProvider.overrideWithValue(signOutDeadline),
+    photoPickerProvider.overrideWithValue(picker),
+    aiKeyStepSeenReaderProvider.overrideWithValue(() async => aiKeyStepSeen),
+    aiKeyStepMarkerProvider.overrideWithValue(() async => aiKeyStepSeen = true),
     downloadLinkProvider.overrideWithValue(
       'https://mykcal-bk-api.cruzerick.com/descargar/mykcal.apk',
     ),
@@ -788,6 +861,8 @@ class Harness {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
+    // El paso opcional de la clave de IA lee su bandera antes de mostrar el inicio.
+    await tester.pump(const Duration(milliseconds: 50));
   }
 }
 
@@ -804,4 +879,47 @@ Future<void> tallScreen(WidgetTester tester) async {
   tester.view.physicalSize = const Size(800, 3000);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
+}
+
+/// Foto de ejemplo de un borrador (la ruta no necesita existir).
+const photoPath = '/tmp/mykcal-test-photo.jpg';
+
+/// Propuesta de la IA con un alimento emparejado y otro sin pareja.
+PhotoAnalysisResult sampleProposal({bool unmatched = true}) =>
+    PhotoAnalysisResult(
+      items: [
+        ProposedItem(
+          aiName: 'Arroz blanco cocido',
+          aiGrams: 150,
+          flagged: false,
+          matchedFood: sampleSummary(id: 'rice', name: 'Arroz, blanco, cocido'),
+          matchedSimilarity: 0.9,
+          kcal: 195,
+          proteinG: 4,
+          carbsG: 42,
+          fatG: 0.5,
+        ),
+        if (unmatched)
+          const ProposedItem(
+            aiName: 'Yogur griego con miel',
+            aiGrams: 120,
+            flagged: false,
+          ),
+      ],
+    );
+
+/// Fotos sin cámara: devuelve lo que se le diga.
+class FakePhotoPicker implements PhotoPicker {
+  String? path = photoPath;
+  bool denyCamera = false;
+  final sources = <PhotoSource>[];
+
+  @override
+  Future<String?> pick(PhotoSource source) async {
+    sources.add(source);
+    if (denyCamera && source == PhotoSource.camera) {
+      throw const PhotoPermissionDenied();
+    }
+    return path;
+  }
 }
