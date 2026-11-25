@@ -410,6 +410,16 @@ class FoodSummary {
   final String baseUnit;
   final double kcal;
   final bool isMine;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'kind': kind.name,
+    'name': name,
+    'brand': brand,
+    'base_unit': baseUnit,
+    'kcal': kcal,
+    'is_mine': isMine,
+  };
 }
 
 /// Detalle de un alimento (`Food`).
@@ -857,4 +867,87 @@ class DiaryCopyResult {
   final String copyId;
   final List<String> entryIds;
   final DiaryDay day;
+}
+
+/// Estado de la clave de IA del usuario (`AiKeyStatus`, 006). Nunca lleva la clave.
+class AiKeyStatus {
+  const AiKeyStatus({required this.provider, required this.configuredAt});
+
+  factory AiKeyStatus.fromJson(Map<String, dynamic> json) => AiKeyStatus(
+    provider: json['provider'] as String,
+    configuredAt: DateTime.parse(json['configured_at'] as String),
+  );
+
+  final String provider;
+  final DateTime configuredAt;
+}
+
+/// Un alimento que propone la IA, con su pareja en la base si la hay (`ProposedItem`, 006).
+class ProposedItem {
+  const ProposedItem({
+    required this.aiName,
+    required this.aiGrams,
+    required this.flagged,
+    this.matchedFood,
+    this.matchedSimilarity,
+    this.kcal,
+    this.proteinG,
+    this.carbsG,
+    this.fatG,
+  });
+
+  factory ProposedItem.fromJson(Map<String, dynamic> json) => ProposedItem(
+    aiName: json['ai_name'] as String,
+    aiGrams: (json['ai_grams'] as num).toDouble(),
+    flagged: json['flagged'] as bool,
+    matchedFood: json['matched_food'] == null
+        ? null
+        : FoodSummary.fromJson(json['matched_food'] as Map<String, dynamic>),
+    matchedSimilarity: (json['matched_similarity'] as num?)?.toDouble(),
+    kcal: (json['kcal'] as num?)?.toDouble(),
+    proteinG: (json['protein_g'] as num?)?.toDouble(),
+    carbsG: (json['carbs_g'] as num?)?.toDouble(),
+    fatG: (json['fat_g'] as num?)?.toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'ai_name': aiName,
+    'ai_grams': aiGrams,
+    'flagged': flagged,
+    'matched_food': matchedFood?.toJson(),
+    'matched_similarity': matchedSimilarity,
+    'kcal': kcal,
+    'protein_g': proteinG,
+    'carbs_g': carbsG,
+    'fat_g': fatG,
+  };
+
+  final String aiName;
+  final double aiGrams;
+
+  /// Gramos absurdos (0 o más de 2000): hay que revisarlos.
+  final bool flagged;
+  final FoodSummary? matchedFood;
+  final double? matchedSimilarity;
+  final double? kcal;
+  final double? proteinG;
+  final double? carbsG;
+  final double? fatG;
+}
+
+class PhotoAnalysisResult {
+  const PhotoAnalysisResult({required this.items});
+
+  factory PhotoAnalysisResult.fromJson(Map<String, dynamic> json) =>
+      PhotoAnalysisResult(
+        items: (json['items'] as List<dynamic>)
+            .map((e) => ProposedItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'items': items.map((e) => e.toJson()).toList(),
+  };
+
+  final List<ProposedItem> items;
 }

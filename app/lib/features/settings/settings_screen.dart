@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../ai_key/ai_key_controller.dart';
+import '../ai_key/ai_key_guide_screen.dart';
 import '../profile/profile_screen.dart';
 import '../target/target_screen.dart';
 import 'data_sources_screen.dart';
@@ -45,6 +48,29 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const DataSourcesScreen(),
+                ),
+              ),
+            ),
+            ListTile(
+              minTileHeight: 56,
+              title: Text(l10n.aiKeyTitle),
+              subtitle: Text(
+                ref.watch(aiKeyControllerProvider).valueOrNull == null
+                    ? l10n.aiKeyRowNone
+                    : l10n.aiKeyRowConfigured(
+                        DateFormat('d MMM y', 'es').format(
+                          ref
+                              .watch(aiKeyControllerProvider)
+                              .value!
+                              .configuredAt
+                              .toLocal(),
+                        ),
+                      ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const AiKeyGuideScreen(),
                 ),
               ),
             ),

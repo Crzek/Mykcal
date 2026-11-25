@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mykcal/core/api/models.dart';
 import 'package:mykcal/features/settings/data_sources_screen.dart';
 import 'package:mykcal/features/settings/settings_screen.dart';
 
@@ -45,5 +46,26 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Ajustes muestra el estado de la clave de IA y abre la guía', (
+    tester,
+  ) async {
+    final h = Harness();
+    await h.pumpScreen(tester, const SettingsScreen());
+    expect(find.text('Clave de IA'), findsOneWidget);
+    expect(find.text('No configurada'), findsOneWidget);
+    final h2 = Harness();
+    h2.api.onAiKey = () async => AiKeyStatus(
+      provider: 'gemini',
+      configuredAt: DateTime.utc(2026, 11, 25, 10),
+    );
+    await tester.pumpWidget(const SizedBox());
+    await h2.pumpScreen(tester, const SettingsScreen());
+    await tester.pumpAndSettle();
+    expect(find.text('Configurada · 25 nov 2026'), findsOneWidget);
+    await tester.tap(find.text('Clave de IA'));
+    await tester.pumpAndSettle();
+    expect(find.text('Proveedor: Google Gemini'), findsOneWidget);
   });
 }

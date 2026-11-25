@@ -1098,4 +1098,280 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get copyOutOfRange => 'Esa comida ya no se puede copiar.';
+
+  @override
+  String get aiKeyTitle => 'Clave de IA';
+
+  @override
+  String aiKeyRowConfigured(String date) {
+    return 'Configurada · $date';
+  }
+
+  @override
+  String get aiKeyRowNone => 'No configurada';
+
+  @override
+  String get aiKeyIntro =>
+      'Para registrar un plato con una foto, Mykcal usa tu propia clave de Google Gemini. Es gratis y solo tuya.';
+
+  @override
+  String get aiKeyStep1 => 'Entra en aistudio.google.com';
+
+  @override
+  String get aiKeyStep2 => 'Accede con tu cuenta de Google';
+
+  @override
+  String get aiKeyStep3 => 'Pulsa «Obtener clave de API» y crea una';
+
+  @override
+  String get aiKeyStep4 => 'Copia la clave y pégala aquí';
+
+  @override
+  String aiKeyStepLabel(String n, String text) {
+    return 'Paso $n: $text';
+  }
+
+  @override
+  String get aiKeyFieldLabel => 'Clave de API';
+
+  @override
+  String get aiKeyFieldHint => 'Pega tu clave aquí';
+
+  @override
+  String get aiKeySave => 'Guardar clave';
+
+  @override
+  String get aiKeySaved => 'Clave configurada';
+
+  @override
+  String get aiKeyInvalid =>
+      'La clave no es válida. Comprueba que la has copiado bien y que tu proyecto de Google tiene la API de Gemini activa.';
+
+  @override
+  String get aiKeyUnavailable =>
+      'No se ha podido comprobar la clave ahora. Inténtalo más tarde.';
+
+  @override
+  String get aiKeySkip => 'Omitir';
+
+  @override
+  String aiKeyConfiguredOn(String date) {
+    return 'Clave configurada el $date';
+  }
+
+  @override
+  String get aiKeyProvider => 'Proveedor: Google Gemini';
+
+  @override
+  String get aiKeyChange => 'Cambiar clave';
+
+  @override
+  String get aiKeyRemove => 'Quitar clave';
+
+  @override
+  String get aiKeyRemoveTitle => '¿Quitar la clave de IA?';
+
+  @override
+  String get aiKeyRemoveBody =>
+      'No podrás registrar con foto hasta que añadas otra clave.';
+
+  @override
+  String get aiKeyRemoved => 'Clave quitada';
+
+  @override
+  String photoTooltip(String meal) {
+    return 'Registrar con foto en $meal';
+  }
+
+  @override
+  String photoNeedsKeyTooltip(String meal) {
+    return 'Registrar con foto en $meal: necesitas una clave de IA';
+  }
+
+  @override
+  String get photoCaptureTitle => 'Foto del plato';
+
+  @override
+  String get photoPermissionDenied =>
+      'La cámara es necesaria para analizar la foto de tu plato.';
+
+  @override
+  String get photoTake => 'Hacer foto';
+
+  @override
+  String get photoFromGallery => 'Elegir de la galería';
+
+  @override
+  String get photoDescriptionLabel => 'Descripción';
+
+  @override
+  String get photoDescriptionHint => 'Ej: arroz con pollo y ensalada';
+
+  @override
+  String get photoTotalGramsLabel => 'Gramos totales del plato';
+
+  @override
+  String get photoTotalGramsHint => 'Opcional';
+
+  @override
+  String get photoAnalyze => 'Analizar';
+
+  @override
+  String get chipAnalyzing => 'Analizando…';
+
+  @override
+  String get chipReady => 'Análisis listo ✓';
+
+  @override
+  String get chipFailed => 'Análisis fallido ✕';
+
+  @override
+  String get snackReady => 'Foto analizada — toca para revisar';
+
+  @override
+  String get snackSeeProposal => 'Ver';
+
+  @override
+  String get snackSettings => 'Ajustes';
+
+  @override
+  String get snackSeeDraft => 'Ver borrador';
+
+  @override
+  String get failKeyInvalid =>
+      'Tu clave de IA no es válida. Revísala en ajustes.';
+
+  @override
+  String get failQuota => 'Has alcanzado el límite de tu cuenta de Google.';
+
+  @override
+  String get failInvalidResponse =>
+      'El análisis no ha podido completarse. Puedes reintentar o continuar a mano.';
+
+  @override
+  String get failUnrecognized =>
+      'No se ha reconocido ningún alimento en la foto. Puedes continuar a mano.';
+
+  @override
+  String get failTimeout =>
+      'El análisis ha tardado demasiado. Puedes reintentar.';
+
+  @override
+  String get failProvider =>
+      'El proveedor de IA no responde. Inténtalo más tarde.';
+
+  @override
+  String get failKeyRequired =>
+      'Necesitas una clave de IA para analizar fotos.';
+
+  @override
+  String get failNoConnection => 'Sin conexión. Se ha guardado como borrador.';
+
+  @override
+  String get failInterrupted =>
+      'El análisis se interrumpió. Puedes reintentar.';
+
+  @override
+  String get proposalTitle => 'Revisa lo que ha visto la IA';
+
+  @override
+  String proposalAiName(String name) {
+    return '$name (IA)';
+  }
+
+  @override
+  String get proposalNoMatch => 'Sin equivalente en tu base';
+
+  @override
+  String get proposalFlagged => 'Revisa los gramos';
+
+  @override
+  String get proposalChange => 'Cambiar';
+
+  @override
+  String get proposalSearch => 'Buscar';
+
+  @override
+  String get proposalCreate => 'Crear';
+
+  @override
+  String get proposalRemove => 'Quitar';
+
+  @override
+  String get proposalAdd => 'Añadir alimento';
+
+  @override
+  String proposalGramsKcal(String grams, String kcal) {
+    return '$grams g · $kcal kcal';
+  }
+
+  @override
+  String proposalGrams(String grams) {
+    return '$grams g';
+  }
+
+  @override
+  String proposalTotals(String kcal, String p, String c, String f) {
+    return 'Total: $kcal kcal · P $p g · H $c g · G $f g';
+  }
+
+  @override
+  String proposalSave(String meal) {
+    return 'Guardar en $meal';
+  }
+
+  @override
+  String proposalSaved(String meal) {
+    return 'Platos guardados en $meal';
+  }
+
+  @override
+  String get proposalGramsTitle => 'Gramos';
+
+  @override
+  String get proposalGramsField => 'Gramos';
+
+  @override
+  String get proposalSaveError =>
+      'No se ha podido guardar. Inténtalo de nuevo.';
+
+  @override
+  String get proposalEmpty => 'No queda ningún alimento en la propuesta.';
+
+  @override
+  String get draftsTitle => 'Borradores de fotos';
+
+  @override
+  String get draftsEmpty => 'No tienes borradores.';
+
+  @override
+  String get draftsRetry => 'Reintentar';
+
+  @override
+  String get draftsManual => 'Añadir a mano';
+
+  @override
+  String get draftsDiscard => 'Descartar';
+
+  @override
+  String get draftsDiscardTitle => '¿Descartar el borrador?';
+
+  @override
+  String get draftsDiscardBody => 'Se borrará la foto de este borrador.';
+
+  @override
+  String get draftsReview => 'Revisar';
+
+  @override
+  String get draftsReady => 'Análisis listo';
+
+  @override
+  String draftsRowTitle(String meal, String date) {
+    return '$meal · $date';
+  }
+
+  @override
+  String draftsBadge(String count) {
+    return 'Borradores de fotos: $count';
+  }
 }

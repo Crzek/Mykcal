@@ -5,7 +5,17 @@ import '../../core/api/api_errors.dart';
 import '../../core/api/models.dart';
 import '../../core/ui/connection_error_view.dart';
 import '../../l10n/app_localizations.dart';
+import '../ai_key/ai_key_controller.dart';
+import '../ai_key/ai_key_guide_screen.dart';
 import '../foods/food_search_screen.dart';
+import '../photo/analysis_chip.dart';
+import '../photo/drafts_controller.dart';
+import '../photo/draft_model.dart';
+import '../photo/drafts_screen.dart';
+import '../photo/failure_text.dart';
+import '../photo/pending_analysis_notifier.dart';
+import '../photo/photo_capture_screen.dart';
+import '../photo/proposal_edit_screen.dart';
 import '../quick/quick_tabs.dart';
 import '../target/target_screen.dart';
 import 'copy_meal_sheet.dart';
@@ -81,6 +91,11 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen>
     final selected = ref.read(selectedDateProvider.notifier);
     final today = selected.today;
     final async = ref.watch(diaryDayControllerProvider(date));
+    final aiKeyConfigured = ref.watch(aiKeyConfiguredProvider);
+    final drafts = ref.watch(visibleDraftsProvider);
+    ref.listen(analysisOutcomesProvider, (_, outcome) {
+      if (outcome != null) _announce(outcome.draft);
+    });
     return Column(
       children: [
         Padding(
@@ -120,9 +135,29 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen>
                   ),
                 ),
                 const SizedBox(height: 8),
+                if (drafts.isNotEmpty)
+                  Semantics(
+                    label: l10n.draftsBadge('${drafts.length}'),
+                    button: true,
+                    excludeSemantics: true,
+                    child: ListTile(
+                      minTileHeight: 48,
+                      leading: const Icon(Icons.photo_library_outlined),
+                      title: Text(l10n.draftsBadge('${drafts.length}')),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const DraftsScreen(),
+                        ),
+                      ),
+                    ),
+                  ),
                 for (final meal in day.meals)
                   MealSection(
                     meal: meal,
+                    aiKeyConfigured: aiKeyConfigured,
+                    onPhoto: () => _photo(context, date, meal.meal),
+                    analysisChip: AnalysisChip(meal: meal.meal, date: date),
                     onAdd: () => _add(context, date, meal.meal),
                     onCopy: () =>
                         showCopyMealSheet(context, date: date, meal: meal.meal),
@@ -138,6 +173,51 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen>
           ),
         ),
       ],
+    );
+  }
+
+  /// Cámara de una comida: con clave abre la captura; sin ella, la guía de la clave (FR-016).
+  void _photo(BuildContext context, DateTime date, Meal meal) {
+    final screen = ref.read(aiKeyConfiguredProvider)
+        ? PhotoCaptureScreen(date: date, meal: meal)
+        : const AiKeyGuideScreen();
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+  }
+
+  /// Aviso de que un análisis terminó, con la acción que corresponde a cada resultado.
+  void _announce(PhotoDraft draft) {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    void open(Widget screen) =>
+        navigator.push(MaterialPageRoute<void>(builder: (_) => screen));
+    final String text;
+    final String actionLabel;
+    final VoidCallback action;
+    if (draft.hasProposal) {
+      text = l10n.snackReady;
+      actionLabel = l10n.snackSeeProposal;
+      action = () => open(ProposalEditScreen(draft: draft));
+    } else {
+      text = failureText(l10n, draft.failureCode);
+      switch (draft.failureCode) {
+        case 'key_invalid' || 'key_required':
+          actionLabel = l10n.snackSettings;
+          action = () => open(const AiKeyGuideScreen());
+        case 'timeout' || 'no_connection' || 'provider_unavailable':
+          actionLabel = l10n.draftsRetry;
+          action = () =>
+              ref.read(draftsControllerProvider.notifier).retry(draft.id);
+        default:
+          actionLabel = l10n.snackSeeDraft;
+          action = () => open(const DraftsScreen());
+      }
+    }
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(text),
+        action: SnackBarAction(label: actionLabel, onPressed: action),
+      ),
     );
   }
 
