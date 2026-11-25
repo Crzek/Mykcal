@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario, 005 registro rápido
-  version: 0.5.0
+  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario, 005 registro rápido, 006 clave de IA y foto
+  version: 0.6.0
   description: >
     Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
     fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
@@ -628,6 +628,112 @@ paths:
               schema: { $ref: "#/components/schemas/ErrorBody" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
 
+  /v1/ai-key:
+    get:
+      summary: Estado de la clave de IA del usuario (006 FR-003)
+      responses:
+        "200":
+          description: Tiene clave configurada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiKeyStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: AI_KEY_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    put:
+      summary: Guarda o sustituye la clave tras comprobarla con el proveedor (006 FR-001, FR-002)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiKeyCreate" }
+      responses:
+        "200":
+          description: Clave guardada (cifrada)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiKeyStatus" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422":
+          description: AI_KEY_INVALID. El proveedor rechaza la clave; no se guarda nada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503":
+          description: AI_PROVIDER_UNAVAILABLE (no se puede comprobar) o AUTH_UNAVAILABLE
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+    delete:
+      summary: Quita la clave (idempotente, 006 FR-003)
+      responses:
+        "204": { description: Sin clave }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/photo-analysis:
+    post:
+      summary: Analiza la foto de un plato con la clave del usuario; la foto no se guarda (006 FR-006, FR-012)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo, meal, entry_date]
+              properties:
+                photo: { type: string, format: binary, description: JPEG de 4 MB como máximo }
+                meal: { $ref: "#/components/schemas/Meal" }
+                entry_date: { type: string, format: date }
+                description: { type: string, maxLength: 500 }
+                total_grams: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Propuesta de alimentos emparejados con la base
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PhotoAnalysisResult" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: AI_KEY_REQUIRED (sin clave), CONSENT_REQUIRED o cuenta no activa
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "413":
+          description: Foto de más de 4 MB
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "422":
+          description: AI_KEY_INVALID, AI_RESPONSE_INVALID o AI_UNRECOGNIZED
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "429":
+          description: AI_QUOTA_EXCEEDED
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503":
+          description: AI_PROVIDER_UNAVAILABLE o AUTH_UNAVAILABLE
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "504":
+          description: AI_TIMEOUT (más de 55 s)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
 components:
   securitySchemes:
     bearerToken:
@@ -881,6 +987,14 @@ components:
             - ENTRY_NOT_FOUND
             - COPY_SOURCE_EMPTY
             - COPY_NOT_FOUND
+            - AI_KEY_NOT_FOUND
+            - AI_KEY_INVALID
+            - AI_KEY_REQUIRED
+            - AI_PROVIDER_UNAVAILABLE
+            - AI_QUOTA_EXCEEDED
+            - AI_RESPONSE_INVALID
+            - AI_UNRECOGNIZED
+            - AI_TIMEOUT
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR
@@ -1226,3 +1340,44 @@ components:
         copy_id: { type: string, format: uuid }
         entry_ids: { type: array, minItems: 1, items: { type: string, format: uuid } }
         day: { $ref: "#/components/schemas/DiaryDay" }
+
+    AiKeyStatus:
+      type: object
+      additionalProperties: false
+      required: [has_key, provider, configured_at]
+      properties:
+        has_key: { type: boolean, const: true }
+        provider: { type: string, enum: [gemini] }
+        configured_at: { type: string, format: date-time }
+
+    AiKeyCreate:
+      type: object
+      additionalProperties: false
+      required: [raw_key]
+      properties:
+        raw_key: { type: string, minLength: 1, maxLength: 256 }
+
+    ProposedItem:
+      type: object
+      required: [ai_name, ai_grams, flagged]
+      properties:
+        ai_name: { type: string }
+        ai_grams: { type: number }
+        flagged: { type: boolean }
+        matched_food:
+          anyOf:
+            - { $ref: "#/components/schemas/FoodSummary" }
+            - { type: "null" }
+        matched_similarity: { type: [number, "null"] }
+        kcal: { type: [number, "null"] }
+        protein_g: { type: [number, "null"] }
+        carbs_g: { type: [number, "null"] }
+        fat_g: { type: [number, "null"] }
+
+    PhotoAnalysisResult:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ProposedItem" }

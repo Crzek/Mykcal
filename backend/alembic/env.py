@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 from mykcal.accounts import models as _accounts  # noqa: F401
+from mykcal.ai import models as _ai  # noqa: F401
 from mykcal.config import get_settings
 from mykcal.consent import models as _consent  # noqa: F401
 from mykcal.db import Base

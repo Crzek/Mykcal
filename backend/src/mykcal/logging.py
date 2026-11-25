@@ -46,6 +46,8 @@ ALLOWED_FIELDS = frozenset(
         "source_meal",
         "target_meal",
         "entries_count",
+        # 006: IA. Solo el resultado (enum fijo) y el modelo; nunca foto, respuesta ni clave.
+        "model",
     }
 )
 

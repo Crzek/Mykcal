@@ -8,6 +8,7 @@ BASE = dict(
     oidc_issuer="https://zitadel.test",
     oidc_project_id="p",
     admin_subject="a",
+    ai_key_master="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
 )
 
 
@@ -20,7 +21,7 @@ def test_ok_y_convierte_esquema():
 
 
 @pytest.mark.parametrize(
-    "missing", ["database_url", "oidc_issuer", "oidc_project_id", "admin_subject"]
+    "missing", ["database_url", "oidc_issuer", "oidc_project_id", "admin_subject", "ai_key_master"]
 )
 def test_falta_variable_obligatoria(missing, monkeypatch):
     for key in BASE:
@@ -65,3 +66,10 @@ def test_off_url_sin_https_rechazada():
 def test_off_timeout_fuera_de_rango(timeout):
     with pytest.raises(ValidationError):
         make(off_timeout_s=timeout)
+
+
+@pytest.mark.parametrize("master", ["no-es-base64!", "AAAAAAAA", "QUJDREVGR0g="])
+def test_ai_key_master_debe_ser_32_bytes_en_base64(master):
+    with pytest.raises(ValidationError) as err:
+        make(ai_key_master=master)
+    assert master not in str(err.value)
