@@ -6,7 +6,9 @@ import '../../core/api/models.dart';
 import '../../core/ui/connection_error_view.dart';
 import '../../l10n/app_localizations.dart';
 import '../foods/food_search_screen.dart';
+import '../quick/quick_tabs.dart';
 import '../target/target_screen.dart';
+import 'copy_meal_sheet.dart';
 import 'entry_quantity_sheet.dart';
 import 'meal_labels.dart';
 import 'day_header.dart';
@@ -122,6 +124,8 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen>
                   MealSection(
                     meal: meal,
                     onAdd: () => _add(context, date, meal.meal),
+                    onCopy: () =>
+                        showCopyMealSheet(context, date: date, meal: meal.meal),
                     onTapEntry: (entry) => showEditEntrySheet(
                       context,
                       ref,
@@ -138,32 +142,55 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen>
   }
 
   /// «+» de una comida: búsqueda en modo selección → hoja de cantidad → de vuelta al diario.
+  /// Con el campo vacío la búsqueda muestra Recientes y Favoritos (005).
   Future<void> _add(BuildContext context, DateTime date, Meal meal) async {
     final l10n = AppLocalizations.of(context);
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final home = ModalRoute.of(context);
     final name = mealName(meal, l10n);
+    final tab = ValueNotifier<int>(0);
+
+    /// Abre la hoja de cantidad; si se añadió, cierra la búsqueda y todo lo abierto desde ella
+    /// (escáner, formulario) y avisa.
+    Future<void> pick(
+      BuildContext searchContext,
+      Food food, {
+      double? quantity,
+      double? servings,
+    }) async {
+      final added = await showEntryQuantitySheet(
+        searchContext,
+        food: food,
+        date: date,
+        meal: meal,
+        initialQuantity: quantity,
+        initialServings: servings,
+      );
+      if (!added) return;
+      navigator.popUntil((route) => route == home);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.entryAdded(name))));
+    }
+
     await navigator.push(
       MaterialPageRoute<void>(
         builder: (searchContext) => FoodSearchScreen(
           title: l10n.diaryAddToMeal(name),
-          onSelected: (food) async {
-            final added = await showEntryQuantitySheet(
+          onSelected: (food) => pick(searchContext, food),
+          emptyBuilder: (_) => QuickTabs(
+            date: date,
+            meal: meal,
+            tabIndex: tab,
+            onOpen: (item) => pick(
               searchContext,
-              food: food,
-              date: date,
-              meal: meal,
-            );
-            if (!added) return;
-            // Cierra la búsqueda y todo lo que se haya abierto desde ella (escáner, formulario).
-            navigator.popUntil((route) => route == home);
-            messenger.showSnackBar(
-              SnackBar(content: Text(l10n.entryAdded(name))),
-            );
-          },
+              item.food,
+              quantity: item.suggestedQuantity,
+              servings: item.suggestedServings,
+            ),
+          ),
         ),
       ),
     );
+    tab.dispose();
   }
 }

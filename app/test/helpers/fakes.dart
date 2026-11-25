@@ -201,6 +201,22 @@ class AddEntryCall {
   final int utcOffsetMin;
 }
 
+class CopyMealCall {
+  const CopyMealCall({
+    required this.sourceDate,
+    required this.sourceMeal,
+    required this.targetDate,
+    required this.targetMeal,
+    required this.utcOffsetMin,
+  });
+
+  final DateTime sourceDate;
+  final Meal sourceMeal;
+  final DateTime targetDate;
+  final Meal targetMeal;
+  final int utcOffsetMin;
+}
+
 class UpdateEntryCall {
   const UpdateEntryCall({
     required this.id,
@@ -286,6 +302,30 @@ DiaryEntry sampleEntry({
     incomplete: [if (base.fiberG == null) 'fiber_g'],
   );
 }
+
+/// Alimento de Recientes o Favoritos con su cantidad sugerida (005).
+QuickFood sampleQuick({
+  String id = 'food-1',
+  String name = 'Pan de molde',
+  String? brand,
+  double quantity = 60,
+  double? servings,
+  double? servingSize,
+  bool favorite = false,
+  DateTime? lastUsedAt,
+}) => QuickFood(
+  food: sampleFood(
+    id: id,
+    name: name,
+    brand: brand,
+    servingSize: servingSize ?? (servings == null ? null : quantity / servings),
+    per100: const Nutrients(kcal: 250, proteinG: 8, carbsG: 46, fatG: 3.5),
+  ),
+  suggestedQuantity: quantity,
+  suggestedServings: servings,
+  lastUsedAt: lastUsedAt ?? DateTime.utc(2026, 11, 21, 8),
+  isFavorite: favorite,
+);
 
 const _mealOrder = Meal.values;
 
@@ -414,6 +454,31 @@ class FakeApi implements MykcalApi {
   ) async => sampleDay(date: date);
   Future<DiaryDay> Function(AddEntryCall call) onAddEntry = (call) async =>
       sampleDay(date: call.date);
+
+  /// Id que devuelve `addEntry` como si viniera de la cabecera `Location`.
+  String addedEntryId = 'entry-new';
+  Future<List<QuickFood>> Function() onRecentFoods = () async => const [];
+  Future<List<QuickFood>> Function() onFavoriteFoods = () async => const [];
+  Future<void> Function(String foodId) onAddFavorite = (_) async {};
+  Future<void> Function(String foodId) onRemoveFavorite = (_) async {};
+  Future<List<CopySourceDay>> Function(DateTime date, Meal meal) onCopySources =
+      (_, _) async => const [];
+  Future<DiaryCopyResult> Function(CopyMealCall call) onCopyMeal =
+      (call) async => DiaryCopyResult(
+        copyId: 'copy-1',
+        entryIds: const ['c1'],
+        day: sampleDay(date: call.targetDate),
+      );
+  Future<DiaryDay> Function(String copyId, int offset) onUndoCopy = (
+    _,
+    _,
+  ) async => sampleDay();
+  final favoriteAdds = <String>[];
+  final favoriteRemoves = <String>[];
+  final copyCalls = <CopyMealCall>[];
+  final undoneCopies = <String>[];
+  int recentCalls = 0;
+  int favoriteCalls = 0;
   Future<DiaryDay> Function(UpdateEntryCall call) onUpdateEntry = (_) async =>
       sampleDay();
   Future<DiaryDay> Function(String id, int offset) onDeleteEntry = (
@@ -506,14 +571,14 @@ class FakeApi implements MykcalApi {
   }
 
   @override
-  Future<DiaryDay> addEntry({
+  Future<AddedEntry> addEntry({
     required DateTime date,
     required Meal meal,
     required String foodId,
     double? quantity,
     double? servings,
     required int utcOffsetMin,
-  }) {
+  }) async {
     final call = AddEntryCall(
       date: date,
       meal: meal,
@@ -523,7 +588,62 @@ class FakeApi implements MykcalApi {
       utcOffsetMin: utcOffsetMin,
     );
     addedEntries.add(call);
-    return onAddEntry(call);
+    return AddedEntry(day: await onAddEntry(call), entryId: addedEntryId);
+  }
+
+  @override
+  Future<List<QuickFood>> recentFoods() {
+    recentCalls++;
+    return onRecentFoods();
+  }
+
+  @override
+  Future<List<QuickFood>> favoriteFoods() {
+    favoriteCalls++;
+    return onFavoriteFoods();
+  }
+
+  @override
+  Future<void> addFavorite(String foodId) {
+    favoriteAdds.add(foodId);
+    return onAddFavorite(foodId);
+  }
+
+  @override
+  Future<void> removeFavorite(String foodId) {
+    favoriteRemoves.add(foodId);
+    return onRemoveFavorite(foodId);
+  }
+
+  @override
+  Future<List<CopySourceDay>> copySources(
+    DateTime targetDate,
+    Meal targetMeal,
+  ) => onCopySources(targetDate, targetMeal);
+
+  @override
+  Future<DiaryCopyResult> copyMeal({
+    required DateTime sourceDate,
+    required Meal sourceMeal,
+    required DateTime targetDate,
+    required Meal targetMeal,
+    required int utcOffsetMin,
+  }) {
+    final call = CopyMealCall(
+      sourceDate: sourceDate,
+      sourceMeal: sourceMeal,
+      targetDate: targetDate,
+      targetMeal: targetMeal,
+      utcOffsetMin: utcOffsetMin,
+    );
+    copyCalls.add(call);
+    return onCopyMeal(call);
+  }
+
+  @override
+  Future<DiaryDay> undoCopy(String copyId, int utcOffsetMin) {
+    undoneCopies.add(copyId);
+    return onUndoCopy(copyId, utcOffsetMin);
   }
 
   @override

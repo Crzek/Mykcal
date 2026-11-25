@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/models.dart';
 import '../../core/api/mykcal_api.dart';
+import '../quick/recent_foods_controller.dart';
 import 'local_day.dart';
 
 /// Reloj del diario: las pruebas lo sustituyen para fijar «hoy».
@@ -20,6 +21,10 @@ class DiaryDayController
   Future<DiaryDay> build(DateTime arg) =>
       ref.watch(mykcalApiProvider).diaryDay(arg, LocalDay.utcOffsetMin(arg));
 
-  /// Sustituye el estado con la respuesta de una ruta del diario.
-  void apply(DiaryDay day) => state = AsyncData(day);
+  /// Sustituye el estado con la respuesta de una ruta del diario. Como cambia lo que se ha
+  /// registrado, también refresca Recientes (005 R12).
+  void apply(DiaryDay day) {
+    state = AsyncData(day);
+    ref.invalidate(recentFoodsProvider);
+  }
 }

@@ -26,6 +26,7 @@ from mykcal.foods.router import router as foods_router
 from mykcal.invitations.router import router as invitations_router
 from mykcal.logging import configure_logging, get_logger
 from mykcal.profile.router import router as profile_router
+from mykcal.quick.router import router as quick_router
 from mykcal.targets.router import router as targets_router
 
 # Única lista de rutas sin identidad (principio V, Complexity Tracking del plan).
@@ -119,6 +120,8 @@ def create_app(
     app.include_router(consent_router)
     app.include_router(profile_router)
     app.include_router(targets_router)
+    # El de `quick` va antes: `/v1/foods/recent` no debe caer en `/v1/foods/{food_id}` (R10).
+    app.include_router(quick_router)
     app.include_router(foods_router)
     app.include_router(diary_router)
     return app

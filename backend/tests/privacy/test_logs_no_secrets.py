@@ -8,6 +8,20 @@ from sqlalchemy import text
 pytestmark = pytest.mark.privacy
 
 
+def _content(out: str) -> str:
+    """El texto de los registros sin ids, marcas de tiempo ni duraciones.
+
+    Las cifras sueltas ("317") pueden aparecer por azar dentro de un UUID o un reloj; lo que
+    importa es que no aparezcan en el contenido de los eventos.
+    """
+    noise = {"user_id", "request_id", "timestamp", "duration_ms"}
+    kept = []
+    for line in out.splitlines():
+        event = json.loads(line)
+        kept.append(json.dumps({k: v for k, v in event.items() if k not in noise}))
+    return "\n".join(kept)
+
+
 def _lines(capsys) -> list[str]:
     return [line for line in capsys.readouterr().out.splitlines() if line.strip()]
 
@@ -209,5 +223,67 @@ async def test_logs_del_diario_sin_alimentos_cantidades_fechas_ni_valores(
         assert set(e) >= {"user_id", "meal", "duration_ms"}, e
         for key in ("food_name", "quantity", "servings", "date", "entry_date", "values", "kcal"):
             assert key not in e, (key, e)
+    content = _content(out)
     for needle in ("Lentejas", "317", "281", "123.4", day):
-        assert needle not in out.replace(day + "T", ""), needle
+        assert needle not in content, needle
+
+
+async def test_logs_de_recientes_y_favoritos_sin_alimentos_ni_cantidades(
+    client, user_with_consent, make_target_version, make_food, make_entry, capsys
+):
+    """Principio X (005, R11): listar no deja evento; marcar y desmarcar solo usuario y duración."""
+    from datetime import UTC, datetime, timedelta
+
+    account, headers = await user_with_consent("u-quick")
+    await make_target_version(account, datetime.now(UTC) - timedelta(days=3))
+    food = await make_food("Fabada asturiana secreta", kcal=177.7)
+    await make_entry(account, datetime.now(UTC).date(), food_id=food, quantity=313)
+    capsys.readouterr()
+    await client.get("/v1/foods/recent", headers=headers)
+    await client.get("/v1/foods/favorites", headers=headers)
+    await client.put(f"/v1/foods/favorites/{food}", headers=headers)
+    await client.delete(f"/v1/foods/favorites/{food}", headers=headers)
+    out = "\n".join(_lines(capsys))
+    events = [json.loads(line) for line in out.splitlines()]
+    quick = [e for e in events if str(e.get("event", "")).startswith("favorite_")]
+    assert {e["event"] for e in quick} == {"favorite_added", "favorite_removed"}
+    assert not [e for e in events if "recent" in str(e.get("event", ""))]
+    content = _content(out)
+    for needle in ("Fabada", "313", "177.7", str(food)):
+        assert needle not in content, needle
+
+
+async def test_logs_de_la_copia_sin_alimentos_cantidades_ni_fechas(
+    client, user_with_consent, make_target_version, make_food, make_entry, capsys
+):
+    """Principio X (005, R11): copiar y deshacer registran comidas y número de entradas, no más."""
+    from datetime import UTC, datetime, timedelta
+
+    account, headers = await user_with_consent("u-copia")
+    await make_target_version(account, datetime.now(UTC) - timedelta(days=3))
+    food = await make_food("Cocido madrileño secreto", kcal=143.9)
+    today = datetime.now(UTC).date()
+    ayer = today - timedelta(days=1)
+    await make_entry(account, ayer, "lunch", food_id=food, quantity=377)
+    capsys.readouterr()
+    body = {
+        "source_date": ayer.isoformat(),
+        "source_meal": "lunch",
+        "target_date": today.isoformat(),
+        "target_meal": "dinner",
+    }
+    copied = await client.post("/v1/diary/copies?utc_offset_min=0", json=body, headers=headers)
+    copy_id = copied.json()["copy_id"]
+    await client.delete(f"/v1/diary/copies/{copy_id}?utc_offset_min=0", headers=headers)
+    await client.get(
+        "/v1/diary/copy-sources",
+        params={"target_date": today.isoformat(), "target_meal": "dinner"},
+        headers=headers,
+    )
+    out = "\n".join(_lines(capsys))
+    events = [json.loads(line) for line in out.splitlines()]
+    ours = [e for e in events if str(e.get("event", "")).startswith(("diary_meal", "diary_copy"))]
+    assert {e["event"] for e in ours} == {"diary_meal_copied", "diary_copy_undone"}
+    content = _content(out)
+    for needle in ("Cocido", "377", "143.9", ayer.isoformat(), copy_id, str(food)):
+        assert needle not in content, needle

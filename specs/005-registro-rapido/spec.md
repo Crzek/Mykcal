@@ -8,6 +8,16 @@
 
 **Input**: User description: "005-registro-rapido: recientes, favoritos y copiar comidas. Épica E7."
 
+## Clarifications
+
+### Session 2026-11-24
+
+- Q: ¿Recientes global o filtrado por la comida en que se abre "añadir"? → A: Global: los 30 últimos alimentos distintos del usuario, sin importar la comida.
+- Q: ¿Cuántos segundos dura la opción de deshacer? → A: 5 segundos.
+- Q: ¿Hasta cuántos días atrás se puede buscar una comida para copiar? → A: Los 14 días naturales anteriores al día visible; los días sin registros no se muestran.
+- Q: ¿"Copiar de otro día" muestra solo comidas del mismo tipo que el destino o todas? → A: Todas las comidas con entradas, agrupadas por día; las del mismo tipo que el destino salen primero.
+- Q: ¿En qué orden se muestra la pestaña de favoritos? → A: Por último uso, el más reciente primero; los nunca usados al final, en orden alfabético.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Añadir desde recientes (Priority: P1)
@@ -66,14 +76,15 @@ entradas sin alterar las de ayer.
 **Acceptance Scenarios**:
 
 1. **Given** una comida del día visible, **When** el usuario elige "copiar de otro día", **Then** ve
-   los días anteriores con esa misma comida y su contenido, el más reciente primero.
+   los últimos 14 días anteriores con sus comidas y su contenido, el más reciente primero, con las
+   del mismo tipo que la comida destino primero dentro de cada día.
 2. **Given** que elige el desayuno de ayer, **When** confirma, **Then** todas sus entradas se añaden
    al desayuno del día visible y el resumen se actualiza.
 3. **Given** que la comida destino ya tiene entradas, **When** copia, **Then** las entradas copiadas
    se añaden a las existentes sin borrarlas.
 4. **Given** la selección, **When** el usuario elige copiar a otra comida distinta (por ejemplo, la
    comida de ayer a la cena de hoy), **Then** se permite.
-5. **Given** una copia hecha por error, **When** la deshace en los segundos siguientes, **Then** se
+5. **Given** una copia hecha por error, **When** la deshace en los 5 segundos siguientes, **Then** se
    eliminan solo las entradas copiadas.
 
 ---
@@ -95,7 +106,8 @@ entradas sin alterar las de ayer.
 ### Functional Requirements
 
 - **FR-001**: El sistema MUST mostrar al usuario sus 30 últimos alimentos distintos registrados,
-  ordenados por último uso, con la última cantidad usada.
+  ordenados por último uso, con la última cantidad usada. La lista es global: no se filtra por la
+  comida (desayuno, cena…) desde la que se abre "añadir".
 - **FR-002**: Los usuarios MUST poder añadir un alimento desde recientes o favoritos con un solo
   toque, usando la última cantidad, o abrirlo para ajustar la cantidad.
 - **FR-003**: Los usuarios MUST poder marcar y desmarcar alimentos como favoritos desde la búsqueda,
@@ -103,15 +115,20 @@ entradas sin alterar las de ayer.
 - **FR-004**: Un favorito sin uso previo MUST añadirse con una ración si el alimento la tiene, o con
   100 g/ml si no.
 - **FR-005**: Los usuarios MUST poder copiar todas las entradas de una comida de un día anterior a
-  cualquier comida del día visible, añadiéndolas a las existentes.
+  cualquier comida del día visible, añadiéndolas a las existentes. Solo se ofrecen los 14 días
+  anteriores al día visible, el más reciente primero, y dentro de cada día todas las comidas con
+  entradas; las del mismo tipo que la comida destino salen primero.
 - **FR-006**: Las entradas copiadas MUST calcular sus valores con los datos actuales del alimento en
   la base (principio: valores siempre desde la base); si el alimento ya no existe, conservan los
   valores de la entrada original.
-- **FR-007**: Los usuarios MUST poder deshacer un añadido rápido o una copia durante unos segundos.
+- **FR-007**: Los usuarios MUST poder deshacer un añadido rápido o una copia durante 5 segundos
+  desde que se hace; pasado ese tiempo la opción desaparece.
 - **FR-008**: Recientes y favoritos MUST ser propios de cada usuario e invisibles para otros.
 - **FR-009**: Todas las pantallas MUST estar en español, en unidades métricas y cumplir WCAG 2.1 AA;
   cada botón de añadir rápido MUST tener una etiqueta para el lector de pantalla que nombre el
   alimento y la cantidad.
+- **FR-010**: La lista de favoritos MUST ordenarse por último uso (el más reciente primero); los
+  favoritos nunca usados van al final, en orden alfabético.
 
 ### Key Entities
 

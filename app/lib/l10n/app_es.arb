@@ -678,5 +678,144 @@
   "dayNext": "Día siguiente",
   "dayPick": "Elegir fecha",
   "dayGoToday": "Ir a hoy",
-  "dayPastNotice": "Este día usó el objetivo que tenías entonces"
+  "dayPastNotice": "Este día usó el objetivo que tenías entonces",
+  "quickTabRecent": "Recientes",
+  "quickTabFavorites": "Favoritos",
+  "quickEmptyRecent": "Aquí aparecerán los alimentos que registres, para añadirlos con un toque.",
+  "quickEmptyFavorites": "Marca alimentos con ☆ para tenerlos a mano aquí.",
+  "quickRowDetail": "{amount} · {kcal} kcal",
+  "@quickRowDetail": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "quickAddLabel": "Añadir {name}, {amount}",
+  "@quickAddLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "quickAmountServings": "{servings} {unit}, {quantity} {base}",
+  "@quickAmountServings": {
+    "placeholders": {
+      "servings": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "quickAdded": "{name} añadido a {meal}",
+  "@quickAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "quickUndone": "Deshecho",
+  "quickUndoFailed": "No se pudo deshacer. Borra la entrada desde el diario.",
+  "favoriteMark": "Marcar {name} como favorito",
+  "@favoriteMark": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "favoriteUnmark": "Quitar {name} de favoritos",
+  "@favoriteUnmark": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "favoriteRemoved": "Quitado de favoritos",
+  "favoriteUnavailable": "Este alimento ya no está disponible",
+  "copyMenu": "Copiar de otro día",
+  "copyMenuTooltip": "Más opciones de {meal}",
+  "@copyMenuTooltip": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "copyTitle": "Copiar a {meal} · {day}",
+  "@copyTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "copyAction": "Copiar",
+  "copyEmpty": "No hay comidas en los 14 días anteriores.",
+  "copyValuesChanged": "Algún alimento ha cambiado: se copiará con sus valores actuales.",
+  "copyMore": "+{count} más",
+  "@copyMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copyOptionSemantics": "{meal} de {day}, {kcal} kcal, {count} alimentos: {items}",
+  "@copyOptionSemantics": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "copyDone": "{count, plural, =1{1 alimento copiado a {meal}} other{{count} alimentos copiados a {meal}}}",
+  "@copyDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "copyUndone": "Copia deshecha",
+  "copySourceEmpty": "Esa comida ya no tiene alimentos.",
+  "copyOutOfRange": "Esa comida ya no se puede copiar."
 }

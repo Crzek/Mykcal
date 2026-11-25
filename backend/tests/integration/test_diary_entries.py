@@ -306,3 +306,13 @@ async def test_entrada_borrada_o_inexistente_no_se_edita_ni_se_borra(client, use
     ):
         resp = await call
         assert resp.status_code == 404 and resp.json()["code"] == "ENTRY_NOT_FOUND"
+
+
+async def test_post_devuelve_location_con_el_id_de_la_entrada(client, user, make_food):
+    """T016 (005, R3): la cabecera Location apunta a la entrada creada; el cuerpo no cambia."""
+    _, headers = user
+    food = await make_food("Pan", kcal=200)
+    resp = await post(client, headers, food_id=str(food), quantity=100)
+    assert resp.status_code == 201
+    entry_id = meal(resp.json(), "breakfast")["entries"][0]["id"]
+    assert resp.headers["location"] == f"/v1/diary/entries/{entry_id}"

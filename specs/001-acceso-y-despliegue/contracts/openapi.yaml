@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario
-  version: 0.4.0
+  title: Mykcal API — 001 acceso y sesión, 002 onboarding, 003 base de alimentos, 004 diario, 005 registro rápido
+  version: 0.5.0
   description: >
     Contrato vivo del backend. Las pruebas de contrato validan las respuestas contra este
     fichero. Todas las rutas exigen bearerToken salvo /v1/health y /descargar/mykcal.apk.
@@ -422,6 +422,43 @@ paths:
         "404": { $ref: "#/components/responses/FoodNotFound" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
 
+  /v1/foods/recent:
+    get:
+      summary: Últimos 30 alimentos distintos registrados, por último uso (005 FR-001)
+      responses:
+        "200": { $ref: "#/components/responses/QuickFoodListOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/foods/favorites:
+    get:
+      summary: Favoritos por último uso; los nunca usados al final por nombre (005 FR-010)
+      responses:
+        "200": { $ref: "#/components/responses/QuickFoodListOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/foods/favorites/{food_id}:
+    parameters:
+      - { name: food_id, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      summary: Marca un alimento como favorito (idempotente, 005 FR-003)
+      responses:
+        "204": { description: Es favorito }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/FoodNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+    delete:
+      summary: Desmarca un favorito (idempotente, 005 US2.3)
+      responses:
+        "204": { description: No es favorito }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
   /v1/foods/{food_id}:
     get:
       summary: Detalle de un alimento visible para el usuario
@@ -466,7 +503,15 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/DiaryEntryCreate" }
       responses:
-        "201": { $ref: "#/components/responses/DiaryDayOk" }
+        "201":
+          description: Día completo y recalculado
+          headers:
+            Location:
+              description: /v1/diary/entries/{id} de la entrada creada (005 R3)
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiaryDay" }
         "400": { $ref: "#/components/responses/DiaryBadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
@@ -521,6 +566,66 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/EntryNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/copy-sources:
+    get:
+      summary: Comidas con entradas de los 14 días anteriores al destino (005 FR-005)
+      parameters:
+        - { name: target_date, in: query, required: true, schema: { type: string, format: date } }
+        - { name: target_meal, in: query, required: true, schema: { $ref: "#/components/schemas/Meal" } }
+      responses:
+        "200":
+          description: Días del más reciente al más antiguo; solo días y comidas con entradas
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CopySourceList" }
+        "400": { $ref: "#/components/responses/DiaryBadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/copies:
+    post:
+      summary: Copia todas las entradas de una comida a una comida del día destino (005 FR-005, FR-006)
+      parameters:
+        - { $ref: "#/components/parameters/UtcOffsetMin" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiaryCopyCreate" }
+      responses:
+        "201":
+          description: Copia hecha; día destino completo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiaryCopyResult" }
+        "400":
+          description: VALIDATION_ERROR, DIARY_DATE_OUT_OF_RANGE o COPY_SOURCE_EMPTY
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/TargetNotFound" }
+        "503": { $ref: "#/components/responses/AuthUnavailable" }
+
+  /v1/diary/copies/{copy_id}:
+    parameters:
+      - { name: copy_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { $ref: "#/components/parameters/UtcOffsetMin" }
+    delete:
+      summary: Deshace una copia hecha hace 60 s o menos; borra solo sus entradas (005 FR-007)
+      responses:
+        "200": { $ref: "#/components/responses/DiaryDayOk" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404":
+          description: COPY_NOT_FOUND (inexistente, ajena, ya deshecha o fuera de plazo)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
         "503": { $ref: "#/components/responses/AuthUnavailable" }
 
 components:
@@ -598,6 +703,11 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorBody" }
+    QuickFoodListOk:
+      description: Alimentos listos para añadir con un toque
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/QuickFoodList" }
     TargetNotFound:
       description: "`TARGET_NOT_FOUND`"
       content:
@@ -769,6 +879,8 @@ components:
             - FOOD_SOURCE_UNAVAILABLE
             - DIARY_DATE_OUT_OF_RANGE
             - ENTRY_NOT_FOUND
+            - COPY_SOURCE_EMPTY
+            - COPY_NOT_FOUND
             - NO_SEATS
             - TOO_MANY_ATTEMPTS
             - VALIDATION_ERROR
@@ -1040,3 +1152,77 @@ components:
           maxItems: 5
           items: { $ref: "#/components/schemas/DiaryMeal" }
           description: Siempre las 5, en orden fijo (FR-001)
+
+    QuickFood:
+      type: object
+      required: [food, suggested_quantity, suggested_servings, last_used_at, is_favorite]
+      properties:
+        food: { $ref: "#/components/schemas/Food" }
+        suggested_quantity: { type: number, exclusiveMinimum: 0, maximum: 10000 }
+        suggested_servings: { type: [number, "null"], exclusiveMinimum: 0, maximum: 100 }
+        last_used_at: { type: [string, "null"], format: date-time }
+        is_favorite: { type: boolean }
+
+    QuickFoodList:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/QuickFood" } }
+
+    CopySourceEntry:
+      type: object
+      required: [food_name, food_brand, base_unit, quantity, servings, kcal]
+      properties:
+        food_name: { type: string }
+        food_brand: { type: [string, "null"] }
+        base_unit: { type: string, enum: [g, ml] }
+        quantity: { type: number }
+        servings: { type: [number, "null"] }
+        kcal: { type: number, description: "Redondeado a entero, de la copia de la entrada" }
+
+    CopySourceMeal:
+      type: object
+      required: [meal, entries, kcal, values_changed]
+      properties:
+        meal: { $ref: "#/components/schemas/Meal" }
+        entries: { type: array, minItems: 1, items: { $ref: "#/components/schemas/CopySourceEntry" } }
+        kcal: { type: number }
+        values_changed:
+          type: boolean
+          description: Algún alimento disponible tiene hoy otros valores que la entrada (005 R7)
+
+    CopySourceDay:
+      type: object
+      required: [date, meals]
+      properties:
+        date: { type: string, format: date }
+        meals:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: Primero la del mismo tipo que target_meal; luego en el orden fijo
+          items: { $ref: "#/components/schemas/CopySourceMeal" }
+
+    CopySourceList:
+      type: object
+      required: [days]
+      properties:
+        days: { type: array, maxItems: 14, items: { $ref: "#/components/schemas/CopySourceDay" } }
+
+    DiaryCopyCreate:
+      type: object
+      additionalProperties: false
+      required: [source_date, source_meal, target_date, target_meal]
+      properties:
+        source_date: { type: string, format: date }
+        source_meal: { $ref: "#/components/schemas/Meal" }
+        target_date: { type: string, format: date }
+        target_meal: { $ref: "#/components/schemas/Meal" }
+
+    DiaryCopyResult:
+      type: object
+      required: [copy_id, entry_ids, day]
+      properties:
+        copy_id: { type: string, format: uuid }
+        entry_ids: { type: array, minItems: 1, items: { type: string, format: uuid } }
+        day: { $ref: "#/components/schemas/DiaryDay" }

@@ -38,6 +38,17 @@ def _visible_in_search(user_id: uuid.UUID):
     )
 
 
+def usable_food(user_id: uuid.UUID):
+    """Alimentos que el usuario puede registrar hoy (las mismas reglas que `create_entry`)."""
+    return _visible_in_search(user_id)
+
+
+async def get_usable(session: AsyncSession, user_id: uuid.UUID, food_id: uuid.UUID) -> Food | None:
+    """El alimento si el usuario puede registrarlo hoy; ajeno, borrado o archivado: `None`."""
+    stmt = select(Food).where(Food.id == food_id, usable_food(user_id))
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
 def _escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
