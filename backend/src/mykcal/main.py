@@ -16,6 +16,7 @@ from sqlalchemy import text
 
 from mykcal.accounts.router import router as accounts_router
 from mykcal.ai.gemini import GeminiProvider
+from mykcal.ai.model_selector import ModelSelector
 from mykcal.ai.provider import AiProvider
 from mykcal.ai.router import router as ai_router
 from mykcal.config import Settings, get_settings
@@ -65,7 +66,8 @@ def create_app(
     app.state.engine = engine
     app.state.sessionmaker = make_sessionmaker(engine)
     app.state.off_transport = off_transport
-    app.state.ai_provider = ai_provider or GeminiProvider(settings.ai_model, settings.ai_timeout_s)
+    app.state.ai_provider = ai_provider or GeminiProvider()
+    app.state.model_selector = ModelSelector(app.state.ai_provider, settings.ai_model_preference)
     app.state.oidc = OidcClient(settings.oidc_issuer, settings.oidc_project_id, oidc_transport)
 
     @app.middleware("http")

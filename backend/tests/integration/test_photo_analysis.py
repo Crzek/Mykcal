@@ -71,3 +71,87 @@ async def test_cada_fallo_tiene_su_codigo_y_su_registro(
     events = [json.loads(line) for line in capsys.readouterr().out.splitlines() if line.strip()]
     (event,) = [e for e in events if e["event"] == "ai_analysis"]
     assert event["result"] == result and event["model"] and "duration_ms" in event
+
+
+def _events(capsys, name):
+    out = capsys.readouterr().out
+    return [
+        e
+        for line in out.splitlines()
+        if line.strip()
+        for e in [json.loads(line)]
+        if e["event"] == name
+    ]
+
+
+async def test_sin_preferencia_usa_el_modelo_listado(client, user, ai):
+    assert (await analyze(client, user)).status_code == 200
+    assert ai.models_tried == ["gemini-3.6-flash"]
+
+
+async def test_modelo_preferido_retirado_cae_a_otro(client, user, ai, app, capsys):
+    from mykcal.ai.model_selector import ModelSelector
+
+    app.state.model_selector = ModelSelector(ai, ["gemini-1.0-flash"])
+    capsys.readouterr()
+    resp = await analyze(client, user)
+    assert resp.status_code == 200
+    (event,) = _events(capsys, "ai_analysis")
+    assert event["selection"] == "fallback" and event["model"] == "gemini-3.6-flash"
+
+
+async def test_sin_modelo_compatible_503(client, user, ai, capsys):
+    ai.models = ["gemini-3.6-pro"]
+    capsys.readouterr()
+    resp = await analyze(client, user)
+    assert resp.status_code == 503 and resp.json()["code"] == "AI_NO_MODEL_AVAILABLE"
+    (event,) = _events(capsys, "ai_analysis")
+    assert event["result"] == "no_model" and "model" not in event
+
+
+async def test_404_a_mitad_prueba_el_siguiente_y_relista(client, user, ai):
+    ai.models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    ai.model_outcomes = {"gemini-3.6-flash-lite": "not_found"}
+    resp = await analyze(client, user)
+    assert resp.status_code == 200
+    assert ai.models_tried == ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    assert ai.list_calls == 2
+
+
+@pytest.mark.parametrize("first", ["overloaded", "quota"])
+async def test_saturado_o_sin_cuota_prueba_el_siguiente(client, user, ai, first):
+    ai.models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    ai.model_outcomes = {"gemini-3.6-flash-lite": first}
+    assert (await analyze(client, user)).status_code == 200
+    assert ai.models_tried == ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+
+
+@pytest.mark.parametrize(
+    ("outcome", "status", "code"),
+    [
+        ("overloaded", 503, "AI_PROVIDER_UNAVAILABLE"),
+        ("quota", 429, "AI_QUOTA_EXCEEDED"),
+        ("timeout", 504, "AI_TIMEOUT"),
+    ],
+)
+async def test_todos_fallan_error_final(client, user, ai, outcome, status, code):
+    ai.models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    ai.model_outcomes = dict.fromkeys(ai.models, outcome)
+    resp = await analyze(client, user)
+    assert resp.status_code == status and resp.json()["code"] == code
+
+
+async def test_respuesta_invalida_no_cambia_de_modelo(client, user, ai):
+    ai.models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    ai.analyze_outcome = "invalid_json"
+    resp = await analyze(client, user)
+    assert resp.status_code == 422 and resp.json()["code"] == "AI_RESPONSE_INVALID"
+    assert len(ai.models_tried) == 1
+
+
+async def test_valor_unico_antiguo_de_ai_model_sigue_funcionando(client, user, ai, app):
+    from mykcal.ai.model_selector import ModelSelector
+
+    app.state.model_selector = ModelSelector(ai, ["gemini-3.6-flash"])
+    assert (await analyze(client, user)).status_code == 200
+    assert ai.models_tried == ["gemini-3.6-flash"]

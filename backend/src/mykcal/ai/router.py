@@ -50,16 +50,23 @@ async def put_ai_key(
         request.app.state.ai_provider,
         request.app.state.settings.ai_key_master.get_secret_value(),
         clock.utcnow(),
+        request.app.state.model_selector,
     )
 
 
 @router.delete("/v1/ai-key", status_code=204)
 async def delete_ai_key(
+    request: Request,
     principal: Principal = Depends(require_consent),
     session: AsyncSession = Depends(get_session),
 ) -> Response:
     assert principal.account is not None
-    await service.delete_key(session, principal.account.id)
+    await service.delete_key(
+        session,
+        principal.account.id,
+        request.app.state.settings.ai_key_master.get_secret_value(),
+        request.app.state.model_selector,
+    )
     return Response(status_code=204)
 
 
@@ -84,7 +91,8 @@ async def photo_analysis(
         principal.account.id,
         request.app.state.ai_provider,
         settings.ai_key_master.get_secret_value(),
-        settings.ai_model,
+        request.app.state.model_selector,
+        settings.ai_timeout_s,
         data,
         description,
         total_grams,
