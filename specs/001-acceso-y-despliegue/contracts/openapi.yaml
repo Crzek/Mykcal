@@ -724,7 +724,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorBody" }
         "503":
-          description: AI_PROVIDER_UNAVAILABLE o AUTH_UNAVAILABLE
+          description: AI_PROVIDER_UNAVAILABLE, AI_NO_MODEL_AVAILABLE (la clave no ve ningún modelo compatible) o AUTH_UNAVAILABLE
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorBody" }
@@ -1153,6 +1153,7 @@ components:
             - AI_RESPONSE_INVALID
             - AI_UNRECOGNIZED
             - AI_TIMEOUT
+            - AI_NO_MODEL_AVAILABLE
             - WEIGHT_NOT_FOUND
             - RECALC_NO_PROPOSAL
             - NO_SEATS

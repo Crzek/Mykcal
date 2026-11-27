@@ -333,9 +333,57 @@ async def test_evento_ai_analysis_no_lleva_foto_respuesta_clave_ni_descripcion(
                 "user_id",
                 "result",
                 "model",
+                "selection",
+                "attempts",
                 "duration_ms",
                 "request_id",
             }
+
+
+async def test_eventos_de_seleccion_de_modelo_sin_datos_sensibles(
+    client, user_with_consent, ai, capsys
+):
+    me, h = await user_with_consent("ai-model-logs")
+    key = "AIzaSyClaveSeleccion0123456789"
+    await client.put("/v1/ai-key", headers=h, json={"raw_key": key})
+    ai.models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"]
+    ai.model_outcomes = {"gemini-3.6-flash-lite": "overloaded"}
+    secret = "descripcion-privada-modelo"
+    post = {
+        "headers": h,
+        "files": {"photo": ("p.jpg", b"\xff\xd8FOTO-SECRETA", "image/jpeg")},
+        "data": {"meal": "lunch", "entry_date": "2026-01-01", "description": secret},
+    }
+    await client.post("/v1/photo-analysis", **post)
+    ai.model_outcomes = {}
+    ai.list_outcome = "unavailable"
+    ai.models = ["gemini-3.6-flash"]
+    # catálogo en caché + listado caído: se usa el viejo y se registra el fallo
+    app_selector = client._transport.app.state.model_selector
+    app_selector._catalog.clear()
+    app_selector._preference = ["gemini-3.6-flash"]
+    await client.post("/v1/photo-analysis", **post)
+    out = capsys.readouterr().out
+    events = [json.loads(line) for line in out.splitlines() if line.strip()]
+    (attempt,) = [e for e in events if e["event"] == "ai_model_attempt"]
+    assert set(attempt) <= {
+        "event", "level", "timestamp", "user_id", "model", "category", "status", "request_id",
+    }  # fmt: skip
+    assert attempt["category"] == "overloaded" and attempt["user_id"]
+    (failed,) = [e for e in events if e["event"] == "ai_model_list_failed"]
+    assert set(failed) <= {
+        "event",
+        "level",
+        "timestamp",
+        "user_id",
+        "category",
+        "status",
+        "request_id",
+    }
+    import hashlib
+
+    for forbidden in (key, hashlib.sha256(key.encode()).hexdigest(), secret, "FOTO-SECRETA"):
+        assert forbidden not in out
 
 
 async def test_logs_del_peso_sin_valores_ni_fechas(

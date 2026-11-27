@@ -57,3 +57,40 @@ async def test_clave_se_guarda_cifrada(app, client, user):
 async def test_cuerpo_no_valido(client, user, body):
     _, h = user
     assert (await client.put("/v1/ai-key", headers=h, json=body)).status_code == 400
+
+
+async def test_borrar_y_volver_a_guardar_relista(client, user, ai):
+    _, h = user
+    photo = {"photo": ("p.jpg", b"\xff\xd8x", "image/jpeg")}
+    form = {"meal": "lunch", "entry_date": "2026-01-01"}
+    await client.put("/v1/ai-key", headers=h, json=KEY)
+    await client.post("/v1/photo-analysis", headers=h, files=photo, data=form)
+    await client.post("/v1/photo-analysis", headers=h, files=photo, data=form)
+    assert ai.list_calls == 1
+    await client.delete("/v1/ai-key", headers=h)
+    await client.put("/v1/ai-key", headers=h, json=KEY)
+    await client.post("/v1/photo-analysis", headers=h, files=photo, data=form)
+    assert ai.list_calls == 2
+
+
+async def test_cambiar_la_clave_lista_con_la_nueva(client, user, ai):
+    _, h = user
+    photo = {"photo": ("p.jpg", b"\xff\xd8x", "image/jpeg")}
+    form = {"meal": "lunch", "entry_date": "2026-01-01"}
+    await client.put("/v1/ai-key", headers=h, json=KEY)
+    await client.post("/v1/photo-analysis", headers=h, files=photo, data=form)
+    await client.put("/v1/ai-key", headers=h, json={"raw_key": "otra-clave"})
+    await client.post("/v1/photo-analysis", headers=h, files=photo, data=form)
+    assert ai.list_calls == 2
+
+
+async def test_guardar_clave_no_depende_de_ningun_modelo(client, user, ai):
+    _, h = user
+    ai.models = ["gemini-3.6-flash"]
+    ai.model_outcomes = {"gemini-3.6-flash": "overloaded"}
+    ai.analyze_outcome = "unavailable"
+    assert (await client.put("/v1/ai-key", headers=h, json=KEY)).status_code == 200
+    assert ai.models_tried == []
+    ai.validate_outcome = "invalid"
+    resp = await client.put("/v1/ai-key", headers=h, json=KEY)
+    assert resp.status_code == 422 and resp.json()["code"] == "AI_KEY_INVALID"

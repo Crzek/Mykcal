@@ -50,7 +50,7 @@ Valores de ejemplo y dónde sacar cada una: `backend/.env.example`.
 | `OFF_BASE_URL` | opcional; por defecto `https://world.openfoodfacts.org` (con `https`) |
 | `OFF_TIMEOUT_S` | opcional; por defecto 5 (de 1 a 30) |
 | `AI_KEY_MASTER` | **secreta**; 32 bytes en base64 (`python -c "import os,base64;print(base64.b64encode(os.urandom(32)).decode())"`). Cifra las claves de IA de los usuarios; si cambia, deben volver a pegarlas |
-| `AI_MODEL` / `AI_TIMEOUT_S` | opcionales; por defecto `gemini-2.0-flash` y 55 s |
+| `AI_MODEL` / `AI_TIMEOUT_S` | opcionales. `AI_MODEL`: preferencia de modelos separada por comas, vacía por defecto (el modelo se descubre solo según la clave); `AI_TIMEOUT_S`: 55 s |
 
 Si falta una obligatoria, el contenedor no arranca y el log nombra cuál.
 

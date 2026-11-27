@@ -43,8 +43,18 @@ class Settings(BaseSettings):
     off_timeout_s: float = Field(default=5.0, ge=1, le=30)
     # 006: clave maestra (32 bytes en base64) con la que se cifran las claves de IA de los usuarios.
     ai_key_master: SecretStr
-    ai_model: str = "gemini-2.0-flash"
+    # 010: preferencia opcional de modelos, separados por comas. Vacía = elección automática.
+    ai_model: str = ""
     ai_timeout_s: float = Field(default=55.0, ge=5, le=58)
+
+    @property
+    def ai_model_preference(self) -> list[str]:
+        names: list[str] = []
+        for part in self.ai_model.split(","):
+            name = part.strip()
+            if name and name not in names:
+                names.append(name)
+        return names
 
     @field_validator("ai_key_master")
     @classmethod

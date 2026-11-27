@@ -66,6 +66,7 @@ void main() {
     (const ApiError('AI_UNRECOGNIZED', 422), 'unrecognized'),
     (const ApiError('AI_TIMEOUT', 504), 'timeout'),
     (const ApiError('AI_PROVIDER_UNAVAILABLE', 503), 'provider_unavailable'),
+    (const ApiError('AI_NO_MODEL_AVAILABLE', 503), 'provider_unavailable'),
     (const ApiError('AI_KEY_REQUIRED', 403), 'key_required'),
     (const NetworkFailure(), 'no_connection'),
   ];
