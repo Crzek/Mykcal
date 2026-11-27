@@ -48,6 +48,10 @@ ALLOWED_FIELDS = frozenset(
         "entries_count",
         # 006: IA. Solo el resultado (enum fijo) y el modelo; nunca foto, respuesta ni clave.
         "model",
+        # 010: selección de modelo. Solo enums y números; nunca texto libre.
+        "selection",
+        "attempts",
+        "category",
     }
 )
 

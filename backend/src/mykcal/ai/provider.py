@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 
 class AiKeyInvalid(Exception):
@@ -14,11 +15,29 @@ class AiQuotaExceeded(Exception):
 
 
 class AiProviderUnavailable(Exception):
-    """El proveedor no responde o falla (5xx, red)."""
+    """El proveedor no responde o falla (5xx, red). `overloaded` marca la saturación (503)."""
+
+    def __init__(self, overloaded: bool = False) -> None:
+        super().__init__()
+        self.overloaded = overloaded
+
+
+class AiModelNotFound(Exception):
+    """El modelo ya no existe para esta clave (404)."""
+
+
+class AiNoModelAvailable(Exception):
+    """La clave no ve ningún modelo compatible (la lanza el selector)."""
 
 
 class AiTimeout(Exception):
     """El análisis superó el tiempo máximo."""
+
+
+@dataclass(frozen=True)
+class ModelInfo:
+    name: str  # sin el prefijo "models/"
+    generate_content: bool
 
 
 class AiProvider(ABC):
@@ -27,5 +46,11 @@ class AiProvider(ABC):
         """Lanza `AiKeyInvalid` o `AiProviderUnavailable` si no se puede usar."""
 
     @abstractmethod
-    async def analyze_photo(self, raw_key: str, image: bytes, prompt: str) -> str:
+    async def list_models(self, raw_key: str, timeout_s: float) -> list[ModelInfo]:
+        """Modelos que ve la clave. Lanza `AiKeyInvalid`, `AiTimeout` o `AiProviderUnavailable`."""
+
+    @abstractmethod
+    async def analyze_photo(
+        self, raw_key: str, model: str, image: bytes, prompt: str, timeout_s: float
+    ) -> str:
         """Devuelve el texto crudo de la respuesta (la validación es de `prompt.parse_response`)."""
